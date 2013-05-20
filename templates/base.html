@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
+    xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
+    lang="{% firstof LANGUAGE_CODE 'en' %}">
+  <head>
+    <title>{% block title %}IEEE 802.11, The Working Group Setting the Standards for Wireless LANs{% endblock %}</title>
+
+    <style type="text/css">
+div#header{
+	font-size: 15pt;
+	font-family: Arial;
+	vertical-align: middle;
+	text-align: center;
+	color:#ffffff;
+	height: 2em;
+	width: 100%;
+	border: 1px solid ;
+ 	padding: 1px 4px;
+  	background: rgb(0, 128, 128) none repeat scroll 0% 50%;
+	}
+	
+div#header a {
+	color: yellow;
+	text-decoration: none;
+}
+div#menu {
+	text-align: center;
+}
+div#footer {
+text-align:center;
+}
+    {% block css %}
+    {% endblock %}
+    </style>
+
+    {% block preload_js %}
+    {% endblock %}
+
+    {% block extra-head %}{% endblock %}
+  </head>
+
+  <body>
+    <div id="header">{% block header %}<a id="logo" href="/">IEEE 802.11, The Working Group Setting the Standards for Wireless LANs</a>{% endblock %}
+    </div>
+    <div id="menu">{%block menu %}
+    {% if user.is_authenticated %}
+    	{% if user.is_staff %}&nbsp;[<a href="/ah">Google Admin</a>]&nbsp;[<a href="/admin">Django Admin</a>]{%endif %}
+		&nbsp;[<a href="{% url django.contrib.auth.views.password_change %}">Change password</a>]
+		{% if user.logout %}&nbsp;[<a href="{{user.logout}}">Logout</a>]{% else %}&nbsp;[<a href="{% url django.contrib.auth.views.logout %}">Log out</a>]{%endif%}
+	{% endif %}
+    {%endblock%}</div>
+
+    <div class="columns">
+      <div id="content" class="column">
+        {% block content-header %}
+          {% if error %}<div class="error">{{ error }}</div>{% endif %}
+          {% if info %}<div class="info">{{ info }}</div>{% endif %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="info">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endblock %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <div id="footer">
+      <h6 style="text-align:center">
+		<a href="http://www.ieee.org/about/documentation/copyright/">Copyright (c)</a>,
+      the Institute of Electrical and Electronics Engineers, Inc. (IEEE). All rights reserved.</h6>
+
+      <h6 style="text-align:center">This website may contain names, logos, designs, titles, words, or phrases that may
+constitute trademarks, service marks, or tradenames of the IEEE or other entities which may be registered in certain jurisdictions.</h6>
+    </div>
+
+    {% block js %}
+    {% endblock %}
+  </body>
+</html>

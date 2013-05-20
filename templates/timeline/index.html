@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load cache %}
+
+{% block title %}IEEE 802.11 Official Timelines{% endblock %}
+
+{% block css %}
+table.timeline caption{
+	font-size: 13pt;
+	font-family: Arial;
+	vertical-align: middle;
+	text-align: center;
+	color:black;
+	height: 40px;
+	border: 1px solid ;
+ 	padding: 1px 4px;
+ 	background: rgb(230, 170, 120);
+	}
+table.timeline caption.caption1{
+ 	background: rgb(0, 255, 0);
+}
+table.timeline caption.caption2{
+ 	background: rgb(0, 0, 200);
+ 	color:white;
+}
+
+table.timeline {
+	border-color: #333;
+	font-family: Arial;
+	font-size: 7pt;
+	text-align: center;
+	padding: 1px;
+	margin: 4px;
+	border-collapse: collapse;
+	table-layout: fixed;
+}	
+table.timeline tr {
+	height: 20.25pt;
+}
+table.timeline td {
+	border: 1px solid black;
+	padding: 1px 4px;
+}
+
+table.timeline tr.row1 td.first, table.timeline tr.row1 td.est{
+	background: rgb(255, 255, 153);
+}
+table.timeline tr.row2 td.first, table.timeline tr.row2 td.est{
+	background: rgb(255, 204, 153);
+}
+table.timeline th.result {
+	font-size: 6pt;
+}
+td.conf {
+	background: lime
+}
+
+table.timeline th.date div{
+	width: 50px;
+}
+table.timeline th.pardate div{
+	width: 64px;
+}
+table.timeline tr.row1 {
+	background: rgb(192, 192, 192)
+}
+table.timeline tr.row2 {
+	background: white;
+}
+table.timeline th.bspan div{
+	width:120px;
+}
+
+
+table.timeline th {
+	background: black;
+	border: 1px solid white;
+	color: white;
+	vertical-align: bottom;
+	text-align: center;
+	padding: 1px 4px;
+	margin: 4px;
+	font-size: 7.5pt;
+}
+	
+table.timeline th a:link, table.timeline th a:visited {
+	color: #f0f000;
+	text-decoration: none;
+}
+
+table.timeline td a:link, table.timeline td a:visited {
+	text-decoration: none;
+}
+	
+p#trademarks {	
+	margin: 0 0 0;
+	text-align: center;
+	font-size: 7.5pt;
+	 font-family: Arial;
+	 }
+div#maintained {
+	text-align: center;
+}
+table#notes {
+	font-size: 7pt;
+	font-family: Arial;
+}
+table#notes td.key {
+	text-align: right;
+}
+table#notes td.value {
+	text-align: left;
+}
+
+div#greeting {
+	float:right;
+	font-size: 10pt;
+	text-align: right;
+}		       
+{% endblock %}
+
+{% block header %}OFFICIAL IEEE 802.11 WORKING GROUP PROJECT TIMELINES - {% now "Y-m-d" %}
+{% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
+{% endblock %}
+
+{% block menu %}
+{% cache 600 menu user.username export %}
+<div id="menu">
+[<a style="font-family: Arial;" href="https://mentor.ieee.org/802.11/dcn/07/11-07-1952-15-0000-non-procedural-letter-ballot-results.xls">Historical Ballot&nbsp;Timeline</a>]
+{% if not export %}
+&nbsp;[<a href="{% url timeline.views.import_page %}">Import CSV</a>]
+&nbsp;[<a href="{% url timeline.views.export_page %}">Export CSV</a>]
+&nbsp;[<a href="{% url timeline.views.main_page %}timeline.html">Export HTML</a>]
+&nbsp;[<a href="{% url timeline.views.add_project %}">Add Project</a>]
+&nbsp;[<a href="{% url timeline.views.add_ballot %}">Add Ballot</a>]
+{{block.super}}
+{% endif %}
+</div>
+{% endcache %}
+{% endblock %}
+
+{% block content %}
+{% cache cache.timeout cprocess cache.in_progress_ver export %}
+{% with "IN PROCESS - Standards, Amendments, and Recommended Practices" as caption %}
+{% with 0 as published %}
+{% with in_process as standards %}
+{% include "timeline/timeline.html" %}
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endcache %}
+
+{% cache cache.timeout cpublished cache.published_ver export %}
+{% with "PUBLISHED - Standards, Amendments, and Recommended Practices" as caption %}
+{% with published as standards %}
+{% with 1 as published %}
+{% include "timeline/timeline.html" %}
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endcache %}
+
+{% cache cache.timeout cwithdrawn cache.withdrawn_ver export %}
+{% with "SUPERSEDED OR WITHDRAWN  -  Standards, Amendments, and Recommended Practices" as caption %}
+{% with withdrawn as standards %}
+{% with 2 as published %}
+{% include "timeline/timeline.html" %}
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endcache %}
+
+<table id="notes">
+    <col width="113" />
+    <col width="47" />
+    <col width="204" />
+    <col width="32" />
+    <col width="137" />
+    <col width="117" />
+    <col width="485" />
+    <thead>
+  <tr>
+  <th />
+    <th colspan="6" style="background:black; color: white;">Timeline Chart Notes:</th>
+    </tr>
+    </thead><tbody>
+  <tr>
+    <td />
+    <td class="key">C</td>
+    <td >&nbsp;=&nbsp; Stage Completed or Currently In-Process</td>
+    <td class="key">N/A</td>
+    <td >&nbsp;=&nbsp; Not Applicable</td>
+    <td class="key">MEC</td>
+    <td >&nbsp;=&nbsp;IEEE-SA Mandatory Editorial Coordination</td>
+  </tr>
+  <tr>
+    <td >  &nbsp;      </td>
+    <td class="key">A / COR</td>
+    <td >&nbsp;=&nbsp;Amendment / Corrigendum</td>
+    <td class="key">RP</td>
+    <td >&nbsp;=&nbsp; Recommended Practice</td>
+    <td class="key">Final 802.11 WG</td>
+    <td >&nbsp;=&nbsp; Approval by 802.11 WG - <a style="color: blue; text-decoration: underline;" href="http://grouper.ieee.org/groups/802/11/Meetings/Meeting_Plan.html">Current 
+      WG Calendar</a></td>
+  </tr>
+  <tr>
+    <td >&nbsp;</td>
+    <td class="key">Predicted</td>
+    <td >&nbsp;=&nbsp; Current Date Estimate</td>
+    <td class="key">SB</td>
+    <td >&nbsp;=&nbsp; Sponsor Ballot</td>
+    <td class="key">Final or Conditional 802 EC</td>
+    <td >&nbsp;=&nbsp; Approval by 802 EC at Plenary Session - 
+    <a style="color: blue; text-decoration: underline;" href="http://grouper.ieee.org/groups/802/11/Meetings/Meeting_Plan.html">Current 
+      802 EC Plenary Calendar</a></td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">&nbsp;</td>
+    <td class="key">Date</td>
+    <td >&nbsp;=&nbsp; Actual or Start Date</td>
+    <td class="key">STD</td>
+    <td >&nbsp;=&nbsp; Standard and/or Revision</td>
+    <td class="key">RevCom/Standards Board</td>
+    <td >&nbsp;=&nbsp; Approval of RevCom / IEEE-SA Standards Board in Normal Session 
+      - <a style="color: blue; text-decoration: underline;" href="http://standards.ieee.org/board/index.html">Current IEEE-SA 
+      Calendar</a></td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">&nbsp;</td>
+    <td class="key">LB</td>
+    <td >&nbsp;=&nbsp; Letter Ballot      </td>
+    <td class="key">TG</td>
+    <td >&nbsp;=&nbsp; Task Group</td>
+    <td class="key">ANSI</td>
+    <td >&nbsp;=&nbsp; American National Standards Institute</td>
+  </tr>
+  </tbody>
+</table>
+       
+      <div id="maintained"><p>This page is maintained by <a href="mailto:stephen.mccann@ieee.org">Stephen McCann</a> and
+      <a href="mailto:aashley@nds.com">Alex Ashley</a>. Comments are welcome.</p></div>
+      
+      <p id="trademarks">
+      IEEE Std 802.11{% for p in published %}, 802.11{{p.task_group|slice:"2:"}} {%endfor %}{% for p in in_process %}, 802.11{{p.task_group|slice:"2:"}} {%endfor %}
+      , 802.11.1 and 802.11.2 are trademarks of
+the IEEE. All other names or product names are the trademarks, service
+marks or registered trademarks of their respective holders.
+      </p>
+      {% endblock %}

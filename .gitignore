@@ -1,0 +1,9 @@
+production_server.py
+django
+djangoappengine
+dbindexer
+djangotoolbox
+autoload
+.gaedata
+*.pyc
+*~

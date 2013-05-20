@@ -1,0 +1,10 @@
+Projects
+ID,Name,Description, doc_type, par url, task group, task group url, doc format, doc version, baseline, order, par_date, par_expiry, initial_wg_ballot, recirc_wg_ballot, sb_form_date, sb_formed, initial_sb_ballot, recirc_sb_ballot, mec_date, mec_completed, wg_approval_date, ec_approval_date, revcom_approval_date, ansi_approval_date, withdrawn_date
+{% for std in standards %}{{std.pk}}, {{std.name}},"{{std.description|safe}}",{{std.doc_type}},{{std.par}}, {{std.task_group}}, {{std.task_group_url}}, {{std.doc_format}},  {{std.doc_version}}, {{std.baseline}}, {{std.order}},  {{std.par_date.isoformat}},  {{std.par_expiry.isoformat}},  {{std.initial_wg_ballot.isoformat}}, {{std.recirc_wg_ballot.isoformat}}, {{std.sb_form_date.isoformat}}, {{std.sb_formed}}, {{std.initial_sb_ballot.isoformat}}, {{std.recirc_sb_ballot.isoformat}}, {{std.mec_date.isoformat}}, {{std.mec_completed}}, {{std.wg_approval_date.isoformat}}, {{std.ec_approval_date.isoformat}}, {{std.revcom_approval_date.isoformat}},{{std.ansi_approval_date.isoformat}}, {{std.withdrawn_date.isoformat}},{{std.withdrawn}}
+{% endfor %}
+
+Ballots
+ID, project, number, draft, end date, ballot_type, result, for, against, abstain
+{% for b in ballots %}{{b.pk}},{{b.project.pk}},{{b.number}}, {{b.draft}}, {{b.date.isoformat}}, {{b.ballot_type}}, {{b.result}}, {{b.result_for}}, {{b.result_against}}, {{b.result_abstain}}
+{% endfor %}
+

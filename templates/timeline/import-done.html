@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Finished Importing Projects and Ballots{% endblock %}
+{% block menu %}
+[<a href="{% url timeline.views.main_page %}">Return to timeline page</a>]
+{% endblock %}
+{% block content %}
+<h1>The following projects have been imported:</h1>
+<table>
+<tr><th>ID</th><th>Name</th><th>Description</th><th>doc_type</th><th> par url</th><th> task group</th><th> task group url</th>
+<th> doc format</th><th> doc version</th><th> baseline</th><th> order</th>
+<th> par_date</th><th> par_expiry</th><th> initial_wg_ballot</th>
+<th> recirc_wg_ballot</th><th> sb_form_date</th>
+<th>sb_formed</th><th> initial_sb_ballot</th>
+<th> recirc_sb_ballot</th><th> mec_date</th><th> mec_completed</th>
+<th> wg_approval_date</th><th>ec_approval_date</th>
+<th>revcom_approval_date</th><th> ansi_approval_date</th><th> withdrawn_date</th></tr>
+{% for std in projects %}
+<tr>
+<td>{{std.pk}}</td><td>{{std.name}}</td><td>{{std.description|safe}}</td>
+<td>{{std.doc_type}}</td><td>{{std.par}}</td><td> {{std.task_group}}</td>
+<td>{{std.task_group_url}}</td><td>{{std.doc_format}}</td><td>{{std.doc_version}}</td>
+<td>{{std.baseline}}</td><td>{{std.order}}</td>
+<td>{{std.par_date.isoformat}}</td><td>{{std.par_expiry.isoformat}}</td>
+<td>{{std.initial_wg_ballot.isoformat}}</td><td>{{std.recirc_wg_ballot.isoformat}}</td>
+<td>{{std.sb_form_date.isoformat}}</td>
+<td>{{std.sb_formed}}</td><td>{{std.initial_sb_ballot.isoformat}}</td>
+<td>{{std.recirc_sb_ballot.isoformat}}</td><td>{{std.mec_date.isoformat}}</td>
+<td>{{std.mec_completed}}</td><td>{{std.wg_approval_date.isoformat}}</td>
+<td>{{std.ec_approval_date.isoformat}}</td><td>{{std.revcom_approval_date.isoformat}}</td>
+<td>{{std.ansi_approval_date.isoformat}}</td><td>{{std.withdrawn_date.isoformat}}</td>
+</tr>
+{% endfor %}
+</table>
+<h1>The following ballots have been imported:</h1>
+<table>
+<tr><th>pk</th><th>project</th><th>number</th><th>draft</th><th>date</th>
+<th>ballot_type</th><th>result</th><th>result_for</th><th>result_against</th>
+<th>result_abstain</th></tr>
+{% for b in ballots %}
+<tr><td>{{b.pk}}</td>
+    <td>{{b.project}}</td>
+    <td>LB{{b.number}}</td>
+    <td>{{b.draft}}</td>
+    <td>{{b.date}}</td>
+    <td>{{b.ballot_type}}</td>
+    <td>{{b.result}}</td>
+    <td>{{b.result_for}}</td>
+    <td>{{b.result_against}}</td>
+    <td>{{b.result_abstain}}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
