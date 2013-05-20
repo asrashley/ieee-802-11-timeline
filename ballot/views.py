@@ -23,6 +23,7 @@
 from ballot.models import Ballot, BallotBacklog, DenormalizedBallot, check_backlog
 from project.models import InProgress, Published, Withdrawn
 from util.cache import CacheControl
+from util.forms import DateModelForm
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response,  get_object_or_404
@@ -36,8 +37,15 @@ from django.views.decorators.cache import cache_page
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
-class BallotForm(forms.ModelForm):
+class BallotForm(DateModelForm):
     curstat = forms.IntegerField(widget=forms.HiddenInput)
+    curpk  = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(BallotForm, self).__init__(*args, **kwargs)    
+        ordered_fields = ['number','project','draft']
+        self.fields.keyOrder = ordered_fields + [ i for i in self.fields if i not in ordered_fields ]
+
     class Meta:
         model = Ballot
 
@@ -69,9 +77,9 @@ def wg_page(request, export=None):
             cc.open_ver = cc.open_ver + 1
         elif redraw==1:
             cc.closed_ver = cc.closed_ver + 1
-        return http.HttpResponseRedirect(next_page)
+        return http.HttpResponseRedirect(next_page)    
     ballots = list(DenormalizedBallot.objects.filter(ballot_type=DenormalizedBallot.WGInitial.code))+list(DenormalizedBallot.objects.filter(ballot_type=DenormalizedBallot.WGRecirc.code))+list(DenormalizedBallot.objects.filter(ballot_type=DenormalizedBallot.Procedural.code))
-    return ballot_page(request,ballots,export, sponsor=False, next=next_page)
+    return ballot_page(request,ballots,export, sponsor=False, next=next_page, export_page='LetterBallots')
 
 @login_required
 def sponsor_page(request, export=None):
@@ -92,7 +100,7 @@ def sponsor_page(request, export=None):
             cc.closed_ver = cc.closed_ver + 1
         return http.HttpResponseRedirect(next_page)
     ballots = list(DenormalizedBallot.objects.filter(ballot_type=DenormalizedBallot.SBInitial.code))+list(DenormalizedBallot.objects.filter(ballot_type=DenormalizedBallot.SBRecirc.code))
-    return ballot_page(request,ballots,export, sponsor=True, next=next_page)
+    return ballot_page(request,ballots,export, sponsor=True, next=next_page, export_page='SponsorBallots')
     
 @login_required
 def add_ballot(request):
@@ -119,6 +127,8 @@ def edit_ballot(request,bal):
         if form.is_valid():
             data = form.cleaned_data
             ballot = form.save()
+            if data['curpk'] and data['curpk']!=ballot.pk:
+                Ballot.objects.get(pk=data['curpk']).delete()
             cc = CacheControl()
             if data['curstat'] != ballot.project.status.id:
                 if InProgress.id==data['curstat']:
@@ -129,10 +139,11 @@ def edit_ballot(request,bal):
                     cc.withdrawn_ver = cc.withdrawn_ver+1
             return http.HttpResponseRedirect(next_page)
     else:
-        initial={'curstat':ballot.project.status.id} if bal is not None else {'curstat':0}
+        initial={'curstat':ballot.project.status.id, 'curpk':ballot.pk} if bal is not None else {'curstat':0}
         form = BallotForm(instance=ballot, initial=initial)
     context['form'] = form
     context['object'] = ballot
+    context['no_delete'] = bal is None
     return render_to_response('edit-object.html',context, context_instance=RequestContext(request))
 
 @login_required
@@ -141,7 +152,7 @@ def del_ballot(request,bal):
     return create_update.delete_object(request, model=Ballot, object_id=bal,
                                        post_delete_redirect=next_page)
 
-def ballot_page(request, ballots, export, sponsor, next):
+def ballot_page(request, ballots, export, sponsor, next, export_page):
     closed = []
     open = []
     needs_update = check_backlog()
@@ -156,13 +167,15 @@ def ballot_page(request, ballots, export, sponsor, next):
     else:
         open.sort(key=lambda x: x.number, reverse=True)
         closed.sort(key=lambda x: x.number, reverse=True)
-    context = dict(cache=CacheControl(), has_open=len(open)>0, open=open, closed=closed, next_page=next, export=export, sponsor=sponsor,
-                   needs_update=needs_update)
-    return render_to_response('ballot/ballots.html', context, context_instance=RequestContext(request))
+    context = dict(has_open=len(open)>0, open=open, closed=closed, next_page=next, export=export, sponsor=sponsor,
+                   needs_update=needs_update, export_page=reverse('ballot.views.main_page')+export_page)
+    context_instance=RequestContext(request)
+    context_instance['cache'].export = export
+    return render_to_response('ballot/ballots.html', context, context_instance=context_instance)
     
 @csrf_exempt
 def backlog_worker(request):
-    for backlog in BallotBacklog.objects.all():
+    for backlog in BallotBacklog.objects.all().iterator():
         try:
             b = DenormalizedBallot(ballot=backlog.ballot)
             b.denormalize()

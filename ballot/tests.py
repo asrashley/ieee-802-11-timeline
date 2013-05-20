@@ -20,15 +20,16 @@
 #
 #############################################################################
 
-from ballot.models import Ballot
+from ballot.models import Ballot, DenormalizedBallot
 from project.models import Project
- 
-from django.test import Client, TestCase
+from util.tasks import run_test_task_queue
+
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 import datetime
 
-class TimelineTest(TestCase):
+class BallotTest(TestCase):
     fixtures = ['site.json']
     
     def __check_page(self,url):
@@ -40,19 +41,33 @@ class TimelineTest(TestCase):
         self.failUnless(login, 'Could not log in')
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, 200)
+        return response
         
-    def test_timeline(self):
+    def _check_ballot_page(self,url,export):
+        from django.conf import settings
+        static_url = settings.STATICFILES_URL
+        response = self.__check_page(url)
+        self.assertContains(response, 'ieeel.gif')
+        response.content.index(static_url)
+        response = self.client.get(export)
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertContains(response, 'ieeel.gif')
+        self.failUnlessRaises(ValueError, response.content.index,static_url)
+        
+    def test_main(self):
         url = reverse('ballot.views.main_page',args=[])
         self.__check_page(url)
         
     def test_wg(self):
         url = reverse('ballot.views.wg_page',args=[])
-        self.__check_page(url)
+        export = ''.join([reverse('ballot.views.main_page',args=[]),'LetterBallots.html'])
+        self._check_ballot_page(url, export)
         
     def test_sponsor(self):
         url = reverse('ballot.views.sponsor_page',args=[])
-        self.__check_page(url)
-        
+        export = ''.join([reverse('ballot.views.main_page',args=[]),'SponsorBallots.html'])
+        self._check_ballot_page(url, export)
+                
     def test_add_ballot(self):
         url = reverse('ballot.views.add_ballot',args=[])
         self.__check_page(url)
@@ -65,3 +80,38 @@ class TimelineTest(TestCase):
         bal.save()
         url = reverse('ballot.views.edit_ballot',args=[bal.number])
         self.__check_page(url)
+        
+    def test_delete_ballot(self):
+        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj.save()
+        bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
+        bal.closed = bal.opened + datetime.timedelta(days=15)
+        bal.save()
+        url = reverse('ballot.views.main_page',args=[])
+        response = self.client.get(url)
+        #run_test_task_queue(response.request)
+        run_test_task_queue(self.client)
+        dn = DenormalizedBallot.objects.get(number=bal.number)
+        bal = Ballot.objects.get(number=bal.number)
+        bal.delete()
+        run_test_task_queue(self.client)
+        self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, number=bal.number)
+        
+    def test_renumber_ballot(self):
+        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj.save()
+        bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
+        bal.closed = bal.opened + datetime.timedelta(days=15)
+        bal.save()
+        url = reverse('ballot.views.main_page',args=[])
+        response = self.client.get(url)
+        run_test_task_queue(self.client)
+        dn = DenormalizedBallot.objects.get(number=bal.number)
+        bal2 = Ballot.objects.get(number=bal.number)
+        bal2.number = 321
+        bal2.save()
+        Ballot.objects.get(number=123).delete()
+        run_test_task_queue(self.client)
+        self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, number=123)
+        dn = DenormalizedBallot.objects.get(number=bal2.number)
+                

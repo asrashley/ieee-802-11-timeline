@@ -25,7 +25,7 @@ from util.tasks import add_task
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.urlresolvers import reverse
 
@@ -52,9 +52,9 @@ class AbstractBallot(models.Model):
     _BALLOT_TYPES = [ (b.code,b.description) for b in WGInitial, WGRecirc, SBInitial, SBRecirc, Procedural] 
     number = models.IntegerField(primary_key=True, help_text=_('Number of this ballot. For sponsor ballots, you need to invent a number'))
     draft = models.DecimalField(max_digits=6, decimal_places=2, help_text=_('The version number of the balloted draft'))
-    opened = models.DateField()
-    closed = models.DateField()
-    ballot_type = models.CharField(max_length=5, choices=_BALLOT_TYPES)
+    opened = models.DateField(help_text=_('Date that ballot opened'))
+    closed = models.DateField(help_text=_('Date that ballot closed'))
+    ballot_type = models.CharField(max_length=5, choices=_BALLOT_TYPES, help_text=_('Initial, recirc, procedural, etc'))
     #result = models.IntegerField(null=True, blank=True)
     pool = models.IntegerField(help_text=_('Number of voters in ballot pool'), null=True)
     vote_for = models.IntegerField(null=True, blank=True) 
@@ -128,7 +128,7 @@ class AbstractBallot(models.Model):
 class Ballot(AbstractBallot):
     FIRST_SPONSOR_LBNUM = 10000
     
-    project = models.ForeignKey(Project)
+    project = models.ForeignKey(Project, help_text=_('The project that produced the balloted document'))
     
     def project_name(self):
         return self.project.name
@@ -181,6 +181,14 @@ def add_to_backlog(sender, instance, **kwargs):
     b = BallotBacklog(ballot=instance)
     b.save()
     check_backlog()
+    
+@receiver(pre_delete, sender=Ballot)
+def remove_ballot(sender, instance, **kwargs):
+    try:
+        dn = DenormalizedBallot.objects.get(ballot=instance)
+        dn.delete()
+    except DenormalizedBallot.DoesNotExist:
+        pass
     
 def check_backlog():
     needs_update = BallotBacklog.objects.exists()

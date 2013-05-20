@@ -8,20 +8,24 @@ except ImportError:
 
 import os
 
+SITE_ID = 1
+APP_VERSION = 3.20
 SECRET_KEY = '=r-$b*8hglm+858dslfkjdlsjs&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
 
 INSTALLED_APPS = (
-    'djangotoolbox',
-    'django.contrib.auth',
-    'django.contrib.admin',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    #'dbindexer',
-    'timeline',
-    'util',
-    'project',
-    'ballot'
-    )
+                  'autoload',
+                  'djangotoolbox',
+                  'django.contrib.auth',
+                  'django.contrib.admin',
+                  'django.contrib.contenttypes',
+                  'django.contrib.sessions',
+                  #'dbindexer',
+                  'timeline',
+                  'util',
+                  'project',
+                  'ballot',
+                  'report',
+                  )
 
 if has_djangoappengine:
     INSTALLED_APPS = ('djangoappengine',) + INSTALLED_APPS
@@ -40,19 +44,28 @@ LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'urls'
 
-#TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-#                               "django.core.context_processors.debug",
-#                               "django.core.context_processors.i18n",
+MIDDLEWARE_CLASSES = ('autoload.middleware.AutoloadMiddleware',
+                      'django.middleware.common.CommonMiddleware',
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware',)
+
+TEMPLATE_CONTEXT_PROCESSORS = ("util.context_processors.site_context",
+                               "django.contrib.auth.context_processors.auth",
+                               "django.core.context_processors.debug",
+                               "django.core.context_processors.request",
+                               "django.contrib.messages.context_processors.messages",
+                               )
 #                               "django.contrib.staticfiles.context_processors.staticfiles",
-#                               "django.contrib.messages.context_processors.messages",
-#                               )
+#                               "django.core.context_processors.i18n",
 
 # Activate django-dbindexer if available
-try:
-    import dbindexer
-    DATABASES['native'] = DATABASES['default']
-    DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
-    INSTALLED_APPS += ('dbindexer',)
-except ImportError:
-    #print 'Warning, unable to import dbindexer'
-    pass
+#try:
+#    import dbindexer
+#    DATABASES['native'] = DATABASES['default']
+#    DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
+#    INSTALLED_APPS += ('dbindexer',)
+#except ImportError:
+#    #print 'Warning, unable to import dbindexer'
+#    pass

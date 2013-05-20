@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
 {% load cache %}
+{% load siteutils %}
 
 {% block title %}IEEE 802.11 chair's toolbox{% endblock %}
 
 {% block content %}
 {% cache 600 homepage user.username %}
-<h1>IEEE 802.11 chair's toolbox</h1>
-<p>
-This site contains tools for helping the chairs of IEEE 802.11 with the administration
-aspects of their roles.
-</p>
-
-<h2>The following applications are available:</h2>
-<ul>
-<li><a href="{% url timeline.views.main_page %}">Timeline tool</a></li>
-<li><a href="{% url ballot.views.main_page %}">Letter Ballot tool</a></li>
-</ul>
+<table id="tools">
+<thead>
+<tr><th class="heading">IEEE 802.11 chair's toolbox</th><td class="version">v{% version %}</td></tr>
+</thead>
+<tbody>
+<tr><td><a href="{% url timeline.views.main_page %}">Timeline</a></td></tr>
+<tr><td><a href="{% url ballot.views.main_page %}">Letter ballots</a></td></tr>
+<tr><td><a href="{% url report.views.main_page %}">Meeting reports</a></td></tr>
+{% if not user.is_authenticated %}<tr><td><a href="{% url django.contrib.auth.views.login %}">Log in</a></td></tr>{%endif %}
+</tbody>
+</table>
 {% endcache %}
 {% endblock %}

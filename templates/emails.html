@@ -1,0 +1,2 @@
+{% for m in email_list %}{% if forloop.last and forloop.counter0 %} and {% else %}{% if not forloop.first %}, {% endif %}{%endif %}<a href="mailto:{{m.address}}">{{m.name}}</a>{% endfor %}
+      

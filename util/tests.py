@@ -22,16 +22,17 @@
 
 from util.io import from_isodatetime, flatten
 from util.tasks import run_test_task_queue
-from ballot.models import *
-from project.models import *
+from ballot.models import Ballot
+from project.models import Project
+from report.models import MeetingReport
+from util.models import SiteURLs
 
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
+from django.db.models.fields import URLField
 
-import datetime, decimal, sys
+import datetime, decimal
 import unittest
-import time
 
 class UtilTest(unittest.TestCase):
     def test_from_isodatetime(self):
@@ -97,7 +98,7 @@ class ImportPageTest(TestCase):
             self.assertContains(response, 'input file contains %d line'%length)
         #self.assertContains(response, 'Finished Importing')
         while progress.finished is None:
-            run_test_task_queue(response.request)
+            run_test_task_queue(self.client)
             response = self.client.get(progress_url)
             self.failUnlessEqual(response.status_code, 200)
             progress = response.context['progress']
@@ -157,6 +158,7 @@ class ImportCsvPageTest(ImportPageTest):
     fixtures = ['site.json']
     #TESTFILE = 'util/fixtures/timeline-2010-10-27-1146.csv' 
     TESTFILE = ('util/fixtures/timeline-2010-11-02-1439.csv' ,187)
+    MODELS = [Ballot, Project]
     
     def test_csv_import(self):
         """
@@ -177,7 +179,9 @@ class ImportCsvPageTest(ImportPageTest):
         #print response
         response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1])
         counts = {}
-        tmodels = { Ballot:0, Project: 0 }
+        tmodels = {}
+        for m in self.MODELS:
+            tmodels[m]=0
         for m in tmodels.keys():
             self.failIfEqual(m.objects.count(),tmodels[m],msg='%s model has %d items, should have more than %d items'%
                                  (m._meta.verbose_name,m.objects.count(),tmodels[m]))
@@ -203,6 +207,11 @@ class ImportCsvPageTest3(ImportCsvPageTest):
     TESTFILE = ('util/fixtures/ballots-zero-fields.csv',3) 
     NOT_IDEMPOTENT = [Ballot]
     
+class ImportCsvPageTest4(ImportCsvPageTest):
+    fixtures = ['site.json']
+    TESTFILE = ('util/fixtures/timeline-2011-03-20-1740.csv', 384)
+    MODELS = [Project, Ballot, MeetingReport]
+    
 class MainPageTest(TestCase):
     fixtures = ['site.json']
     
@@ -217,3 +226,44 @@ class MainPageTest(TestCase):
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
         
+class EditUrlsPageTest(TestCase):
+    fixtures = ['site.json','projects.json']
+    
+    def test_edit_urls(self):
+        """
+        Tests edit urls page
+        """
+
+        default = SiteURLs.get_urls()
+        url = reverse('util.views.edit_urls',args=[])
+        response = self.client.get(url)
+        # not logged in, should redirect to login page
+        self.failUnlessEqual(response.status_code, 302)
+
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+        response = self.client.get(url)
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertContains(response, '<input type="submit" name="submit"')
+        urls = response.context['object']
+        post = {'submit':'submit'}
+        for field in urls._meta.fields:
+            if field.editable and not field.primary_key :
+                dft = getattr(default,field.attname)
+                a = getattr(urls,field.attname)
+                self.failUnlessEqual(a,dft)
+                if isinstance(field,URLField):
+                    post[field.attname] = a+'/Test'
+                else:
+                    # assume it's an email field
+                    post[field.attname] = 'Test User <test@example-net.org>'
+        response = self.client.post(url, post, follow=True)      
+        # The POST should have caused the site URLs to change, so get the new URLS and compare them to the defaults
+        new_urls = SiteURLs.get_urls()
+        for field in urls._meta.fields:
+            if not field.primary_key:
+                dft = getattr(default,field.attname)
+                a = getattr(new_urls,field.attname)
+                self.failIfEqual(a,dft)
+                if field.editable:
+                    self.failUnlessEqual(a,post[field.attname])

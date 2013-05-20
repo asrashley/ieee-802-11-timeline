@@ -20,42 +20,50 @@
 #
 #############################################################################
 
-from google.appengine.api.labs import taskqueue
-from django.core.urlresolvers import resolve
-
-import time,sys
+from google.appengine.api import taskqueue 
+ 
+import time #, sys
 
 class TaskProxy(object):
     def __init__(self,name,url):
         self.name = name
         self.url = url
     
-_test_task_queue = []
-_completed_tasks = []
-        
 def add_task(name, url, queue_name='background-processing', countdown=None):
+    #sys.stderr.write('a'.join([name,' - ',url,'\n']))
     try:
         name = '%s%d'%(name,int(time.time()/2))
         taskqueue.add(url=url, name=name, method='POST', queue_name=queue_name, countdown=countdown)
         return True
     except taskqueue.TaskAlreadyExistsError:
         return False
-    except taskqueue.UnknownQueueError:
-        # Assume running in unit test mode
-        _test_task_queue.append(TaskProxy(name,url))
-        return True
+    #except taskqueue.UnknownQueueError:
+    #    # Assume running in unit test mode
+    #    _test_task_queue.append(TaskProxy(name,url))
+    #    return True
     except taskqueue.TombstonedTaskError:
         taskqueue.add(url=url, method='POST', queue_name=queue_name, countdown=countdown)
         return True
         
-def run_test_task_queue(request):
-    global _completed_tasks
-    for task in _completed_tasks:
-        _test_task_queue.remove(task)
-    _completed_tasks = []
-    for task in _test_task_queue:
-        res = resolve(task.url)
-        a = [request]+list(res.args)
-        #sys.stderr.write(''.join([task.name,' - ',task.url,'\n']))
-        res.func(*a,**res.kwargs)
-        _completed_tasks.append(task)
+def run_test_task_queue(client):
+    from google.appengine.ext import testbed
+    from djangoappengine.db.stubs import stub_manager
+    
+    stub = stub_manager.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
+    for queue in stub.GetQueues():
+        tasks = stub.GetTasks(queue['name'])
+        for task in tasks:
+            if task['method'].upper()=='POST':
+                content_type = 'multipart/form-data'
+                data = {}
+                for k,v in task['headers']:
+                    if k=='Content-Type':
+                        content_type = v
+                if task['body']:
+                    data = task['body']
+                client.post(task['url'],data=data, content_type=content_type)
+            else:
+                client.get(task['url'])
+            #sys.stderr.write('r'.join([task['name'],' - ',task['url'],'\n']))
+        stub.FlushQueue(queue['name'])
+        

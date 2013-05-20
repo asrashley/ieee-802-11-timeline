@@ -1,10 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Import Projects and Ballots{% endblock %}
+{% block title %}Import Projects, Ballots and Meeting Reports{% endblock %}
+{% block css %}
+input[type=checkbox] {
+	width: auto;
+}
+input[type=submit] {
+	width: 200px;
+}
+a img {
+border: none;
+}
+sup.requ { color: red; font-size: 8pt; }
+.helptext { 
+	font-size: 8pt;
+	font-family: Arial;
+	color: #808080;
+	vertical-align: top;
+	margin-top: 0px;
+ } 
+
+{% endblock %}
 {% block content %}
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-<p>This import page allows a previous export of projects and ballots to be loaded, or to load
-data from an HTML page. If the HTML page files to import, try creating a CSV file from the HTML page by loading
-the HTML page in to Excel and <q>Save As</q> a CSV file.</p>
+<p>This import page allows a previous export of projects, ballots and reports to be loaded, or to load
+data from an HTML page. If the HTML page fails to import, try creating a CSV file from the HTML page by loading
+the HTML page in to Excel and then <q>Save As</q> a CSV file.</p>
 <form action="{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" enctype="multipart/form-data" method="post">
 {% csrf_token %}
 <table>

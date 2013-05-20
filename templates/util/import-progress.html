@@ -3,7 +3,7 @@
 {% block title %}Importing Projects and Ballots{% endblock %}
 
 {% block css %}
-div#progress p.bar {
+#progress p.bar {
         width: 300px;
         height: 20px;
         background: #dddde6;
@@ -13,7 +13,7 @@ div#progress p.bar {
         margin: 0px;
 }
 
-div#progress p.percent {
+#progress p.percent {
         font-weight: bold;
         position: relative;
         padding: 0px;
@@ -29,11 +29,6 @@ div#progress p.percent {
 <meta http-equiv="refresh" content="10; URL=''">
 {% endif %}
 {% endblock %}
-{% block menu %}
-&nbsp;[<a href="{% url timeline.views.main_page %}">Timeline</a>]
-&nbsp;[<a href="{% url ballot.views.main_page %}">Letter Ballots</a>]
-{{block.super}}
-{% endblock %}
 
 {% block content %}
 <div id="progress">
@@ -45,8 +40,9 @@ alt="" /></p><p class="percent">{{ progress.percent }}%
 {% else %}
 <p>The import process will start shortly.</p>
 {% endif %}
-<p>The input file contains {{progress.linecount}} line{{progress.linecount|pluralize}} and so far 
+<p>The input file contains {{progress.linecount|add:"-1"}} line{{progress.linecount|pluralize}} and so far 
 {{progress.current_line}} line{{progress.current_line|pluralize}} have been processed</p>
-<p>{{progress.project_count}} project{{progress.project_count|pluralize}} and {{progress.ballot_count}}
-ballot{{progress.ballot_count|pluralize}} have been imported</p>
+<p>{{progress.project_count}} project{{progress.project_count|pluralize}}, {{progress.ballot_count}}
+ballot{{progress.ballot_count|pluralize}} and {{progress.report_count}}
+meeting report{{progress.report_count|pluralize}} have been imported</p>
 {% endblock %}

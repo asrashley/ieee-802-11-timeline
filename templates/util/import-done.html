@@ -1,11 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Finished Importing Projects and Ballots{% endblock %}
-{% block menu %}
-&nbsp;[<a href="{% url timeline.views.main_page %}">Timeline</a>]
-&nbsp;[<a href="{% url ballot.views.main_page %}">Letter Ballots</a>]
-{{block.super}}
+{% block title %}Finished Importing Projects, Ballots and Meeting Reports{% endblock %}
+{% block css %}
+div.error {
+border: 1px solid black;
+margin-top: 3px;
+background: #d8d8d8;
+}
+div.error div.text, div.error span.text {
+border: 1px dashed #404040;
+background: #c0c0c0;
+}
+div.error span.text {
+background: #d8d8d8;
+}
+div.error div span.line {
+display: block; float: left; clear: left; 
+width: 60px;
+border: none;
+}
 {% endblock %}
 {% block content %}
+{% for error in errors %}
+{% if forloop.first %}
+<h1>The following errors were detected:</h1>
+{% endif %}
+<div class="error"><div><span class="line">Line {{error.line}}</span><span class="text">{{error.source}}</span></div>
+<div class="text">
+{% for e in error.exception %} 
+{{e}}<br />
+{% endfor %}
+</div></div>
+{% endfor %}
+
 {% for std in projects %}
 {% if forloop.first %}
 <h1>The following projects have been imported:</h1>
@@ -57,6 +83,22 @@
     <td>{{b.vote_abstain}}</td>
 </tr>
 {% if forloop.last %}
+</table>
+{% endif %}
+{% endfor %}
+{% for r in reports %}
+{% if forloop.first %}
+<h1>The following reports have been imported:</h1>
+<table>
+<thead>
+<tr><th>Session</th><th>Venue</th><th>Location</th><th>Date</th></tr></thead>
+<tbody>
+{% endif %}
+<tr><td>{{r.session}}</td><td>{{r.venue}}</td><td>{{r.location}}</td>
+<td>{{r.start}}</td>
+</tr>
+{% if forloop.last %}
+</tbody>
 </table>
 {% endif %}
 {% endfor %}

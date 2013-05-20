@@ -1,5 +1,5 @@
 application: ieee80211timeline
-version: 2
+version: 3
 runtime: python
 api_version: 1
 
@@ -35,6 +35,12 @@ handlers:
   
 - url: /media/images
   static_dir: media/images/
+  
+- url: /media/css
+  static_dir: media/css/
+
+- url: /media/js
+  static_dir: media/js/
 
 - url: /favicon.ico
   static_files: media/images/favicon.ico

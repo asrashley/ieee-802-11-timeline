@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                                            *
 #
 #  Author              :    Alex Ashley
 #
@@ -22,8 +22,8 @@
 
 from project.models import Project, InProgress, Published, Withdrawn
 from timeline.models import DenormalizedProject, ProjectBacklog, check_backlog
-
 from util.cache import CacheControl
+from util.forms import DateModelForm
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response,  get_object_or_404
@@ -34,25 +34,25 @@ from django.core.urlresolvers import reverse
 from django.views.generic import create_update
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-
 from django.contrib.auth.decorators import login_required
 
 import datetime
 from operator import attrgetter
 
-class ProjectForm(forms.ModelForm):
+class ProjectForm(DateModelForm):
     curstat = forms.IntegerField(widget=forms.HiddenInput)
     base = forms.ModelChoiceField(label='Baseline',queryset=Project.objects.filter(doc_type='STD'),
                                   required=False,
                                   help_text='Baseline standard. (NOTE-Amendment ordering will be automatically calculated via ordering)')
+            
     class Meta:
         model = Project
         exclude=('baseline',)
-        
+
 @login_required
 def main_page(request, export=None):
     if request.GET.get('refresh'):
-        for p in Project.objects.all():
+        for p in Project.objects.all().iterator():
             ProjectBacklog(project=p).save()
         return http.HttpResponseRedirect(reverse('timeline.views.main_page'))
     if request.GET.get('redraw',None) is not None:
@@ -73,7 +73,7 @@ def main_page(request, export=None):
     published = []
     withdrawn = []
     needs_update = check_backlog()
-    for pd in DenormalizedProject.objects.all(): #order_by('-sort_key'):
+    for pd in DenormalizedProject.objects.all().iterator():
         if pd.withdrawn:
             withdrawn.append(pd)
         elif pd.published:
@@ -85,10 +85,12 @@ def main_page(request, export=None):
     withdrawn.sort(key=attrgetter('sortkey'), reverse=True)
     context = dict(now=now, in_process=in_process, published=published, withdrawn=withdrawn)
     context['export'] = export
-    context['cache'] = CacheControl()
     context['next_page'] = reverse('timeline.views.main_page')
     context['needs_update'] = needs_update
-    return render_to_response('timeline/index.html', context, context_instance=RequestContext(request))
+    context['export_page'] = 'timeline'
+    context_instance=RequestContext(request)
+    context_instance['cache'].export = export
+    return render_to_response('timeline/index.html', context, context_instance=context_instance)
 
 @login_required
 def add_project(request):
@@ -138,18 +140,16 @@ def edit_project(request,proj):
 def del_project(request,proj):
     return create_update.delete_object(request, model=Project, object_id=proj,
                                        post_delete_redirect=request.GET.get('next','/'))
-
-
+    
 @csrf_exempt
 def backlog_worker(request):
-    for backlog in ProjectBacklog.objects.all():
+    for backlog in ProjectBacklog.objects.all().iterator():
         try:
             pd = DenormalizedProject(project=backlog.project)
             pd.denormalize()
-        except Project.DoesNotExist:
-            pass
-        finally:
             backlog.delete()
+        except (Project.DoesNotExist,TypeError):
+            pass
     message='Timeline backlog complete'
     return render_to_response('done.html',locals(),context_instance=RequestContext(request))
 

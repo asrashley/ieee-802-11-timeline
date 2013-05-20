@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
+<div id="tools">
+<p class="heading">Letter Ballot tools</p>
 <ul>
-<li><a href="{% url ballot.views.wg_page %}">Working Group Ballots</a></li>
-<li><a href="{% url ballot.views.sponsor_page %}">Sponsor Ballots</a></li>
-<li><a href="{% url ballot.views.add_ballot %}">Add a ballot</a></li>
+<li><a href="{% url ballot.views.wg_page %}">View and edit Working Group ballots</a></li>
+<li><a href="{% url ballot.views.sponsor_page %}">View and edit Sponsor Ballots</a></li>
+<li><a href="{% url ballot.views.add_ballot %}">Add a new ballot</a></li>
 </ul>
-
+</div>
 {% endblock %}

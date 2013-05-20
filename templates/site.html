@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
+    xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
+    lang="{% firstof LANGUAGE_CODE 'en' %}">
+{% load siteutils %}
+  <head>
+    <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
+{% if not cache.export %}
+	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/ieeeadmin.css" />
+{%endif %}
+
+    <style type="text/css">
+    div#header{
+	font-size: 1.5em;
+	font-family: Verdana,Arial,sans-serif;
+	vertical-align: middle;
+	text-align: center;
+	color:#ffffff;
+	height: 2em;
+	width: 100%;
+	border: 1px solid ;
+	line-height: 2em;
+ 	padding: 1px 4px;
+  	background: rgb(0, 128, 128) none repeat scroll 0% 50%;
+	}
+	
+div#header a {
+	color: yellow;
+	text-decoration: none;
+}
+
+div#footer {
+	text-align:center;
+}
+div#footer table {
+	border:0px;
+	padding: 0px;
+	margin:10px;
+}
+div#footer table td{
+	height: 2.7em;
+	width:6.4em;
+	vertical-align: bottom;
+}
+div#footer table img {
+	border:0px;
+}
+div.centered {
+	text-align: center;
+}
+p.center {
+	text-align: center;
+}
+
+div.centered table, div#footer table {
+	margin: 0 auto; 
+	text-align: left;
+}
+    
+    {% block css %}
+    {% endblock %}
+    </style>
+
+    {% block preload_js %}
+    {% endblock %}
+
+    {% block extra-head %}{% endblock %}
+    
+    {% ifequal cache.export "shtml" %}
+<!--#include file="banner_head.html" -->
+
+<!--#include file="banner_body.html" -->
+
+<!-- Hide error message when lb_block is not there -->
+	{% endifequal %}    
+  </head>
+
+  <body>
+    <div id="header">{% block header %}{%endblock%}</div>
+    <div id="menu">{% block menu %}{%endblock%}</div>
+	
+    <div class="columns">
+      <div id="content" class="column">
+        {% block content-header %}
+          {% if error %}<div class="error">{{ error }}</div>{% endif %}
+          {% if info %}<div class="info">{{ info }}</div>{% endif %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="info">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endblock %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <div id="footer">
+    {% block footer %}
+    <h6 style="text-align:center">This website may contain names, logos, designs, titles, words, or phrases that may
+constitute trademarks, service marks, or tradenames of the IEEE or other entities which may be registered in certain jurisdictions.</h6>
+    {% endblock %}
+    </div>
+    {% block js %}
+    {% endblock %}
+  </body>
+</html>

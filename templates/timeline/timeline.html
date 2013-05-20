@@ -1,6 +1,6 @@
 {% load siteutils %}
 <table class="timeline">
-<caption class="caption{{published}}">{% if not export %}<a href="?redraw={{published}}">{%endif%}{{caption}}{% if not export %}</a>{%endif%}</caption>
+<caption class="caption{{published}}">{% if not cache.export %}<a href="?redraw={{published}}">{%endif%}{{caption}}{% if not cache.export %}</a>{%endif%}</caption>
 <thead>
     <tr>
     <th rowspan="3" class="first">IEEE Project and Final Document</th>
@@ -10,10 +10,10 @@
 <th colspan="2">Documentation</th>
 <th rowspan="3">Current Status</th>
 <th rowspan="3" class="pardate"><div>PAR Approved, Modified, or Extended [Expires]</div></th>
-<th colspan="4"><a href="http://grouper.ieee.org/groups/802/11/LetterBallots.shtml">WG Letter Ballots</a></th>
+<th colspan="4"><a href="{{urls.wg_letter_ballots}}">WG Letter Ballots</a></th>
 <th rowspan="3" class="date"><div>Form Sponsor Ballot Pool / Reform</div></th>
-<th rowspan="3" class="date"><div>MEC<br />Done</div></th>
-<th colspan="4"><a href="http://grouper.ieee.org/groups/802/11/SponsorBallots.html">IEEE-SA Sponsor Ballots</a></th>
+<th rowspan="3" class="date"><div>MEC<br />/ MDR<br />Done</div></th>
+<th colspan="4"><a href="{{urls.sponsor_ballots}}">IEEE-SA Sponsor Ballots</a></th>
 <th rowspan="3" class="date"><div>Final 802.11 WG Approval</div></th>
 <th rowspan="3" class="date"><div>Final or Conditional 802 EC Approval</div></th>
 <th rowspan="3" class="date"><div>RevCom &amp; Standards Board Final or Continuous Process Approval</div></th>
@@ -36,8 +36,8 @@
     {% for std in standards %}
     <tr class="{% cycle 'row1' 'row2' as rowcol %}">
     <td {% if not published %}rowspan="2"{% endif %} class="first"><a name="{{std.slug}}"></a>
-    {% if not export %}<a href="{% url timeline.views.edit_project std.pk %}?next={{next_page|escape}}">{% endif %}
-    IEEE Std P{{std.fullname}}{% if not export %}</a>{%endif%}</td>
+    {% if not cache.export %}<a href="{% url timeline.views.edit_project std.pk %}?next={{next_page|escape}}">{% endif %}
+    IEEE Std P{{std.fullname}}{% if not cache.export %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_type}}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.par %}<a href="{{std.par}}">{%endif%}{{std.description}}{% if std.par %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.task_group_url %}<a href="{{std.task_group_url}}">{%endif%}{{std.task_group}}{% if std.task_group_url %}</a>{%endif%}</td>

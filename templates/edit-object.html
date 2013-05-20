@@ -1,20 +1,66 @@
 {% extends "base.html" %}
+{% load siteutils %}
+{% load adminmedia %}
 {% block title %}Edit - {{object.name}}{% endblock %}
-{% block css %}
-ul.errorlist { color: red; font-weight: bold;}
-{%endblock %}
+{% block preload_js %}
+<script type="text/javascript">window.__admin_media_prefix__ = "{%admin_media_prefix%}";</script>
+<script type="text/javascript" src="{% get_staticfiles_prefix %}js/jsi18n.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/core.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/jquery.min.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/jquery.init.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/actions.min.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/calendar.js"></script>
+<script type="text/javascript" src="{%admin_media_prefix%}js/admin/DateTimeShortcuts.js"></script>
+{% endblock %}
+{% block extra-head %}
+<link rel="stylesheet" type="text/css" href="{%admin_media_prefix%}css/forms.css" />
+{% endblock %}
 
 {% block content %}
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <form action="{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" method="post">{% csrf_token %}
+{{ form.non_field_errors }}
 <table>
-        {{form.as_table }}
+   {% for field in form %}
+   {% if not field.is_hidden %}
+   <tr>
+     <th>{{ field.label_tag }} {% if field.field.required %}<sup class="requ">*</sup>{% endif %}</th>
+     <td>{{ field.errors }}{{ field }}
+       {% if field.help_text %}
+       {% if field|field_type:'checkboxinput' %}
+       <span class="help_text">{{ field.help_text }}</span>
+       {% else %}
+       <p class="help_text">{{ field.help_text }}</p>
+       {% endif %}
+       {% endif %}
+       </td>
+   </tr>
+   {% endif %}
+   {% endfor %}
         <tr><td colspan="2">
+   {% for field in form %}{% if field.is_hidden %}{{field}}{% endif %}{% endfor %}
 <input type="submit" name="submit" value="Save" />
 <input type="submit" name="cancel" value="Cancel" />
-{% if object.pk %}<input type="submit" name="delete" value="Delete" />{% endif %}
+{% if object.pk and not no_delete %}<input type="submit" name="delete" value="Delete" />{% endif %}
 </td></tr>
+   <tr><td colspan="2" style="text-align:right;"><sup class="requ">*</sup>&nbsp;=&nbsp;required field</td></tr>
 </table>
 </form>
 {% endblock %}
+    {% block js %}
+    <script type="text/javascript">
+<!--
+django.jQuery(document).ready(function() {
+(function($) {
+	/* When the form is submitted, iterate through all fields of class "vURLField" and remove any spaces from the value */
+	$('form').bind('submit',function(evt) {
+		$('.vURLField').each(function(index,elt) {
+			$(elt).val($(elt).val().replace(/ /g,'%20'));
+		});
+	});
+})(django.jQuery)});
+
+//-->
+</script>
+    {% endblock %}

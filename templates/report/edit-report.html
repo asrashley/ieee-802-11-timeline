@@ -1,0 +1,14 @@
+{% extends "edit-object.html" %}
+{% block extra-head %}
+<script type="text/javascript">
+django.jQuery(document).ready(function() {
+	var $j = django.jQuery.noConflict();
+	$j("input[name='report'], input[name='minutes_doc'], , input[name='minutes_pdf']").change(function() {
+		var val = $j(this).val();
+		if(val){
+			$j("input[name='pending']").attr('checked', false);
+		}
+	});
+});
+</script>
+{% endblock %}

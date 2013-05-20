@@ -1,150 +1,94 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-    dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
-    xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
-    lang="{% firstof LANGUAGE_CODE 'en' %}">
-{% load siteutils %}
+{% extends 'site.html' %}
 {% load cache %}
-  <head>
-    <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
+{% load siteutils %}
 
-    <style type="text/css">
-div#header{
-	font-size: 15pt;
-	font-family: Arial;
-	vertical-align: middle;
-	text-align: center;
-	color:#ffffff;
-	height: 2em;
-	width: 100%;
-	border: 1px solid ;
- 	padding: 1px 4px;
-  	background: rgb(0, 128, 128) none repeat scroll 0% 50%;
-	}
-	
-div#header a {
-	color: yellow;
-	text-decoration: none;
-}
-div#menu {
-	text-align: center;
-}
-div#footer {
-	text-align:center;
-}
-div#footer table {
-	border:0px;
-	padding: 0px;
-	margin:10px;
-	#width:50px;
-}
-div#footer table td{
-	height: 30px;
-	width:70px;
-	vertical-align: bottom;
-}
-div#footer table img {
-	border:0px;
-}
-div#greeting {
-	float:right;
-	font-size: 10pt;
-	text-align: right;
-}		       
-div.centered {
-	text-align: center;
-}
-p.center {
-	text-align: center;
-}
-
-div.centered table, div#footer table {
-	margin: 0 auto; 
-	text-align: left;
-}
-    {% block css %}
-    {% endblock %}
-    </style>
-
-    {% block preload_js %}
-    {% endblock %}
-
-    {% block extra-head %}{% endblock %}
-    
-    {% ifequal export "shtml" %}
-<!--#include file="banner_head.html" -->
-
-<!--#include file="banner_body.html" -->
-
-<!-- Hide error message when lb_block is not there -->
-{% endifequal %}    
-  </head>
-
-  <body>
-  {% if export != "shtml" %}
-    <div id="header">{% block header %}
+{% block header %}
+  {% if cache.export != "shtml" %}
     <a id="logo" href="/">IEEE 802.11, The Working Group Setting the Standards for Wireless LANs</a>
-    {% if not export and user %}<div id="greeting">{{user.username}}</div>{%endif %}
-    {% if not user.is_authenticated %}<div id="greeting"><a href="{% url django.contrib.auth.views.login %}">Log in</a></div>{%endif %}
-    {% endblock %}
-    </div>
-    <div id="menu">{% block menu %}
-    {% if user.is_authenticated %}
-    	&nbsp;[<a href="{% url util.views.import_page %}">Import</a>]
-		&nbsp;[<a href="{% url util.views.export_page %}">Export CSV</a>]
-		&nbsp;[<a href="{% url timeline.views.add_project %}{%if next_page %}?next={{next_page|escape}}{%endif%}">Add Project</a>]
-		&nbsp;[<a href="{% url ballot.views.add_ballot %}{%if next_page %}?next={{next_page|escape}}{%endif%}">Add Ballot</a>]
-    	{% if user.is_staff %}&nbsp;[<a href="/ah">Google Admin</a>]&nbsp;[<a href="/admin">Django Admin</a>]{%endif %}
-		&nbsp;[<a href="{% url django.contrib.auth.views.password_change %}">Change password</a>]
-		{% if user.logout %}&nbsp;[<a href="{{user.logout}}">Logout</a>]{% else %}&nbsp;[<a href="{% url django.contrib.auth.views.logout %}">Log out</a>]{%endif%}
-	{% endif %}
-    {%endblock%}
-    </div>
-	{% endif %}
-	
-    <div class="columns">
-      <div id="content" class="column">
-        {% block content-header %}
-          {% if error %}<div class="error">{{ error }}</div>{% endif %}
-          {% if info %}<div class="info">{{ info }}</div>{% endif %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="info">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endblock %}
+    {% if not cache.export %}
+	    {% if user %}<div id="greeting">{{user.username}}</div>{%else%}<div id="greeting"><a href="{% url django.contrib.auth.views.login %}">Log in</a></div>{%endif %}
+  	{%endif %}
+  {%endif %}
+{% endblock %}
 
-        {% block content %}{% endblock %}
-      </div>
-    </div>
+{% block menu %}
+{% if user.is_authenticated and cache and not cache.export %}
+{% cache cache.timeout menu request.path %}
+  <ul>
+    <li><a class="hide" href="{% url util.views.import_page %}">Import</a></li>
+	<li><a class="hide" href="{% url util.views.export_page %}">Export</a>
+	<ul>
+		<li><a href="{% url util.views.export_page %}" title="Export Database">Database</a></li>
+	{% if export_page and not needs_update %}
+		<li><a href="{{export_page}}.html" title="Export as HTML page">HTML</a></li>
+		<li><a href="{{export_page}}.shtml" title="Export as SHTML page">SHTML</a></li>
+	{% endif %}
+	</ul>
+    </li>
+    <li><a class="hide" href="{% url ballot.views.main_page %}">Ballots</a>
+	<ul>
+		<li><a href="{% url ballot.views.wg_page %}">Working Group Ballots</a></li>
+		<li><a href="{% url ballot.views.sponsor_page %}">Sponsor Ballots</a></li>
+		<li><a href="{% url timeline.views.add_project %}?next={% url ballot.views.main_page %}" title="Add project">Add project</a></li>
+		<li><a href="{% url ballot.views.add_ballot %}?next={% url ballot.views.main_page %}">Add Ballot</a></li>
+	</ul>
+    </li>
+	<li><a class="hide" href="{% url report.views.main_page %}">Reports</a>
+	<ul>
+		<li><a href="{% url report.views.main_page %}">View Reports</a></li>
+		<li><a href="{% url report.views.add_report%}?next={% url report.views.main_page %}">Add Report</a></li>
+	</ul>
+	</li>
+    <li><a class="hide" href="{% url timeline.views.main_page %}">Timeline</a>
+	<ul>
+		<li><a href="{% url timeline.views.main_page %}">View Timeline</a></li>
+		<li><a href="{% url timeline.views.add_project %}?next={% url timeline.views.main_page %}" title="Add project">Add project</a></li>
+		<li><a href="{% url ballot.views.add_ballot %}?next={% url timeline.views.main_page %}">Add Ballot</a></li>
+	</ul>
+    </li>
+	<li><a class="hide" href="{% url util.views.main_page %}">System</a>
+	<ul>
+		<li><a href="{% url util.views.edit_urls %}{% if next_page %}?next={{next_page|escape}}{% endif %}">Edit URLs</a></li>
+		{% if user.is_staff %}<li><a href="/ah">Google Admin</a></li><li><a href="{% url util.views.main_page %}admin">Django Admin</a></li>{% endif %}
+		<li><a href="{% url django.contrib.auth.views.password_change %}">Change password</a></li>
+	</ul>
+	</li>
+	<li><a class="hide" {% if user.logout %}href="{{user.logout}}"{% else %}href="{% url django.contrib.auth.views.logout %}"{%endif%}>Log out</a></li>
+</ul>
+{% endcache %}
+{% endif %}
+{%endblock%}
 
-    <div id="footer">
+
+
+
+{% block footer %}
+{% if cache %}
+{% cache cache.timeout footer cache.export %}
+{% site_urls %}
 	<table>
   <tr>
     <td><img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}ieeel.gif" alt="IEEE Networking the World"  width="80" 
     	height="69" /></td>
-    <td><a href="http://standards.ieee.org/search.html">
-    	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}search.gif" alt="ZZ Search IEEE" width="54" 
+    <td><a href="{{urls.search|default:'http://standards.ieee.org/search.html'}}">
+    	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}search.gif" alt="Search IEEE" width="54" 
     	height="58" /></a></td>
-    <td><a href="http://standards.ieee.org/cgi-bin/staffmail">
+    <td><a href="{{urls.staff_email|default:'http://standards.ieee.org/cgi-bin/staffmail'}}">
     	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}email.gif" alt="E-mail IEEE Staff" width="55" 
     	height="59" /></a></td>
-    <td><a href="http://standards.ieee.org/index.html">
+    <td><a href="{{urls.standards|default:'http://standards.ieee.org/index.html'}}">
 	    <img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}home.gif" alt="IEEE Standards Home Page" width="52"
 	     height="58" /></a></td>
-    <td><a href="http://www.ieee.org/">
+    <td><a href="{{urls.ieee_home_page|default:'http://www.ieee.org/'}}">
     	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}corp.gif" alt="IEEE Corporate Home Page" width="72" 
     	height="58" /></a></td>
     <td><img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}802.GIF" width="66" height="68" alt="IEEE 802.11"/></td>
   </tr>
 </table>
-      <h6 style="text-align:center"><a href="http://www.ieee.org/about/documentation/copyright/">Copyright (c)</a>,
+      <h6 style="text-align:center"><a href="{{urls.copyright|default:'http://www.ieee.org/about/documentation/copyright/'}}">Copyright (c)</a>,
       the Institute of Electrical and Electronics Engineers, Inc. (IEEE). All rights reserved.</h6>
       <h6 style="text-align:center">This website may contain names, logos, designs, titles, words, or phrases that may
 constitute trademarks, service marks, or tradenames of the IEEE or other entities which may be registered in certain jurisdictions.</h6>
-    </div>
-
-    {% block js %}
-    {% endblock %}
-  </body>
-</html>
+{% endcache %}
+{% endif %}
+{% endblock %}

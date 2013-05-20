@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load cache %}
+{% load siteutils %}
+
+{% block title %}Summary reports of IEEE P802.11{% endblock %}
+
+{% block header %}
+{% if needs_update %}
+<a id="logo" href="{{next_page}}">UPDATES ARE BEING PROCESSED</a>
+{% else %}
+<a id="logo" href="/">SUMMARY REPORTS &amp; MINUTES  OF 802.11 WG SESSIONS:</a>
+{% endif %}
+{% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
+{% endblock %}
+
+{% block extra-head %}
+{% if needs_update %}
+<meta http-equiv="refresh" content="15; URL=''">
+{% endif %}
+{% endblock %}
+
+{% block css %}
+{% cache 600 rcss user.username cache.export %}
+h4	{
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:2.0pt;
+	margin-left:2.0in;
+	text-indent:-.5in;
+	page-break-after:avoid;
+	tab-stops:list 2.25in;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:normal
+	}
+	
+.style1 {
+				font-size: x-small;
+}
+.style2 {
+				color: #FFFFFF;
+				font-weight: bold;
+				text-align: center;
+}
+.style3 {
+				text-align: center;
+}
+
+table.report {
+	font-family: "Times New Roman", Times, Serif;
+	border: 1px solid black;
+	text-align: center;
+	padding: 1px;
+	margin: 4px;
+	border-collapse: collapse;
+	table-layout: fixed;
+	margin-left: auto;
+	margin-right: auto;
+	width: 840px;
+}
+table.report tr.row1 td {
+	background:#dddddd;
+}
+table.report tr td a {
+	color: blue;
+}
+table.report tr.blank td {
+	background: white;
+	color: black;
+}
+table.report th{ 
+	background:#008080;
+	text-align:center;
+	vertical-align: bottom;
+	color: white;
+	font-size: 10pt;
+} 
+table.report th a {
+	text-decoration: none;
+	color: white;
+}
+table.report th.notice a {
+	color: blue;
+}
+table.report th.notice a:hover {
+	text-decoration: underline;
+}
+table.report td {
+	background:#cccccc;
+	font-size: 9pt;
+	border: 1px solid black;
+	text-align: center;
+	vertical-align: middle;
+}
+	
+table.report td.result0{
+	color:#808080;
+}
+table.report td.result1{
+	color:black;
+}
+table.report td.notice, table.report th.notice {
+ 	background:white;
+	color:black;
+	text-align:justify;
+	vertical-align: middle;
+	font-weight: normal;
+	font-size: 12pt;
+	padding: 2px 6px;
+}
+table.report td.header, table.report th.header {
+	background:black;
+	color:white;
+	text-align:center;
+	vertical-align: middle;
+	font-weight: bold;
+}
+table.report th.header {
+	font-size: 16pt;
+}
+table.report td.header {
+	font-size: 12pt;
+}
+table.report tfoot tr td.notice {
+	font-size: 8pt;
+}
+
+table.report td.empty {
+	font-size: 14pt;
+}
+table.report td.empty a {
+	text-decoration: none;
+	color: black;
+}
+p.style1 {
+	font-size:16pt;
+}
+p.style2, p.style3 {
+	font-size:14pt;
+}
+
+div.Section1 {
+	page: Section1
+}
+{% endcache %}
+{% endblock %}
+
+{% block content %}
+<table class="report" >
+<col width="56" />
+<col width="86" />
+<col width="90" />
+<col width="90" />
+<col width="90" />
+<col width="190" />
+<col width="170" />
+<col width="65" />
+  <thead>
+  <tr><th class="header" colspan="8">IEEE 802.11 WLAN WORKING GROUP SESSIONS</th></tr>
+  <tr>
+    <th class="notice" colspan="8">
+    As our sessions are open to the public, all interested parties 
+      are welcome to attend IEEE P802.11 Working Group sessions, for which there 
+      is a registration fee, to defray the cost of the session. At Plenary 
+      sessions this is administered by the IEEE P802 LMSC organization. Whereas, 
+      the Interim sessions are normally managed by our sponsoring host. This is 
+      in-addition to your individual hotel accommodation, and travel expenses. 
+      Click here to view <a href="{{urls.example_agenda|default:'http://grouper.ieee.org/groups/802/11/Meetings/Typical_Meeting_Agenda.htm'}}">Example 
+      Plenary and Interim Session Agenda</a>.
+      </th>
+    </tr>
+
+  <tr>
+    <th rowspan="2" >Session</th>
+    <th rowspan="2" >Date</th>
+    <th rowspan="2">Month</th>
+    <th colspan="2">File URL or Doc#</th>
+    <th rowspan="2">Location</th>
+    <th rowspan="2" >Place</th>
+    <th rowspan="2">Type</th>
+    </tr>
+  <tr>
+    <th >Report</th>
+    <th>Minutes</th>
+    </tr>
+  </thead>
+  <tfoot>
+ <tr><td class="header" colspan="8">&nbsp;</td></tr>
+ <tr><td class="notice" colspan="8">n/a Denotes - Not Applicable.</td></tr>
+ <tr><td class="header" colspan="8">&nbsp;</td></tr>
+ </tfoot>
+  <tbody>
+{% for report in reports %}
+  {%ifchanged report.start.year %}
+<tr>
+    <td class="header" colspan="8">For Year {{report.start|date:"Y"}}</td>
+    </tr>
+    {%endifchanged %}
+<tr class="{%cycle 'row1' 'row2' %}">
+<td>
+{% if not export %}<a href="{%url report.views.edit_report report.pk %}?next={%url report.views.main_page %}">{%endif %}
+{{report.session}}
+{% if not export %}</a>{%endif%}
+</td>
+<td>{{report.start|date:"j"}}<sup>{{report.start|date:"S"}}</sup> - {{report.end|date:"j"}}<sup>{{report.end|date:"S"}}</sup></td>
+<td>{% ifequal report.start.month report.end.month %}{{report.start|date:"F"}}{%else%}
+{{report.start|date:"M"}} / {{report.end|date:"M"}}
+{%endifequal%}</td>
+<td {%if report.cancelled or report.pending %}colspan="2"{%endif%}>
+{%if report.cancelled %}Cancelled Session{%else%}
+  {%if report.pending %}Soon to be posted{% else %}
+    {%if report.report%}<a href="{{report.report}}">Report</a>{%else%}
+n/a
+    {%endif%}
+  {%endif%}
+{%endif%}
+</td>
+{% if not report.cancelled and not report.pending %}
+<td>{%if report.minutes_doc%}<a href="{{report.minutes_doc}}">{%if report.minutes_pdf%}.doc{%else%}Minutes{%endif%}</a>{%endif%}
+{%if report.minutes_pdf%}<a href="{{report.minutes_pdf}}">{%if report.minutes_doc%}.pdf{%else%}Minutes{%endif%}</a>{%endif%}
+</td>{%endif%}
+<td>{{report.venue}}</td>
+<td>{{report.location}}</td>
+<td>{{report.get_meeting_type_display}}</td>
+    </tr>
+ {% endfor %}
+  </tbody>
+</table>
+{% endblock %}    

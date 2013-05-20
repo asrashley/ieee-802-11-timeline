@@ -17,15 +17,15 @@
 		<col width="35" />
 		<col width="45" />        
       <thead>
-      {% if not completed %}
+      <!--  if not completed  -->
       <tr>
         <td class="notice" colspan="17">
         <p class="style1">IEEE-SA SPONSOR BALLOTS AS RELATED TO IEEE 802.11 WG</p>
         <p class="style3">(Note - percentage results are rounded to the nearest integer)</p>
 		</td>
       </tr>
-      {% endif %}
-      <tr class="table{{completed}}"><td colspan="17">{{caption}}</td></tr>      
+      <!-- endif  -->
+      <tr class="table{{completed}}"><td colspan="17">{% if completed %}COMPLETED BALLOTS{% else %}ONGOING BALLOTS{% endif %}</td></tr>      
       {% if completed or has_open %}
 	<tr>
         <th>{% if not export %}<a href="?redraw={{completed}}">{%endif%}Group{% if not export %}</a>{%endif%}</th>

@@ -24,7 +24,7 @@ from HTMLParser import HTMLParser
 import StringIO
 
 def clean(string):
-    okchars=' /.-_:?=()%'
+    okchars=' /.-_:?=()%&'
     return ''.join([s for s in string if s.isalnum() or s in okchars])
             
 class TableRow(object):
@@ -65,6 +65,10 @@ class TableHTMLParser(HTMLParser):
             self.row = TableRow()
             self.x = 0
         elif tag=='td' or tag=='th':
+            if self.row is None:
+                # handle badly formed table
+                self.row = TableRow()
+                self.x = 0
             try:
                 ys,ye = self.rowspan[self.x]
                 while self.y>=ys:

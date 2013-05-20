@@ -22,11 +22,12 @@
 
 from project.models import Project
 from ballot.models import Ballot
+from report.models import MeetingReport
 from util.models import ImportProgress, ImportLine 
 from util.tasks import add_task
 from util.htmlparser import clean, TableHTMLParser
 
-from django.db import models
+from django.db import models, connection
 from django.http import HttpResponse
 from django.db.models.fields import URLField
 from django.core.urlresolvers import reverse
@@ -64,6 +65,10 @@ ballot_v1_fields = ['id','project_id','number','draft','date','ballot_type','res
 ballot_fields = [ field.attname for field in Ballot._meta.fields]
 ballot_fields.append('project.task_group')
 
+html_report_fields = ['Session', 'Date', 'Month', 'Report', 'Minutes', 'Location', 'Place', 'Type' ]
+html_report_fields2 = ['Session', 'Date', 'Month', 'NoReport', 'Location', 'Place', 'Type', 'Report', 'Minutes']
+
+report_fields = [ field.attname for field in MeetingReport._meta.fields]
 
 class LastObject(object):
     def __init__(self, progress):
@@ -110,9 +115,15 @@ class Cache(object):
         return self._pdict['pk-%d'%pk]
         
     def put_project(self,project):
-        self._pdict['pk-%d'%project.pk] = project
+        self._pdict['pk-%d'%int(project.pk)] = project
         self._pdict['task_group-%s'%project.task_group] = project
         self._pdict['name-%s'%project.name] = project
+        
+    def get_report(self,session):
+        return self._misc['report-%03d'%int(session)]
+    
+    def put_report(self,report):
+        self._misc['report-%03d'%int(report.session)] = report
         
     def get_next_lb_number(self):
         try:
@@ -134,7 +145,7 @@ class Cache(object):
     #    self._bdict['pk-%d'%ballot.pk] = ballot
 
                 
-def import_projects_and_ballots(source):
+def import_projects_and_ballots(source, debug=False):
     """ Called by import_view to store a file on the server for later processing.
     """
     if 'html' in source.content_type:
@@ -151,13 +162,16 @@ def import_projects_and_ballots(source):
         except AttributeError:
             il = ImportLine(line=linenumber+1,text=[clean(c) for c in line])
         il.save(force_insert=True)
-    ip = ImportProgress( linecount = linenumber, current_line = 0)
+    ip = ImportProgress( linecount = linenumber+1, current_line = 0)
     ip.save()
-    add_task(name = 'import-worker', url=reverse('util.views.import_worker', args=[ip.pk]),countdown=10)
+    if debug:
+        parse_projects_and_ballots(ip)
+    else:
+        add_task(name = 'import-worker', url=reverse('util.views.import_worker', args=[ip.pk]),countdown=10)
     return ip
 
 def parse_projects_and_ballots(progress):
-    """ Called by import worker to process a file that as been uploaded by the import_view
+    """ Called by import worker to process a file that as been uploaded by import_view
     """
     if progress.started is None:
         progress.started=datetime.datetime.now()
@@ -184,6 +198,11 @@ def parse_projects_and_ballots(progress):
             handler = import_ballot
             last.set(None)
             continue
+        elif is_section_header(text,report_fields):
+            model = MeetingReport
+            handler = import_report
+            last.set(None)
+            continue
         elif is_section_header(text,ballot_v1_fields):
             model = Ballot
             handler = import_ballot_v1
@@ -204,14 +223,26 @@ def parse_projects_and_ballots(progress):
             handler = import_html_sponsor_ballot
             last.set(None)
             continue
-        if handler is None or model is None:
+        elif text[0]=='IEEE 802.11 WLAN WORKING GROUP       SESSIONS' or is_section_header(text, ['Session', 'Date', 'Month', 'File URL or Doc', 'Location', 'Place', 'Type']):
+            model = MeetingReport
+            handler = import_html_report
+            last.set(None)
             continue
-        o = handler(impline, last.get(), cache)
+        if handler is None or model is None:
+            #print text
+            continue
+        try:
+            o = handler(impline, last.get(), cache)
+        except Exception,excp:
+            progress.add_error(linenum,excp,impline)
+            o = None
         if o is not None:
             if model==Project:
                 progress.add_project(o)
-            else:
+            elif model==Ballot:
                 progress.add_ballot(o)
+            else:
+                progress.add_report(o)
             last.set(o)
         last.add(impline)                
     last.set(None)
@@ -220,17 +251,21 @@ def parse_projects_and_ballots(progress):
     progress.current_line = progress.linecount
     progress.save()
 
-def export_projects_and_ballots():
+def export_csv():
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=timeline-'+datetime.datetime.now().strftime('%Y-%m-%d-%H%M.csv')
     writer = csv.writer(response,delimiter=',')
     writer.writerow(project_fields)
-    for p in Project.objects.all().order_by('par_date'):
+    for p in Project.objects.all().order_by('par_date').iterator():
         writer.writerow(flatten([eval('p.'+f) for f in project_fields]))
     writer.writerow([])
     writer.writerow(ballot_fields)
-    for b in Ballot.objects.all().order_by('number'):
+    for b in Ballot.objects.all().order_by('number').iterator():
         writer.writerow(flatten([eval('b.'+f) for f in ballot_fields]))
+    writer.writerow([])
+    writer.writerow(report_fields)
+    for r in MeetingReport.objects.all().order_by('session').iterator():
+        writer.writerow(flatten([eval('r.'+f) for f in report_fields]))
     writer.writerow([])
     return response
 
@@ -537,6 +572,80 @@ def import_ballot(item, last_ballot,cache,fields=None):
     #b.save()
     return b
 
+def import_report(item,last_report,cache):
+    entry = item.as_dict(report_fields)
+    try:
+        session = entry['session'].as_int()
+    except (ValueError,TypeError):
+        return None
+    try:
+        report = cache.get_report(session)
+    except KeyError:
+        try:
+            report = MeetingReport.objects.get(session=session)
+        except MeetingReport.DoesNotExist:
+            report = MeetingReport(session=session)
+    for field in report._meta.fields:
+        if not field.primary_key:
+            try:
+                value = to_python(field, entry[field.attname].value) if entry[field.attname] is not None else None
+                setattr(report,field.attname,value)
+            except KeyError:
+                pass
+    cache.put_report(report)
+    return report
+    
+def import_html_report(item,last_report,cache):
+    entry = item.as_dict(html_report_fields)
+    if entry['Session'].lower().startswith('for year '):
+        cache.set('repyear',entry['Session'][9:])
+        return None
+    try:
+        session = entry['Session'].as_int()
+    except (ValueError,TypeError):
+        return None
+    if entry['Type'] is None and entry['Place'] is not None:
+        entry = item.as_dict(html_report_fields2)
+    try:
+        report = cache.get_report(session)
+        report.venue=entry['Location']
+        report.location=entry['Place']
+    except KeyError:
+        try:
+            report = MeetingReport.objects.get(session=session)
+        except MeetingReport.DoesNotExist:
+            report = MeetingReport(session=session, venue=entry['Location'], location=entry['Place'])
+    year = int(cache.get('repyear'))
+    month = entry['Month']
+    start,end = entry['Date'].split('-')
+    if '/' in month:
+        sm,em = month.split('/')
+        set_date(report,'start','%s %s %d'%(sm,start,year))
+        set_date(report,'end','%s %s %d'%(em,end,year))
+    else:
+        set_date(report,'start','%s %s %d'%(month,start,year))
+        set_date(report,'end','%s %s %d'%(month,end,year))
+    if entry['Type'].lower().find('plenary')>=0:
+        report.meeting_type = MeetingReport.Plenary.code
+    elif entry['Type'].lower().find('interim')>=0:
+        report.meeting_type = MeetingReport.Interim.code
+    else:
+        report.meeting_type = MeetingReport.Special.code
+    try:
+        minutes  = entry['Minutes'].anchor
+        if minutes.lower().endswith('.pdf'):
+            report.minutes_pdf = minutes
+        else:
+            report.minutes_doc = minutes
+    except AttributeError:
+        pass
+    try:
+        report.report = entry['Report'].anchor
+    except AttributeError:
+        pass
+    cache.put_report(report)
+    return report
+    
 def flatten(items):
     """Converts an object in to a form suitable for storage.
     flatten will take a dictionary, list or tuple and inspect each item in the object looking for
@@ -576,9 +685,10 @@ def flatten(items):
     return rv
 
 def to_python(field,value):
-    if field.db_type()=='date':
+    db_type = field.db_type(connection=connection)
+    if db_type =='date':
         value = from_isodatetime(value)
-    elif field.db_type()=='bool':
+    elif db_type=='bool':
         value = value.lower()=='true'
     elif isinstance(field,URLField):
         value = value.replace(' ','%20')

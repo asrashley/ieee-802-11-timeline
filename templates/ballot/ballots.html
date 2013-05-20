@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load cache %}
+{% load siteutils %}
 
 {% block title %}IEEE 802.11, The Working Group for Wireless LANs Standards{% endblock %}
 
@@ -19,6 +20,7 @@
 {% endblock %}
 
 {% block css %}
+{% cache cache.timeout bcss %}
 h4
 	{margin-top:0in;
 	margin-right:0in;
@@ -128,63 +130,53 @@ p.style1 {
 p.style2, p.style3 {
 	font-size:14pt;
 }
-
-{% endblock %}
-
-{% block menu %}
-{% cache 600 lbmenu user.username next_page export needs_update %}
-{% if not export %}
-{% if not needs_update %}
-&nbsp;[{%spaceless%}
-	<a href="{% url ballot.views.main_page %}{% if sponsor %}SponsorBallots.html{%else%}LetterBallots.html{%endif%}">
-	{%endspaceless%}Export HTML</a>]
-&nbsp;[{%spaceless%}
-	<a href="{% url ballot.views.main_page %}{% if sponsor %}SponsorBallots.shtml{%else%}LetterBallots.shtml{%endif%}">
-	{%endspaceless%}Export SHTML</a>]
-{% endif %}
-{{block.super}}
-{% endif %}
 {% endcache %}
 {% endblock %}
 
 {% block content %}
+{% site_urls %}
 <p class="center">This page is maintained by 
-<a href="mailto:adrian.p.stephens@intel.com">Adrian Stephens</a>. Comments are welcome. </p>
+{% if sponsor %}
+{% with urls.sb_ballot_maintainers_list as email_list %}
+{% include "emails.html" %}
+{% endwith %}
+{% else %}
+{% with urls.lb_ballot_maintainers_list as email_list %}
+{% include "emails.html" %}
+{% endwith %}
+{% endif %}
+. Comments are welcome. </p>
 <div class="centered">
 
-{% with "ONGOING BALLOTS" as caption %}
 {% with 0 as completed %}
-{% with open as ballots %}
-{%if sponsor %}
-{% cache cache.timeout sbopen cache.open_ver export %}
-{% include "ballot/sbballots.html" %}
-{% endcache %}
-{% else %}
-{% cache cache.timeout wgopen cache.open_ver export %}
-{% include "ballot/wgballots.html" %}
-{% endcache %}
-{% endif %}
-{% endwith %}
-{% endwith %}
+	{% with open as ballots %}
+		{% if sponsor %}
+			{% if not cache.export %}
+				{% cache cache.timeout sbopen cache.open_ver cache.export urls.last_modified %}
+					{% include "ballot/sbballots.html" %}
+				{% endcache %}
+			{% endif %}
+		{% else %}
+			{% cache cache.timeout wgopen cache.open_ver cache.export %}
+				{% include "ballot/wgballots.html" %}
+			{% endcache %}
+		{% endif %}
+	{% endwith %}
 {% endwith %}
 
 {%if sponsor %}
-	{% cache cache.timeout sbclosed cache.closed_ver export %}
-	{% with "COMPLETED BALLOTS" as caption %}
+	{% cache cache.timeout sbclosed cache.closed_ver cache.export urls.last_modified %}
 	{% with 1 as completed %}
 	{% with closed as ballots %}
 	{% include "ballot/sbballots.html" %}
 	{% endwith %}
 	{% endwith %}
-	{% endwith %}
 	{% endcache %}
 {% else %}
-	{% cache cache.timeout wgclosed cache.closed_ver export %}
-	{% with "COMPLETED BALLOTS, from LB101 onwards<br />Letter ballot results up to LB100 <a href='http://www.ieee802.org/11/LetterBallots0to100.shtml'>can be found here.</a>" as caption %}
+	{% cache cache.timeout wgclosed cache.closed_ver cache.export urls.last_modified %}
 	{% with 1 as completed %}
 	{% with closed as ballots %}
 	{% include "ballot/wgballots.html" %}
-	{% endwith %}
 	{% endwith %}
 	{% endwith %}
 	{% endcache %}

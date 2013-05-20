@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                                            *
 #
 #  Author              :    Alex Ashley
 #
@@ -73,7 +73,7 @@ class DenormalizedProject(AbstractProject):
         sr = self.project.ballot_set.filter(ballot_type='SR').order_by('draft').values_list('pk',flat=True)
         self.denormalized_recirc_sb = ','.join(['%d'%pk for pk in sr])
         a = self.project.withdrawn_date.strftime('%Y%m%d') if self.project.withdrawn_date is not None else '00000000'
-        b = self.project.revcom_approval_date.strftime('%Y%m%d') if self.project.revcom_approval_date is not None else '00000000'
+        b = self.project.revcom_approval_date.strftime('%Y%m%d') if self.project.published and self.project.revcom_approval_date is not None else '00000000'
         c = self.project.par_date.strftime('%Y%m%d')
         self.sortkey = ''.join([a,b,c])
         if commit:
@@ -119,10 +119,11 @@ def add_to_backlog(sender, instance, **kwargs):
     # instance is a Project object
     b = ProjectBacklog(project=instance)
     b.save()
-    for dproj in DenormalizedProject.objects.filter(baseline=instance.baseline):
-        if dproj.pk!=instance.pk:
-            b = ProjectBacklog(project=dproj.project)
-            b.save()
+    if instance.baseline is not None:
+        for dproj in DenormalizedProject.objects.filter(baseline=instance.baseline).iterator():
+            if dproj.pk!=instance.pk:
+                b = ProjectBacklog(project=dproj.project)
+                b.save()
     check_backlog()
     
 @receiver(post_save, sender=Ballot)
@@ -142,6 +143,19 @@ def pre_ballot_delete(sender, instance, **kwargs):
     except Project.DoesNotExist:
         pass
         
+@receiver(pre_delete, sender=Project)
+def pre_project_delete(sender, instance, **kwargs):
+    if instance.baseline is not None:
+        for proj in Project.objects.filter(baseline=instance.baseline).iterator():
+            if proj.pk!=instance.pk:
+                proj.baseline = None
+                proj.save()
+    try:
+        dn = DenormalizedProject.objects.get(project=instance)
+        dn.delete()
+    except DenormalizedProject.DoesNotExist:
+        pass
+    
 def check_backlog():
     needs_update = ProjectBacklog.objects.exists()
     if needs_update:

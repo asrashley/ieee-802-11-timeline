@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load cache %}
+{% load siteutils %}
 
 {% block title %}IEEE 802.11 Official Timelines{% endblock %}
 
@@ -10,6 +11,7 @@
 {% endblock %}
 
 {% block css %}
+{% cache cache.timeout tcss %}
 table.timeline caption{
 	font-size: 16pt;
 	font-family: Arial;
@@ -32,7 +34,6 @@ table.timeline caption a:link, table.timeline caption a:visited {
 	text-decoration: none;
 	color: black;
 }
-
 table.timeline caption.caption2 a:link, table.timeline caption.caption2 a:visited {
 	color: white;
 }
@@ -51,7 +52,6 @@ table.timeline td {
 	padding: 1px 2px;
 	height: 30px;
 }
-
 table.timeline tr.row1 td.first, table.timeline tr.row1 td.est{
 	background: rgb(255, 255, 153);
 }
@@ -65,7 +65,6 @@ table.timeline th.result {
 td.conf {
 	background: lime;
 }
-
 table.timeline th.date div{
 	width: 55px;
 }
@@ -96,39 +95,38 @@ table.timeline th.last {
 table.timeline th.doctype {
 	padding: 2px 1px;
 }
-	
 table.timeline th a:link, table.timeline th a:visited {
 	color: #f0f000;
 	text-decoration: none;
 }
-
 table.timeline td a:link, table.timeline td a:visited {
 	text-decoration: none;
-}
-	
-p#trademarks {	
+}	
+#trademarks {	
 	margin: 0 0 0;
 	text-align: center;
 	font-size: 7.5pt;
 	 font-family: Arial;
 	 }
-div#maintained {
+#maintained {
 	text-align: center;
 }
-table#notes {
+#notes {
 	font-size: 7pt;
 	font-family: Arial;
+	width: 120em;
+	margin: 0.5em auto;
 }
-table#notes td.key {
+#notes td.key {
 	text-align: right;
 }
-table#notes td.value {
+#notes td.value {
 	text-align: left;
 }
-
-span.disabled {
+.disabled {
 	color: 808080;
 	}
+{% endcache %}
 {% endblock %}
 
 {% block header %}
@@ -137,28 +135,12 @@ span.disabled {
 {% else %}
 <a id="logo" href="/">OFFICIAL IEEE 802.11 WORKING GROUP PROJECT TIMELINES - {% now "Y-m-d" %}</a>
 {% endif %}
-{% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
-{% endblock %}
-
-{% block menu %}
-{% cache 600 menu user.username export needs_update %}
-{% if not export %}
-{% if needs_update %}
-<span class="disabled">[Export HTML]</span>
-<span class="disabled">&nbsp;[Export SHTML]</span>
-{% else %}
-[<a href="{% url timeline.views.main_page %}timeline.html">Export HTML</a>]
-&nbsp;[<a href="{% url timeline.views.main_page %}timeline.shtml">Export SHTML</a>]
-{% endif %}
-{{block.super}}
-{% else %}
-[<a style="font-family: Arial;" href="https://mentor.ieee.org/802.11/dcn/07/11-07-1952-15-0000-non-procedural-letter-ballot-results.xls">Historical Ballot&nbsp;Timeline</a>]
-{% endif %}
-{% endcache %}
+{% if not cache.export %}<div id="greeting">{{user.username}}</div>{%endif %}
 {% endblock %}
 
 {% block content %}
-{% cache cache.timeout cprocess cache.in_progress_ver export %}
+{% site_urls %}
+{% cache cache.timeout cprocess cache.in_progress_ver cache.export urls.last_modified %}
 {% with "IN PROCESS - Standards, Amendments, and Recommended Practices" as caption %}
 {% with 0 as published %}
 {% with in_process as standards %}
@@ -168,7 +150,7 @@ span.disabled {
 {% endwith %}
 {% endcache %}
 
-{% cache cache.timeout cpublished cache.published_ver export %}
+{% cache cache.timeout cpublished cache.published_ver cache.export urls.last_modified %}
 {% with "PUBLISHED - Standards, Amendments, and Recommended Practices" as caption %}
 {% with published as standards %}
 {% with 1 as published %}
@@ -178,7 +160,7 @@ span.disabled {
 {% endwith %}
 {% endcache %}
 
-{% cache cache.timeout cwithdrawn cache.withdrawn_ver export %}
+{% cache cache.timeout cwithdrawn cache.withdrawn_ver cache.export urls.last_modified %}
 {% with "SUPERSEDED OR WITHDRAWN  -  Standards, Amendments, and Recommended Practices" as caption %}
 {% with withdrawn as standards %}
 {% with 2 as published %}
@@ -188,63 +170,56 @@ span.disabled {
 {% endwith %}
 {% endcache %}
 
-<table id="notes">
-    <col width="113" />
-    <col width="47" />
-    <col width="204" />
-    <col width="32" />
-    <col width="137" />
-    <col width="117" />
-    <col width="485" />
+{% cache cache.timeout notes urls.last_modified %}
+<table id="notes"> 
+    <col width="5%" />
+    <col width="19%" />
+    <col width="3%" />
+    <col width="13%" />
+    <col width="12%" />
+    <col width="20%" />
+    <col width="11%" />
+    <col width="17%" />
     <thead>
   <tr>
-  <th />
-    <th colspan="6" style="background:black; color: white;">Timeline Chart Notes:</th>
+    <th colspan="8" style="background:black; color: white;">Timeline Chart Notes:</th>
     </tr>
     </thead><tbody>
   <tr>
-    <td />
     <td class="key">C</td>
     <td >&nbsp;=&nbsp; Stage Completed or Currently In-Process</td>
     <td class="key">N/A</td>
     <td >&nbsp;=&nbsp; Not Applicable</td>
     <td class="key">MEC</td>
     <td >&nbsp;=&nbsp;IEEE-SA Mandatory Editorial Coordination</td>
+    <td class="key">MDR</td>
+    <td >&nbsp;=&nbsp;802.11 WG Mandatory Draft Review</td>
   </tr>
   <tr>
-    <td >  &nbsp;      </td>
     <td class="key">A / COR</td>
     <td >&nbsp;=&nbsp;Amendment / Corrigendum</td>
     <td class="key">RP</td>
     <td >&nbsp;=&nbsp; Recommended Practice</td>
     <td class="key">Final 802.11 WG</td>
-    <td >&nbsp;=&nbsp; Approval by 802.11 WG - <a style="color: blue; text-decoration: underline;" href="http://grouper.ieee.org/groups/802/11/Meetings/Meeting_Plan.html">Current 
-      WG Calendar</a></td>
+    <td colspan="3">&nbsp;=&nbsp; Approval by 802.11 WG - <a href="{{urls.wg_meeting_plan}}">Current WG Calendar</a></td>
   </tr>
   <tr>
-    <td >&nbsp;</td>
     <td class="key">Predicted</td>
     <td >&nbsp;=&nbsp; Current Date Estimate</td>
     <td class="key">SB</td>
     <td >&nbsp;=&nbsp; Sponsor Ballot</td>
     <td class="key">Final or Conditional 802 EC</td>
-    <td >&nbsp;=&nbsp; Approval by 802 EC at Plenary Session - 
-    <a style="color: blue; text-decoration: underline;" href="http://grouper.ieee.org/groups/802/11/Meetings/Meeting_Plan.html">Current 
-      802 EC Plenary Calendar</a></td>
+    <td colspan="3">&nbsp;=&nbsp; Approval by 802 EC at Plenary Session - <a href="{{urls.ec_meeting_plan}}">Current 802 EC Plenary Calendar</a></td>
   </tr>
   <tr>
-    <td style="text-align: right;">&nbsp;</td>
     <td class="key">Date</td>
     <td >&nbsp;=&nbsp; Actual or Start Date</td>
     <td class="key">STD</td>
     <td >&nbsp;=&nbsp; Standard and/or Revision</td>
     <td class="key">RevCom/Standards Board</td>
-    <td >&nbsp;=&nbsp; Approval of RevCom / IEEE-SA Standards Board in Normal Session 
-      - <a style="color: blue; text-decoration: underline;" href="http://standards.ieee.org/board/index.html">Current IEEE-SA 
-      Calendar</a></td>
+    <td colspan="3">&nbsp;=&nbsp; Approval of RevCom / IEEE-SA Standards Board in Normal Session -  <a href="{{urls.ieee_sa_calendar}}">Current IEEE-SA Calendar</a></td>
   </tr>
   <tr>
-    <td style="text-align: right;">&nbsp;</td>
     <td class="key">LB</td>
     <td >&nbsp;=&nbsp; Letter Ballot      </td>
     <td class="key">TG</td>
@@ -254,14 +229,18 @@ span.disabled {
   </tr>
   </tbody>
 </table>
-       
-      <div id="maintained"><p>This page is maintained by <a href="mailto:stephen.mccann@ieee.org">Stephen McCann</a> and
-      <a href="mailto:aashley@nds.com">Alex Ashley</a>. Comments are welcome.</p></div>
-      
+{% endcache %}       
+{% cache cache.timeout tpublished cache.published_ver urls.last_modified %}
+      <div id="maintained"><p>This page is maintained by
+	{% with urls.timeline_maintainers_list as email_list %}
+	{% include "emails.html" %}
+	{% endwith %}
+      . Comments are welcome.</p></div>
       <p id="trademarks">
       IEEE Std 802.11{% for p in published %}, 802.11{{p.task_group|slice:"2:"}} {%endfor %}{% for p in in_process %}, 802.11{{p.task_group|slice:"2:"}} {%endfor %}
       , 802.11.1 and 802.11.2 are trademarks of
 the IEEE. All other names or product names are the trademarks, service
 marks or registered trademarks of their respective holders.
       </p>
+{% endcache %}       
       {% endblock %}
