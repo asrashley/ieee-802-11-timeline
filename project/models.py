@@ -65,11 +65,9 @@ class AbstractProject(models.Model):
     slug = models.SlugField(max_length=15, unique=True, editable=False, null=True, blank=True)
     description = models.CharField(max_length=100, help_text=_('Project Description'))
     doc_type = models.CharField(max_length=4, choices=_PROJECT_TYPES, help_text='Amendment, Standard, Recommended Practice or Corrigendum')
-    par = models.URLField(verify_exists=False, null=False, blank=True, 
-                          help_text=_('URL pointing to PAR document'))
+    par = models.URLField(null=False, blank=True, help_text=_('URL pointing to PAR document'))
     task_group = models.CharField(max_length=10, help_text=_('Name of task group (TG..)'))
-    task_group_url = models.URLField(verify_exists=False, null=True, blank=True,
-                                    help_text=_('URL pointing to TG status page'))
+    task_group_url = models.URLField(null=True, blank=True, help_text=_('URL pointing to TG status page'))
     doc_format = models.CharField(max_length=20, blank=True, null=True, help_text=_('Word/PDF, Frame/PDF, etc'))
     doc_version = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True, help_text=_('Version number of current draft'))
     baseline = models.IntegerField(help_text=_('Baseline standard. (NOTE-Amendment ordering will be automatically calculated via ordering)'),blank=True,null=True)

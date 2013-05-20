@@ -62,17 +62,17 @@ class AbstractBallot(models.Model):
     vote_abstain = models.IntegerField(null=True, blank=True) 
     vote_invalid = models.IntegerField(null=True, blank=True, help_text=_('Number of NO votes without comments')) 
     comments = models.IntegerField(null=True, blank=True, help_text=_('Number of comments')) 
-    instructions_url = models.URLField(verify_exists=False, null=True, blank=True,
+    instructions_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to ballot instruction'))
-    draft_url = models.URLField(verify_exists=False, null=True, blank=True,
+    draft_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to draft document'))
-    redline_url = models.URLField(verify_exists=False, null=True, blank=True,
+    redline_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to redline version of draft'))
-    resolution_url = models.URLField(verify_exists=False, null=True, blank=True,
+    resolution_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to comment resolutions document'))
-    template_url = models.URLField(verify_exists=False, null=True, blank=True,
+    template_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to comment submission template'))
-    pool_url = models.URLField(verify_exists=False, null=True, blank=True,
+    pool_url = models.URLField(null=True, blank=True,
                                     help_text=_('URL pointing to voter pool'))
 
     class Meta:

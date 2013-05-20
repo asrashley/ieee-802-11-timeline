@@ -1,36 +1,42 @@
 application: ieee80211timeline
 version: 3
-runtime: python
+runtime: python27
 api_version: 1
-
+threadsafe: true
 default_expiration: '365d'
 
 builtins:
-- datastore_admin: on
-- admin_redirect: on
- 
+- remote_api: on
+
+inbound_services:
+- warmup
+
+libraries:
+- name: django
+  version: latest
+
 handlers:
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+- url: /remoteapi.*
+  script: google.appengine.ext.remote_api.handler.app
   login: admin
 
 - url: /_ah/queue/deferred
-  script: djangoappengine/deferred/handler.py
+  script: djangoappengine.deferred.handler.application
   login: admin
   
 - url: /media/admin
   static_dir: django/contrib/admin/media/
 
 - url: /timeline/dn
-  script: djangoappengine/main/main.py
+  script: djangoappengine.main.application
   login: admin
   
 - url: /ballot/dn
-  script: djangoappengine/main/main.py
+  script: djangoappengine.main.application
   login: admin
   
 - url: /util/import/work
-  script: djangoappengine/main/main.py
+  script: djangoappengine.main.application
   login: admin
   
 - url: /media/images
@@ -41,6 +47,10 @@ handlers:
 
 - url: /media/js
   static_dir: media/js/
+  
+- url: /media/bin
+  static_dir: media/bin/
+
 
 - url: /favicon.ico
   static_files: media/images/favicon.ico
@@ -53,8 +63,8 @@ handlers:
   expiration: '0'
   
 - url: /.*
-  script: djangoappengine/main/main.py
-  
+  script: djangoappengine.main.application
+    
 admin_console:
   pages:
   - name: Django Admin

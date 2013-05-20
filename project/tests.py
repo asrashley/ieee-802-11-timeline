@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                                            *
 #
 #  Author              :    Alex Ashley
 #

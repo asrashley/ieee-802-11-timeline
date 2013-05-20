@@ -16,9 +16,9 @@
 {% cache cache.timeout menu request.path %}
   <ul>
     <li><a class="hide" href="{% url util.views.import_page %}">Import</a></li>
-	<li><a class="hide" href="{% url util.views.export_page %}">Export</a>
+	<li><a class="hide" href="{% url util.views.main_page %}">Export</a>
 	<ul>
-		<li><a href="{% url util.views.export_page %}" title="Export Database">Database</a></li>
+		<li><a href="{% url util.views.export_db %}" title="Export Database">Database</a></li>
 	{% if export_page and not needs_update %}
 		<li><a href="{{export_page}}.html" title="Export as HTML page">HTML</a></li>
 		<li><a href="{{export_page}}.shtml" title="Export as SHTML page">SHTML</a></li>

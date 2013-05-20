@@ -1,11 +1,9 @@
-IEEE 802.11 Timeline tool v1.0
-------------------------------
 Unless you are a member of the IEEE 802.11 executive, this is probably not the
 git repository you are looking for.
 
 The application is based upon the model, view, controller paradigm. It uses
 databases to hold information on the IEEE 802.11 projects and ballots, scripts
-to control the "business logic" of viewing and modifying this data, and HTML
+to control the “business logic” of viewing and modifying this data, and HTML
 templates that render the data that you see in your web browser.
 
 The main advantage of this approach is that it allows changes to the visual
@@ -38,8 +36,8 @@ layer to allow Django to use the GAE datastore.
 To run the timeline tool locally, you need to install Python, the GAE
 development environment, unzip the timeline tool source code and then place the
 django-nonrel source code in the same directory as the timeline tool source
-code, as described below. This version of the app requires the use of
-Python v2.5.
+code, as described below. At the time of writing, GAE requires the use of
+Python v2.7.
 
 Download the following:
 * Google App Engine for Python <http://code.google.com/appengine/>
@@ -47,6 +45,28 @@ Download the following:
 * djangoappengine: <https://github.com/django-nonrel/djangoappengine>
 * djangotoolbox: <https://github.com/django-nonrel/djangotoolbox>
 * django-dbindexer: <https://github.com/django-nonrel/django-dbindexer>
+* django-autoload: <https://bitbucket.org/twanschik/django-autoload>
+
+Make sure you select the 1.4 branch for all of the django repositories. The
+following commands should do the job:
+
+    git clone https://github.com/django-nonrel/django
+    cd django
+    git checkout nonrel-1.4
+    cd ..
+    git clone https://github.com/django-nonrel/djangoappengine
+    cd djangoappengine
+    git checkout appengine-1.4
+    cd ..
+    git clone https://github.com/django-nonrel/djangotoolbox
+    cd djangotoolbox
+    git checkout toolbox-1.4
+    cd ..
+    git clone https://github.com/django-nonrel/django-dbindexer
+    cd django-dbindexer
+    git checkout dbindexer-1.4
+    cd ..
+    hg clone https://bitbucket.org/twanschik/django-autoload
 
 Install the Google App Engine. Copy the following folders into the same 
 directory where you have downloaded the source code:
@@ -54,9 +74,11 @@ directory where you have downloaded the source code:
 * djangotoolbox/djangotoolbox => <timeline_dir>/djangotoolbox
 * django-dbindexer/dbindexer => <timeline_dir>/dbindexer
 * djangoappengine => <timeline_dir>/djangoappengine
+* django-autload/autoload => <timeline_dir>/autoload
 
 Once finished, you should have a directory that contains:
 
+    <DIR>          autoload
     <DIR>          ballot
     <DIR>          dbindexer
     <DIR>          django
@@ -70,6 +92,7 @@ Once finished, you should have a directory that contains:
     app.yaml
     cron.yaml
     index.yaml
+    indexes.py
     LICENSE-2.0.txt
     manage.py
     queue.yaml

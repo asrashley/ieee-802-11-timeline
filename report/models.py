@@ -55,11 +55,10 @@ class MeetingReport(models.Model):
     
     pending = models.BooleanField(default=True,help_text=_(u'Reports are in-progress and will be provided later'))
     #null=True, blank=True,
-    report = models.URLField(verify_exists=False, null=True, blank=True,
-                             help_text=_('URL pointing to meeting report'))
-    minutes_doc = models.URLField(verify_exists=False,null=True, blank=True,
+    report = models.URLField(null=True, blank=True, help_text=_('URL pointing to meeting report'))
+    minutes_doc = models.URLField(null=True, blank=True,
                                   help_text=_('URL pointing to meeting minutes in Word format'))
-    minutes_pdf = models.URLField(verify_exists=False, null=True, blank=True,
+    minutes_pdf = models.URLField(null=True, blank=True,
                                   help_text=_('URL pointing to meeting minutes in PDF format'))
     
     venue = models.CharField(max_length=100, help_text=_('Name of meeting venue'))

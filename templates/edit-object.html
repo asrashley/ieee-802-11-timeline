@@ -1,19 +1,18 @@
 {% extends "base.html" %}
 {% load siteutils %}
-{% load adminmedia %}
 {% block title %}Edit - {{object.name}}{% endblock %}
 {% block preload_js %}
-<script type="text/javascript">window.__admin_media_prefix__ = "{%admin_media_prefix%}";</script>
+<script type="text/javascript">window.__get_staticfiles_prefix__ = "{% get_staticfiles_prefix %}";</script>
 <script type="text/javascript" src="{% get_staticfiles_prefix %}js/jsi18n.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/core.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/jquery.min.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/jquery.init.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/actions.min.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/calendar.js"></script>
-<script type="text/javascript" src="{%admin_media_prefix%}js/admin/DateTimeShortcuts.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/core.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery.min.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery.init.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/actions.min.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/calendar.js"></script>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/DateTimeShortcuts.js"></script>
 {% endblock %}
 {% block extra-head %}
-<link rel="stylesheet" type="text/css" href="{%admin_media_prefix%}css/forms.css" />
+<link rel="stylesheet" type="text/css" href="{%get_staticfiles_prefix%}css/forms.css" />
 {% endblock %}
 
 {% block content %}

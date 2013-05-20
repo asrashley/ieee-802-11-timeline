@@ -29,7 +29,7 @@ from timeline.models import check_backlog as check_project_backlog
 from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
 from ballot.models import check_backlog as check_ballot_backlog 
 
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
@@ -63,8 +63,17 @@ def main_page(request):
     return render_to_response('util/index.html', {}, context_instance=RequestContext(request))
     
 @login_required
-def export_page(request):    
+def export_db(request):    
     return export_csv()
+
+@login_required
+def export_sw(request):
+    try:
+        from django.conf import settings
+        version = '_v%.1f'%settings.APP_VERSION
+    except ImportError:
+        version = ''
+    return redirect('/media/bin/ieee80211timeline%s.zip'%(version))
 
 @login_required
 def import_page(request, next):
