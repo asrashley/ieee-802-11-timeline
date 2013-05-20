@@ -1,3 +1,25 @@
+#############################################################################
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#############################################################################
+#
+#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#
+#  Author              :    Alex Ashley
+#
+#############################################################################
+
 from project.models import Project
 from util.tasks import add_task
 
@@ -34,7 +56,7 @@ class AbstractBallot(models.Model):
     closed = models.DateField()
     ballot_type = models.CharField(max_length=5, choices=_BALLOT_TYPES)
     #result = models.IntegerField(null=True, blank=True)
-    pool = models.IntegerField(help_text=_('Number of voters in ballot pool'))
+    pool = models.IntegerField(help_text=_('Number of voters in ballot pool'), null=True)
     vote_for = models.IntegerField(null=True, blank=True) 
     vote_against = models.IntegerField(null=True, blank=True) 
     vote_abstain = models.IntegerField(null=True, blank=True) 
@@ -65,21 +87,22 @@ class AbstractBallot(models.Model):
     
     @property
     def return_percent(self):
-        if self.pool>0:
+        if self.pool:
             return int((100*float(self.return_count) / float(self.pool))+0.5)
         return 0
     
     @property
     def return_count(self):
-        return self.vote_for + self.vote_against + self.vote_abstain
+        votes = self.vote_for if self.vote_for is not None else 0
+        votes += self.vote_abstain if self.vote_abstain is not None else 0
+        votes += self.vote_against if self.vote_against is not None else 0
+        return votes
     
     @property
     def abstain_percent(self):
         if self.vote_abstain is None:
             return 0
-        votes = self.vote_for if self.vote_for is not None else 0
-        votes += self.vote_abstain
-        votes += self.vote_against if self.vote_against is not None else 0
+        votes = self.return_count
         if votes>0:
             return int((100*float(self.vote_abstain) / float(votes))+0.5)
         return 0
@@ -88,11 +111,9 @@ class AbstractBallot(models.Model):
     def against_percent(self):
         if self.vote_against is None:
             return 0
-        votes = self.vote_for if self.vote_for is not None else 0
-        votes += self.vote_abstain if self.vote_abstain is not None else 0
-        votes += self.vote_against
+        votes = self.return_count
         if votes>0:
-            return int((100*float(self.vote_against) / float(self.pool))+0.5)
+            return int((100*float(self.vote_against) / float(votes))+0.5)
         return 0
         
     @property

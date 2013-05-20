@@ -1,9 +1,30 @@
+#############################################################################
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#############################################################################
+#
+#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#
+#  Author              :    Alex Ashley
+#
+#############################################################################
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 
-import random
+import random, re
 
 def generate_slug(model,object,field, max_length):
     """Generates a slug that is unique within the specified model.
@@ -93,6 +114,8 @@ class AbstractProject(models.Model):
         return InProgress
     
 class Project(AbstractProject):
+    name_re = re.compile('.+-[0-9x][0-9x][0-9x][0-9x]$')
+        
     def __unicode__(self):
         return self.fullname
     
@@ -108,9 +131,12 @@ class Project(AbstractProject):
     def baselines(self):
         if self.baseline is None:
             return []
-        rv = [Project.objects.get(pk=self.baseline)]
-        rv += [p for p in Project.objects.filter(baseline=self.baseline).order_by('order') if p.pk!=self.pk and p.order<self.order]
-        return rv
+        try:
+            rv = [Project.objects.get(pk=self.baseline)]
+            rv += [p for p in Project.objects.filter(baseline=self.baseline).order_by('order') if p.pk!=self.pk and p.order<self.order]
+            return rv
+        except Project.DoesNotExist:
+            return []
     
     @property    
     def initial_wg_ballots(self):
@@ -137,5 +163,7 @@ class Project(AbstractProject):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = generate_slug(Project,self,'task_group',10)
+        if self.name_re.match(self.name):
+            self.name = self.name[:-5]
         super(Project,self).save(*args, **kwargs)
     

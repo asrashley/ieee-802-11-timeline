@@ -1,3 +1,25 @@
+#############################################################################
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#############################################################################
+#
+#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#
+#  Author              :    Alex Ashley
+#
+#############################################################################
+
 from project.models import Project, AbstractProject
 from ballot.models import DenormalizedBallot, Ballot
 from util.tasks import add_task
@@ -58,12 +80,20 @@ class DenormalizedProject(AbstractProject):
             self.save()
         
     @property    
+    def wg_ballots(self):
+        return self._get_ballots(self.denormalized_initial_wg)+self._get_ballots(self.denormalized_recirc_wg)
+    
+    @property    
     def initial_wg_ballots(self):
         return self._get_ballots(self.denormalized_initial_wg)
     
     @property    
     def recirc_wg_ballots(self):
         return self._get_ballots(self.denormalized_recirc_wg)
+    
+    @property    
+    def sb_ballots(self):
+        return self._get_ballots(self.denormalized_initial_sb)+self._get_ballots(self.denormalized_recirc_sb)
     
     @property    
     def initial_sb_ballots(self):

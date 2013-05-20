@@ -1,4 +1,4 @@
 {% extends "base.html" %}
 {% block content %}
-<p>{% if message %}{{message}}{%else%}Done{%endif%}</p>
+<p>{% if message %}{{message|safe}}{%else%}Done{%endif%}</p>
 {% endblock %}

@@ -1,38 +1,35 @@
+{% load siteutils %}
 <table class="timeline">
 <caption class="caption{{published}}">{% if not export %}<a href="?redraw={{published}}">{%endif%}{{caption}}{% if not export %}</a>{%endif%}</caption>
 <thead>
     <tr>
-    <th rowspan="3">IEEE Project and Final Document</th>
-    <th rowspan="3">Final Doc Type</th>
+    <th rowspan="3" class="first">IEEE Project and Final Document</th>
+    <th rowspan="3" class="doctype">Final Doc Type</th>
 <th rowspan="3">Project Authorization Request (PAR)</th>
 <th rowspan="3">Task Group and Activity</th>
 <th colspan="2">Documentation</th>
 <th rowspan="3">Current Status</th>
 <th rowspan="3" class="pardate"><div>PAR Approved, Modified, or Extended [Expires]</div></th>
-<th colspan="6"><a href="http://grouper.ieee.org/groups/802/11/LetterBallots.shtml">WG Letter Ballots (LBs)</a></th>
-<th rowspan="3" class="date"><div>Form Sponsor Ballot (SB) Pool / Reform</div></th>
-<th rowspan="3" class="date"><div>MEC Done</div></th>
-<th colspan="6"><a href="http://grouper.ieee.org/groups/802/11/SponsorBallots.html">IEEE-SA Sponsor Ballots (SBs)</a></th>
-<th rowspan="3">Final 802.11 WG Approval</th>
-<th rowspan="3">Final or (Conditional) 802 EC Approval</th>
-<th rowspan="3">RevCom &amp; Standards Board Final or Continuous Process Approval</th>
-<th rowspan="3">ANSI Approved</th>
-<th rowspan="3">Superseded or Withdrawn by Standards Board</th>
+<th colspan="4"><a href="http://grouper.ieee.org/groups/802/11/LetterBallots.shtml">WG Letter Ballots</a></th>
+<th rowspan="3" class="date"><div>Form Sponsor Ballot Pool / Reform</div></th>
+<th rowspan="3" class="date"><div>MEC<br />Done</div></th>
+<th colspan="4"><a href="http://grouper.ieee.org/groups/802/11/SponsorBallots.html">IEEE-SA Sponsor Ballots</a></th>
+<th rowspan="3" class="date"><div>Final 802.11 WG Approval</div></th>
+<th rowspan="3" class="date"><div>Final or Conditional 802 EC Approval</div></th>
+<th rowspan="3" class="date"><div>RevCom &amp; Standards Board Final or Continuous Process Approval</div></th>
+<th rowspan="3" class="date"><div>ANSI Approved</div></th>
+<th rowspan="3" class="date last"><div>Superseded or Withdrawn by Standards Board</div></th>
     </tr>
     <tr>
     <th colspan="2">Session End Snapshot</th>
-    <th colspan="3" class="bspan"><div>Initial</div></th>
-   	<th colspan="3"class="bspan"><div>Recirculation</div></th>
-    <th colspan="3"class="bspan"><div>Initial</div></th>
-   	<th colspan="3"class="bspan"><div>Recirculation</div></th>
+   	<th class="draft">Draft</th><th colspan="2" class="date"><div>Date</div></th><th class="result">Result</th>
+   	<th class="draft">Draft</th><th colspan="2" class="date"><div>Date</div></th><th class="result">Result</th>
    	</tr>
    	<tr>
-   	<th>Format &amp; Version</th>
+   	<th class="result">Format &amp; Version</th>
    	<th>Incorporated Baselines</th>
-   	<th class="draft">Draft</th><th class="date"><div>Date</div></th><th class="result">Result</th>
-   	<th class="draft">Draft</th><th class="date"><div>Date</div></th><th class="result">Result</th>
-   	<th class="draft">Draft</th><th class="date"><div>Date</div></th><th class="result">Result</th>
-   	<th class="draft">Draft</th><th class="date"><div>Date</div></th><th class="result">Result</th>
+   	<th colspan="2" class="predicted">Predicted<br />Initial</th><th colspan="2" class="predicted">Predicted<br />Recirc</th>
+   	<th colspan="2" class="predicted">Predicted<br />Initial</th><th colspan="2" class="predicted">Predicted<br />Recirc</th>
    	</tr>
     </thead>
     <tbody>
@@ -44,32 +41,18 @@
     <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_type}}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.par %}<a href="{{std.par}}">{%endif%}{{std.description}}{% if std.par %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.task_group_url %}<a href="{{std.task_group_url}}">{%endif%}{{std.task_group}}{% if std.task_group_url %}</a>{%endif%}</td>
-    <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_format}}<br />{% if std.doc_version %}D{{std.doc_version}}{% endif %}</td>
+    <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_format|padslash}}{% if std.doc_version %}<br />D{{std.doc_version}}{% endif %}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% for base in std.baselines %}{%if not forloop.first%}<br />{%endif%}
     <a href="#{{base.slug}}">{{base.name}}</a>{% endfor %}</td>
     <td>Actual</td>
     <td class="date">{{std.par_date|date:"Y-m-d"}}{%for h in std.par_history %}<br /><span>({{h}})</span>{%endfor%}{% if std.par_expiry %}<br /><span>[{{std.par_expiry|date:"Y-m-d"}}]</span>{% endif %}</td>
-    {% with std.initial_wg_ballots as ballots %}
-    {% with std.initial_wg_ballot as ballot_date %}
+    {% with std.wg_ballots as ballots %}
     {% include "timeline/ballots.html" %}
-	{% endwith %}    
-	{% endwith %}    
-    {% with std.recirc_wg_ballots as ballots %}
-    {% with std.recirc_wg_ballot as ballot_date %}
-    {% include "timeline/ballots.html" %}
-	{% endwith %}    
 	{% endwith %}    
     <td>{% if std.sb_formed %}{{std.sb_form_date|date:"Y-m-d"}}{% endif %}</td>
     <td>{% if std.mec_completed %}{{std.mec_date|date:"Y-m-d"}}{% endif %}</td>
-    {% with std.initial_sb_ballots as ballots %}
-    {% with std.initial_sb_ballot as ballot_date %}
+    {% with std.sb_ballots as ballots %}
     {% include "timeline/ballots.html" %}
-	{% endwith %}    
-	{% endwith %}    
-    {% with std.recirc_sb_ballots as ballots %}
-    {% with std.recirc_sb_ballot as ballot_date %}
-    {% include "timeline/ballots.html" %}
-	{% endwith %}    
 	{% endwith %}    
     <td>{% if std.wg_approved %}{{std.wg_approval_date|date:"Y-m-d"}}{% if std.published and not std.wg_approval_date%}C{%endif%}{% endif %}</td>
     <td>{% if std.ec_approved %}{{std.ec_approval_date|date:"Y-m-d"}}{% if std.published and not std.ec_approval_date%}C{%endif%}{% endif %}</td>
@@ -80,12 +63,12 @@
 	{% if not published %}<tr class="{{rowcol}}">
     <td class="est">Predicted</td>
     <td class="conf">C</td>
-    <td colspan="3" {% if not std.initial_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.initial_wg_ballots %}{{std.initial_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
-    <td colspan="3" {% if not std.recirc_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.recirc_wg_ballots %}{{std.recirc_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.initial_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.initial_wg_ballots %}{{std.initial_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.recirc_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.recirc_wg_ballots %}{{std.recirc_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
     <td {% if std.sb_formed %}class="conf"{%else%}class="est"{%endif %}>{% if not std.sb_formed %}{{std.sb_form_date|date:"M-y"}}{% else %}C{% endif %}</td>
     <td {% if std.mec_completed %}class="conf"{%else%}class="est"{%endif %}>{% if std.mec_completed %}C{%else%}{{std.mec_date|date:"M-y"}}{% endif %}</td>
-   	<td colspan="3" {% if not std.initial_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.initial_sb_ballots %}{{std.initial_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
-    <td colspan="3" {% if not std.recirc_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.recirc_sb_ballots %}{{std.recirc_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+   	<td colspan="2" {% if not std.initial_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.initial_sb_ballots %}{{std.initial_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.recirc_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.recirc_sb_ballots %}{{std.recirc_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
     <td {% if std.wg_approved %}class="conf"{%else%}class="est"{%endif%}>{% if std.wg_approved %}C{%else%}{{std.wg_approval_date|date:"M-y"}}{% endif %}</td>
     <td {% if std.ec_approved %}class="conf"{%else%}class="est"{%endif%}>{% if std.ec_approved %}C{%else%}{{std.ec_approval_date|date:"M-y"}}{% endif %}</td>
     <td {% if std.published %}class="conf"{%else%}class="est"{%endif%}>{% if std.published %}C{%else%}{{std.revcom_approval_date|date:"M-y"}}{% endif %}</td>

@@ -1,4 +1,27 @@
+#############################################################################
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#############################################################################
+#
+#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#
+#  Author              :    Alex Ashley
+#
+#############################################################################
+
 from util.io import from_isodatetime, flatten
+from util.tasks import run_test_task_queue
 from ballot.models import *
 from project.models import *
 
@@ -6,8 +29,7 @@ from django.test import Client, TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-import datetime
-import decimal
+import datetime, decimal, sys
 import unittest
 import time
 
@@ -44,8 +66,13 @@ class UtilTest(unittest.TestCase):
             
 class ImportPageTest(TestCase):
     NOT_IDEMPOTENT = []
-    
-    def _post_import(self,url,filename):
+
+    def setUp(self):
+        from util import tasks 
+        tasks._test_task_queue = []
+        tasks._completed_tasks = []
+
+    def _post_import(self,url,filename,length=0):
         testfile = open(filename,'r')
         data = {
                 'wipe_projects' : False,
@@ -54,16 +81,26 @@ class ImportPageTest(TestCase):
                 'file' : testfile
                 }
         try:
-            response = self.client.post(url, data)
+            response = self.client.post(url, data, follow=True)
         except:
             raise
         finally:
             testfile.close()
+        progress = response.context['progress']
+        progress_url = reverse('util.views.import_progress',args=[progress.pk])
+        self.failUnlessEqual(response.redirect_chain[0][1],302)
+        self.failUnless(response.redirect_chain[0][0].endswith(progress_url))
         #print response.content
-        self.failUnlessEqual(response.status_code, 200)
         #self.failIf(response.context['errors'])
         #print response.content
-        self.assertContains(response, 'Finished Importing')
+        if length:
+            self.assertContains(response, 'input file contains %d line'%length)
+        #self.assertContains(response, 'Finished Importing')
+        while progress.finished is None:
+            run_test_task_queue(response.request)
+            response = self.client.get(progress_url)
+            self.failUnlessEqual(response.status_code, 200)
+            progress = response.context['progress']
         return response
         
 class ImportHtmlPageTest(ImportPageTest):
@@ -88,6 +125,7 @@ class ImportHtmlPageTest(ImportPageTest):
         self.assertContains(response, '<input type="submit" name="submit"')
         
         response = self._post_import(url, self.LB_BALLOT_HTML)
+
         #print 'results',response.context['results']
         counts = {}
         tmodels = { Ballot:0, Project: 0 }
@@ -118,7 +156,7 @@ class ImportHtmlPageTest(ImportPageTest):
 class ImportCsvPageTest(ImportPageTest):
     fixtures = ['site.json']
     #TESTFILE = 'util/fixtures/timeline-2010-10-27-1146.csv' 
-    TESTFILE = 'util/fixtures/timeline-2010-11-02-1439.csv' 
+    TESTFILE = ('util/fixtures/timeline-2010-11-02-1439.csv' ,187)
     
     def test_csv_import(self):
         """
@@ -137,7 +175,7 @@ class ImportCsvPageTest(ImportPageTest):
         self.failUnlessEqual(response.status_code, 200)
         self.assertContains(response, '<input type="submit" name="submit"')
         #print response
-        response = self._post_import(url, self.TESTFILE)
+        response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1])
         counts = {}
         tmodels = { Ballot:0, Project: 0 }
         for m in tmodels.keys():
@@ -145,7 +183,7 @@ class ImportCsvPageTest(ImportPageTest):
                                  (m._meta.verbose_name,m.objects.count(),tmodels[m]))
             counts[m] = m.objects.count()
         # Check that a second attempt to import the data does not cause errors and does not add any new objects to the database
-        response = self._post_import(url, self.TESTFILE)
+        response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1])
         for m in tmodels.keys():
             if m in self.NOT_IDEMPOTENT:
                 self.failIfEqual(m.objects.count(),counts[m],msg='%s model had %d items, but after a second import it still has %d'%
@@ -157,12 +195,12 @@ class ImportCsvPageTest(ImportPageTest):
 class ImportCsvPageTest2(ImportCsvPageTest):
     fixtures = ['site.json','projects.json'] 
     #TESTFILE = 'util/fixtures/ballots-2010-10-27-1410.csv' 
-    TESTFILE = 'util/fixtures/ballots-2010-11-02-1439.csv'
+    TESTFILE = ('util/fixtures/ballots-2010-11-02-1439.csv',153)
      
 class ImportCsvPageTest3(ImportCsvPageTest):
     fixtures = ['site.json','projects.json'] 
     #TESTFILE = 'util/fixtures/ballots-2010-10-27-1410.csv' 
-    TESTFILE = 'util/fixtures/ballots-zero-fields.csv' 
+    TESTFILE = ('util/fixtures/ballots-zero-fields.csv',3) 
     NOT_IDEMPOTENT = [Ballot]
     
 class MainPageTest(TestCase):

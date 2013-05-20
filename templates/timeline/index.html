@@ -42,16 +42,14 @@ table.timeline {
 	font-size: 7pt;
 	text-align: center;
 	padding: 1px;
-	margin: 4px;
+	margin: 2px;
 	border-collapse: collapse;
 	table-layout: fixed;
 }	
-table.timeline tr {
-	height: 20.25pt;
-}
 table.timeline td {
 	border: 1px solid black;
-	padding: 1px 4px;
+	padding: 1px 2px;
+	height: 30px;
 }
 
 table.timeline tr.row1 td.first, table.timeline tr.row1 td.est{
@@ -62,37 +60,41 @@ table.timeline tr.row2 td.first, table.timeline tr.row2 td.est{
 }
 table.timeline th.result {
 	font-size: 6pt;
+	padding: 1px 1px;
 }
 td.conf {
-	background: lime
+	background: lime;
 }
 
 table.timeline th.date div{
-	width: 50px;
+	width: 55px;
 }
 table.timeline th.pardate div{
 	width: 64px;
 }
 table.timeline tr.row1 {
-	background: rgb(192, 192, 192)
+	background: rgb(192, 192, 192);
 }
 table.timeline tr.row2 {
 	background: white;
 }
-table.timeline th.bspan div{
-	width:120px;
-}
-
-
 table.timeline th {
 	background: black;
 	border: 1px solid white;
 	color: white;
 	vertical-align: bottom;
 	text-align: center;
-	padding: 1px 4px;
-	margin: 4px;
-	font-size: 7.5pt;
+	padding: 2px 4px;
+	font-size: 7pt;
+}
+table.timeline th.first {
+	border-left: 1px solid black;
+}
+table.timeline th.last {
+	border-right: 1px solid black;
+}
+table.timeline th.doctype {
+	padding: 2px 1px;
 }
 	
 table.timeline th a:link, table.timeline th a:visited {

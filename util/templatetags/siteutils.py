@@ -20,10 +20,43 @@
 #
 #############################################################################
 
-from ballot.models import *
-from django.contrib import admin
+from django.template import Library
+from django.template.defaultfilters import stringfilter
+#from django.utils.translation import ugettext, ungettext
 
-class BallotAdmin(admin.ModelAdmin):
-    list_display = ('number', 'ballot_type', 'project_name', 'draft', 'opened', 'closed')
+from urlparse import urlsplit
+from xml.sax.saxutils import unescape
+import re
 
-admin.site.register(Ballot, BallotAdmin)
+register = Library()
+
+@register.filter(name='basename')
+@stringfilter
+def basename(value):
+    if not value:
+        return ''
+    url = urlsplit(value)
+    rv = [ r for r in url.path.split('/') if r!='']
+    return unescape(rv[-1], {'%20':' '})
+
+pad_re = re.compile(r'.+[^ ]\/[^ ]')
+
+@register.filter(name='padslash')
+@stringfilter
+def padslash(value):
+    if not value:
+        return ''
+    if pad_re.match(value):
+        return value.replace('/', ' / ')
+    return value
+
+@register.simple_tag
+def get_staticfiles_prefix():
+    """
+    Returns the string contained in the setting STATICFILES_URL
+    """
+    try:
+        from django.conf import settings
+    except ImportError:
+        return ''
+    return settings.STATICFILES_URL

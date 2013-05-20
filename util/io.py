@@ -1,12 +1,37 @@
+#############################################################################
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#############################################################################
+#
+#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#
+#  Author              :    Alex Ashley
+#
+#############################################################################
+
 from project.models import Project
 from ballot.models import Ballot
+from util.models import ImportProgress, ImportLine 
+from util.tasks import add_task
+from util.htmlparser import clean, TableHTMLParser
 
 from django.db import models
 from django.http import HttpResponse
 from django.db.models.fields import URLField
+from django.core.urlresolvers import reverse
 
-import datetime, decimal, csv, time, StringIO, re
-from HTMLParser import HTMLParser
+import datetime, decimal, csv, time, re
 
 project_fields = ['pk', 'name', 'description', 'doc_type','par', 'task_group',
                   'task_group_url', 'doc_format',  'doc_version', 'baseline',
@@ -39,138 +64,31 @@ ballot_v1_fields = ['id','project_id','number','draft','date','ballot_type','res
 ballot_fields = [ field.attname for field in Ballot._meta.fields]
 ballot_fields.append('project.task_group')
 
-class TableCell(object):
-    def __init__(self, value=None, anchor=None):
-        self.value = value if value is not None else ''
-        self.anchor = anchor
-        
-    def __eq__(self,val):
-        #if self.value=='LB':
-        #    raise Exception("debug")
-        return self.value==val
-    
-    def __ne__(self,val):
-        return self.value!=val
-    
-    #def __iter__(self):
-    #    return iter(self.value)
-    
-    def lower(self):
-        return self.value.lower()
-    
-    def strip(self):
-        return self.value.strip()
-    
-    def index(self,s):
-        return self.value.index(s)
-    
-    def endswith(self,s):
-        return self.value.endswith(s)
-    
-    def replace(self,a,b):
-        return self.value.replace(a,b)
-    
-    def as_int(self):
-        if self.value[-1]=='%':
-            return int(self.value[:-1])
-        return int(self.value)
-    
-    def __getitem__(self,key):
-        return self.value[key]
-    
-    def __getslice__(self,i,j):
-        return self.value[i:j]
-    
-    def __nonzero__(self):
-        return self.value!=''
-    
-    def __str__(self):
-        return self.value
-    
-    def __unicode__(self):
-        return self.value
-    
-    def __repr__(self):
-        if self.anchor and self.value:
-            return '%s .A=%s'%(self.value,self.anchor)
-        return self.value
-    
-class TableHTMLParser(HTMLParser):
-    def __init__(self, *args, **kwargs):
-        HTMLParser.__init__(self, *args, **kwargs)
-        self.anchor = None
-        self.active = False
-        self.buffer = []
-        self.item = None
-        self.row = None
-        self.rowspan = {}
-        self.x=0
-        self.y=0
-        
-    def handle_starttag(self, tag, attrs):
-        if tag=='table':
-            self.active = True
-        if not self.active:
-            return
-        if tag=='a':
-            for k,v in attrs:
-                if k=='href':
-                    self.anchor = v.replace(' ','%20')
-        elif tag=='tr':
-            self.row = []
-            self.x = 0
-        elif tag=='td':
-            try:
-                ys,ye = self.rowspan[self.x]
-                while self.y>=ys:
-                    if self.y>=ye:
-                        del self.rowspan[self.x]
-                    if self.y<=ye:
-                        tc = TableCell() #'%d_%d_%d'%(self.x,self.y,ye))
-                        self.row.append(tc)
-                        self.x += 1
-                    ys,ye = self.rowspan[self.x]                        
-            except KeyError:
-                pass
-            self.item = StringIO.StringIO()
-            for k,v in attrs:
-                if k=='rowspan':
-                    self.rowspan[self.x] = (self.y+1,self.y+as_int(v)-1)
 
-    def handle_data(self,data):
-        if self.item is not None:
-            data = clean(data)
-            if data:
-                self.item.write(data)
-            
-    def handle_endtag(self,tag):
-        if tag=='table':
-            self.active = False
-        if not self.active:
-            return
-        if tag=='td':
-            s = self.item.getvalue().strip()
-            tc = TableCell(s,self.anchor)
-            self.row.append(tc)
-            self.x += 1
-            self.item = None
-            self.anchor = None
-        elif tag=='tr':
-            self.buffer.append(self.row)
-            self.row = None
-            self.y += 1
-        
 class LastObject(object):
-    def __init__(self):
+    def __init__(self, progress):
         self._object = None
+        self._progress = progress
         
     def set(self,value):
         if self._object is not None:
             self._object.save()
+            pos = 0
+            for line in self._lines:
+                pos = max(pos,line.line)
+                line.delete()
+            if pos>self._progress.current_line:
+                self._progress.current_line = pos
+                self._progress.save()
+        self._lines = []
         self._object = value
     
     def get(self):
         return self._object
+
+    def add(self,line):
+        if self._object is not None:
+            self._lines.append(line)
          
 class Cache(object):
     def __init__(self):
@@ -215,7 +133,10 @@ class Cache(object):
     #def put_ballot(self,ballot):
     #    self._bdict['pk-%d'%ballot.pk] = ballot
 
+                
 def import_projects_and_ballots(source):
+    """ Called by import_view to store a file on the server for later processing.
+    """
     if 'html' in source.content_type:
         hr = TableHTMLParser()
         for line in source:
@@ -223,55 +144,81 @@ def import_projects_and_ballots(source):
         reader = hr.buffer
     else:
         reader = csv.reader(source,delimiter=',',skipinitialspace=True)
+    #ImportLine.objects.all().delete()
+    for linenumber,line in enumerate(reader):
+        try:
+            il = ImportLine(line=linenumber+1,text=line.text, anchors = line.anchors)
+        except AttributeError:
+            il = ImportLine(line=linenumber+1,text=[clean(c) for c in line])
+        il.save(force_insert=True)
+    ip = ImportProgress( linecount = linenumber, current_line = 0)
+    ip.save()
+    add_task(name = 'import-worker', url=reverse('util.views.import_worker', args=[ip.pk]),countdown=10)
+    return ip
+
+def parse_projects_and_ballots(progress):
+    """ Called by import worker to process a file that as been uploaded by the import_view
+    """
+    if progress.started is None:
+        progress.started=datetime.datetime.now()
+        progress.save()
+    #source = ImportLine.objects.all().order_by('line')
     handler = None
     model = None
-    projects = []
-    ballots = []
     cache = Cache()
-    last = LastObject()
-    for line in reader:
+    last = LastObject(progress)
+    for linenum in range(1,progress.linecount+1):
+    #for impline in source:
+        impline = ImportLine.objects.get(line=linenum)
+        if impline.text is None:
+            continue
+        text = impline.text #.split('|')
         #raise Exception("debug")
-        if is_section_header(line,project_fields[:20]):
+        if is_section_header(text,project_fields[:20]):
             model = Project
             handler = import_project
             last.set(None)
             continue
-        elif is_section_header(line,ballot_fields):
+        elif is_section_header(text,ballot_fields):
             model = Ballot
             handler = import_ballot
             last.set(None)
             continue
-        elif is_section_header(line,ballot_v1_fields):
+        elif is_section_header(text,ballot_v1_fields):
             model = Ballot
             handler = import_ballot_v1
             last.set(None)
             continue
-        elif len(line)>1 and line[0]=='IEEE Project and Final Document':
+        elif len(text)>1 and text[0]=='IEEE Project and Final Document':
             model = Project
             handler = import_html_project
             last.set(None)
             continue
-        elif is_section_header(line, ['LB','Group(s)','Comment(s)','Instructions','Document(s)']): #,'','Opened','Closed','Days','Ballot Results']):
+        elif is_section_header(text, ['LB','Group(s)','Comment(s)','Instructions','Document(s)']): #,'','Opened','Closed','Days','Ballot Results']):
             model = Ballot
             handler = import_html_letter_ballot
             last.set(None)
             continue
-        elif is_section_header(line, html_sponsor_ballot_fields[:5]):
+        elif is_section_header(text, html_sponsor_ballot_fields[:5]):
             model = Ballot
             handler = import_html_sponsor_ballot
             last.set(None)
             continue
         if handler is None or model is None:
             continue
-        o = handler(line,last.get(),cache)
+        o = handler(impline, last.get(), cache)
         if o is not None:
             if model==Project:
-                projects.append(o)
+                progress.add_project(o)
             else:
-                ballots.append(o)
-            last.set(o)                
+                progress.add_ballot(o)
+            last.set(o)
+        last.add(impline)                
     last.set(None)
-    return dict(projects=projects,ballots=ballots)
+    #ImportLine.objects.all().delete()
+    progress.finished = datetime.datetime.now()
+    progress.current_line = progress.linecount
+    progress.save()
 
 def export_projects_and_ballots():
     response = HttpResponse(mimetype='text/csv')
@@ -300,7 +247,7 @@ def is_section_header(item,section):
     #return item[:len(section)]==section
     
 def import_html_project(item,last_project,cache):
-    entry = make_entries(html_project_fields,item)
+    entry = item.as_dict(html_project_fields)
     if entry['actual'].lower()=='actual':
         # Start of a project line
         # remove the "IEEE Std" from in front of the name, and any text after the name
@@ -358,13 +305,16 @@ def make_url(entry, prefix=''):
     return '%s%s'%(prefix,entry)
     
 def import_html_letter_ballot(item,last_ballot,cache):
-    entry = make_entries(html_ballot_fields, item)
+    entry = item.as_dict(html_ballot_fields)
     if entry['number'] and entry['task_group']:
         lbnum = as_int(entry['number'])
         try:
             b = Ballot.objects.get(number=lbnum)
         except Ballot.DoesNotExist:
             b = Ballot(number=lbnum)
+        if entry['task_group']=='TGm':
+            # TODO: Find a better solution
+            entry['task_group']='TGma'
         try:
             wg = cache.get_project(task_group=entry['task_group'])
         except KeyError:
@@ -395,12 +345,7 @@ def import_html_letter_ballot(item,last_ballot,cache):
             b.draft_url = entry['documents'].anchor
         except AttributeError:
             b.draft_url = make_url(entry['documents'],'/11/private/Draft_Standards/11%s/'%(wg.task_group[2:]))
-        b.pool  = as_int(entry['result'])
-        for c in ['opened', 'closed']:
-            if entry[c].endswith(' ET'):
-                entry[c] = entry[c][:-3]
-            elif entry[c].endswith(' EDT'):
-                entry[c] = entry[c][:-4]
+        b.pool  = as_int_or_none(entry['result'])
         set_date(b,'opened', entry['opened'])
         set_date(b,'closed', entry['closed'])
         if b.opened is None or b.closed is None:
@@ -452,7 +397,7 @@ def import_html_sponsor_ballot(item, last_ballot,cache):
     class Container(object):
         pass
     
-    entry = make_entries(html_sponsor_ballot_fields, item)
+    entry = item.as_dict(html_sponsor_ballot_fields)
     tg = entry['Group'].strip()
     if not tg:
         if entry['Disapprove'] and last_ballot is not None:
@@ -516,28 +461,24 @@ def import_html_sponsor_ballot(item, last_ballot,cache):
     return b
     
 def import_project(item, last_project,cache):
-    entry = make_entries(project_fields, item)
+    entry = item.as_dict(project_fields)
     if entry['pk'] is None:
         return None
     try:
-        pk = as_int(entry['pk'])
+        pk = entry['pk'].as_int()
     except ValueError:
         return None
     try:
-        p = Project.objects.get(pk=as_int(entry['pk']))
+        p = Project.objects.get(pk=pk)
     except Project.DoesNotExist:
-        try:
-            p = Project.objects.get(name=entry['name'])
-        except Project.DoesNotExist:
-            p = Project(pk=pk)
+        p = Project(pk=pk)
     for field in p._meta.fields:
         if not field.primary_key:
             try:
-                value = to_python(field, entry[field.attname])
+                value = to_python(field, entry[field.attname].value) if entry[field.attname] is not None else None
                 setattr(p,field.attname,value)
             except KeyError:
                 pass
-    #p.save()
     cache.put_project(p)
     return p
 
@@ -547,11 +488,11 @@ def import_ballot_v1(item, last_ballot,cache):
 def import_ballot(item, last_ballot,cache,fields=None):
     if fields is None:
         fields = ballot_fields
-    entry = make_entries(fields, item)
+    entry = item.as_dict(fields)
     #if entry['number'] is None:
     #    return None
     try:
-        number = as_int(entry['number'])
+        number = entry['number'].as_int()
     except (ValueError,TypeError):
         return None
     if number==0:
@@ -565,19 +506,19 @@ def import_ballot(item, last_ballot,cache,fields=None):
     for field in b._meta.fields:
         if not field.primary_key:
             try:
-                value = to_python(field, entry[field.attname])
+                value = to_python(field, entry[field.attname].value) if entry[field.attname] is not None else None
                 setattr(b,field.attname,value)
             except KeyError:
                 pass
     try:
-        proj = int(entry['project_id'])
+        proj = entry['project_id'].as_int()
     except ValueError:
         proj = 0
     if proj==0:
         try:
-            b.project = cache.get_project(task_group=entry['project.task_group'])
+            b.project = cache.get_project(task_group=entry['project.task_group'].value)
         except KeyError:            
-            b.project = Project.objects.get(task_group=entry['project.task_group'])            
+            b.project = Project.objects.get(task_group=entry['project.task_group'].value)            
             cache.put_project(b.project)
     else:
         try:
@@ -586,10 +527,13 @@ def import_ballot(item, last_ballot,cache,fields=None):
             b.project = Project.objects.get(pk=proj)
             cache.put_project(b.project)
     if b.opened is None:
-        set_date(b, 'closed', entry['date'], format='%Y-%m-%d')
+        set_date(b, 'closed', entry['date'].value, format='%Y-%m-%d')
         b.opened = b.closed + datetime.timedelta(days=-15) 
     if b.pool is None:
-        b.pool = int(b.vote_for) + int(b.vote_against) + int(b.vote_abstain)
+        try:
+            b.pool = int(b.vote_for) + int(b.vote_against) + int(b.vote_abstain)
+        except TypeError:
+            pass
     #b.save()
     return b
 
@@ -665,17 +609,21 @@ def from_isodatetime(date_time):
     return datetime.datetime.strptime(date_time, "%H:%M:%SZ").time()
 
 
-month_hack = [(re.compile('Apri[^l]'),'Apr '), (re.compile('Sept[^e]'),'Sep ')]
+date_hacks = [(re.compile('Apri[^l]'),'Apr '), (re.compile('Sept[^e]'),'Sep '),
+              (re.compile(r'(\w{3} \d{1,2} \d{4})\s*-\s*(.*$)'), r'\1 \2' ), 
+              (re.compile(r'(.+) (CT|EDT|ET)$'),r'\1')
+              ]
 
 def set_date(obj,dest,date, format=None):
-    formats = ["%m/%d/%y", "%m/%d/%Y", "%b-%y", "%m/xx/%y", "%a %b %d %Y", 
-               "%B %d %Y", "%b %d %Y", "%B %d %Y - %H:%M", "%b %d %Y - %H:%M"]
+    formats = ["%m/%d/%y", "%m/%d/%Y", "%b-%y", "%m/xx/%y", "%a %b %d %Y",
+               "%B %d %Y %H:%M", "%b %d %Y %H:%M", 
+               "%B %d %Y", "%b %d %Y"]
     if format is not None:
         formats.insert(0,format)
     if date.__class__!=str:
         date = str(date)
-    for regex,sub in month_hack:
-        date = re.sub(regex,sub,date)
+    for regex,sub in date_hacks:
+        date = regex.sub(sub,date)
     for format in formats:
         try:
             setattr(obj, dest, datetime.datetime.strptime(date, format))
@@ -688,23 +636,6 @@ def set_date(obj,dest,date, format=None):
     except ValueError:
         pass
     
-def clean(string):
-    if isinstance(string,TableCell): # yes, not Pythonic.
-        # TableCell string is already clean
-        return string
-    okchars=' /.-_:?=()%'
-    return ''.join([s for s in string if s.isalnum() or s in okchars])
-
-def make_entries(fields,item):
-    entry = {}
-    for i,v in enumerate(fields):
-        try:
-            entry[v] = clean(item[i])
-        except IndexError:
-            entry[v] = None
-    return entry
-
-        
 def as_int(v):
     try:
         return v.as_int()
@@ -717,5 +648,5 @@ def as_int_or_none(v):
             return v.as_int()
         except AttributeError:
             return int(v)
-    except ValueError:
+    except (ValueError, TypeError):
         return None    
