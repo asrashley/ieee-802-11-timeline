@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Finished Importing Projects and Ballots{% endblock %}
+{% block menu %}
+&nbsp;[<a href="{% url timeline.views.main_page %}">Timeline</a>]
+&nbsp;[<a href="{% url ballot.views.main_page %}">Letter Ballots</a>]
+{{block.super}}
+{% endblock %}
+{% block content %}
+{% for std in projects %}
+{% if forloop.first %}
+<h1>The following projects have been imported:</h1>
+<table>
+<tr><th>ID</th><th>Name</th><th>Description</th><th>doc_type</th><th> par url</th><th> task group</th><th> task group url</th>
+<th> doc format</th><th> doc version</th><th> baseline</th><th> order</th>
+<th> par_date</th><th> par_expiry</th><th> initial_wg_ballot</th>
+<th> recirc_wg_ballot</th><th> sb_form_date</th>
+<th>sb_formed</th><th> initial_sb_ballot</th>
+<th> recirc_sb_ballot</th><th> mec_date</th><th> mec_completed</th>
+<th> wg_approval_date</th><th>ec_approval_date</th>
+<th>revcom_approval_date</th><th> ansi_approval_date</th><th> withdrawn_date</th></tr>
+{% endif %}
+<tr>
+<td>{{std.pk}}</td><td>{{std.name}}</td><td>{{std.description|safe}}</td>
+<td>{{std.doc_type}}</td><td>{{std.par}}</td><td> {{std.task_group}}</td>
+<td>{{std.task_group_url}}</td><td>{{std.doc_format}}</td><td>{{std.doc_version}}</td>
+<td>{{std.baseline}}</td><td>{{std.order}}</td>
+<td>{{std.par_date.isoformat}}</td><td>{{std.par_expiry.isoformat}}</td>
+<td>{{std.initial_wg_ballot.isoformat}}</td><td>{{std.recirc_wg_ballot.isoformat}}</td>
+<td>{{std.sb_form_date.isoformat}}</td>
+<td>{{std.sb_formed}}</td><td>{{std.initial_sb_ballot.isoformat}}</td>
+<td>{{std.recirc_sb_ballot.isoformat}}</td><td>{{std.mec_date.isoformat}}</td>
+<td>{{std.mec_completed}}</td><td>{{std.wg_approval_date.isoformat}}</td>
+<td>{{std.ec_approval_date.isoformat}}</td><td>{{std.revcom_approval_date.isoformat}}</td>
+<td>{{std.ansi_approval_date.isoformat}}</td><td>{{std.withdrawn_date.isoformat}}</td>
+</tr>
+{% if forloop.last %}
+</table>
+{% endif %}
+{% endfor %}
+
+{% for b in ballots %}
+{% if forloop.first %}
+<h1>The following ballots have been imported:</h1>
+<table>
+<tr><th>project</th><th>number</th><th>draft</th><th>date</th>
+<th>type</th><th>result</th><th>for</th><th>against</th>
+<th>abstain</th></tr>
+{% endif %}
+<tr> <td>{{b.project}}</td>
+    <td><a href="{% url ballot.views.edit_ballot b.number %}">LB{{b.number}}</a></td>
+    <td>{{b.draft}}</td>
+    <td>{{b.opened|date:"Y-m-d"}} to {{b.closed|date:"Y-m-d"}}</td>
+    <td>{{b.ballot_type}}</td>
+    <td>{{b.result}}</td>
+    <td>{{b.vote_for}}</td>
+    <td>{{b.vote_against}}</td>
+    <td>{{b.vote_abstain}}</td>
+</tr>
+{% if forloop.last %}
+</table>
+{% endif %}
+{% endfor %}
+{% endblock %}

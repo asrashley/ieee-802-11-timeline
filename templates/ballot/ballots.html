@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load cache %}
+
+{% block title %}IEEE 802.11, The Working Group for Wireless LANs Standards{% endblock %}
+
+{% block header %}
+{% if needs_update %}
+<a id="logo" href="{{next_page}}">UPDATES ARE BEING PROCESSED</a>
+{% else %}
+<a id="logo" href="/">IEEE 802.11, The Working Group for Wireless LANs Standards</a>
+{% endif %}
+{% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
+{% endblock %}
+
+{% block extra-head %}
+{% if needs_update %}
+<meta http-equiv="refresh" content="15; URL=''">
+{% endif %}
+{% endblock %}
+
+{% block css %}
+h4
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:2.0pt;
+	margin-left:2.0in;
+	text-indent:-.5in;
+	page-break-after:avoid;
+	tab-stops:list 2.25in;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:normal
+	}
+div.Section1
+	{page:Section1;}
+.style1 {
+				font-size: x-small;
+}
+.style2 {
+				color: #FFFFFF;
+				font-weight: bold;
+				text-align: center;
+}
+.style3 {
+				text-align: center;
+}
+
+
+table.ballot {
+	font-family: "Times New Roman", Times, Serif;
+	border: 1px solid black;
+	text-align: center;
+	padding: 1px;
+	margin: 4px;
+	border-collapse: collapse;
+	table-layout: fixed;
+	width:1115px;
+	#margin-left: auto;
+	#margin-right: auto;
+}
+table.ballot tr.table0 td {
+	background: #FF0000;
+	font-size: 14pt;
+	font-weight: bold;
+	color: #FFFFFF;
+	text-align: center;
+	vertical-align: middle;
+}
+table.ballot tr.table1 td {
+	background: #008000;
+	font-size: 14pt;
+	font-weight: bold;
+	color: #FFFFFF;
+	text-align:center;
+	vertical-align: middle;
+}
+table.ballot tr.table0 td a, table.ballot tr.table1 td a {
+	color: #FFFF00;
+}
+table.ballot tr.blank td {
+	background: white;
+	color: black;
+}
+table.ballot th{ 
+	background:#008080;
+	text-align:center;
+	vertical-align: middle;
+	color: white;
+	font-size: 12pt;
+} 
+table.ballot th a {
+	text-decoration: none;
+	color: white;
+}
+
+table.ballot td {
+	vertical-align: top;
+	text-align:center;
+	background:#cccccc;
+	font-size: 9pt;
+	border: 1px solid black;
+}
+	
+table.ballot td.result0{
+	color:#808080;
+}
+table.ballot td.result1{
+	color:black;
+}
+table.ballot td.notice {
+	background:black;
+	color:white;
+	text-align:center;
+	vertical-align: middle;
+	font-weight: bold;
+	font-size: 16pt;
+}
+table.ballot td.empty {
+	font-size: 14pt;
+}
+table.ballot td.empty a {
+	text-decoration: none;
+	color: black;
+}
+p.style1 {
+	font-size:16pt;
+}
+p.style2, p.style3 {
+	font-size:14pt;
+}
+
+{% endblock %}
+
+{% block menu %}
+{% cache 600 lbmenu user.username next_page export needs_update %}
+{% if not export %}
+{% if not needs_update %}
+&nbsp;[{%spaceless%}
+	<a href="{% url ballot.views.main_page %}{% if sponsor %}SponsorBallots.html{%else%}LetterBallots.html{%endif%}">
+	{%endspaceless%}Export HTML</a>]
+&nbsp;[{%spaceless%}
+	<a href="{% url ballot.views.main_page %}{% if sponsor %}SponsorBallots.shtml{%else%}LetterBallots.shtml{%endif%}">
+	{%endspaceless%}Export SHTML</a>]
+{% endif %}
+{{block.super}}
+{% endif %}
+{% endcache %}
+{% endblock %}
+
+{% block content %}
+<p class="center">This page is maintained by 
+<a href="mailto:adrian.p.stephens@intel.com">Adrian Stephens</a>. Comments are welcome. </p>
+<div class="centered">
+
+{% with "ONGOING BALLOTS" as caption %}
+{% with 0 as completed %}
+{% with open as ballots %}
+{%if sponsor %}
+{% cache cache.timeout sbopen cache.open_ver export %}
+{% include "ballot/sbballots.html" %}
+{% endcache %}
+{% else %}
+{% cache cache.timeout wgopen cache.open_ver export %}
+{% include "ballot/wgballots.html" %}
+{% endcache %}
+{% endif %}
+{% endwith %}
+{% endwith %}
+{% endwith %}
+
+{%if sponsor %}
+	{% cache cache.timeout sbclosed cache.closed_ver export %}
+	{% with "COMPLETED BALLOTS" as caption %}
+	{% with 1 as completed %}
+	{% with closed as ballots %}
+	{% include "ballot/sbballots.html" %}
+	{% endwith %}
+	{% endwith %}
+	{% endwith %}
+	{% endcache %}
+{% else %}
+	{% cache cache.timeout wgclosed cache.closed_ver export %}
+	{% with "COMPLETED BALLOTS, from LB101 onwards<br />Letter ballot results up to LB100 <a href='http://www.ieee802.org/11/LetterBallots0to100.shtml'>can be found here.</a>" as caption %}
+	{% with 1 as completed %}
+	{% with closed as ballots %}
+	{% include "ballot/wgballots.html" %}
+	{% endwith %}
+	{% endwith %}
+	{% endwith %}
+	{% endcache %}
+{% endif %}
+</div>
+
+{% endblock %}

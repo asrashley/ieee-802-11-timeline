@@ -1,10 +1,15 @@
 application: ieee80211timeline
-version: 1
+version: 2
 runtime: python
 api_version: 1
 
 default_expiration: '365d'
 
+builtins:
+- datastore_admin: on
+- admin_redirect: on
+- remote_api: on
+ 
 handlers:
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
@@ -14,19 +19,36 @@ handlers:
   script: djangoappengine/deferred/handler.py
   login: admin
   
-- url: /profile/.*
-  script: user_profile.py
-  login: required
-
 - url: /media/admin
   static_dir: django/contrib/admin/media/
 
-- url: /timeline/.*
+- url: /timeline/dn
   script: djangoappengine/main/main.py
+  login: admin
+  
+- url: /ballot/dn
+  script: djangoappengine/main/main.py
+  login: admin
+  
+- url: /media/images
+  static_dir: media/images/
+
+- url: /favicon.ico
+  static_files: media/images/favicon.ico
+  upload: media/images/favicon.ico
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+  secure: optional
+  expiration: '0'
   
 - url: /.*
   script: djangoappengine/main/main.py
   
-- url: /favicon.ico
-  static_files: static/images/favicon.ico
-  upload: static/images/favicon.ico
+admin_console:
+  pages:
+  - name: Django Admin
+    url: /admin
+     
+  

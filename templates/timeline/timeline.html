@@ -1,5 +1,5 @@
 <table class="timeline">
-<caption class="caption{{published}}">{{caption}}</caption>
+<caption class="caption{{published}}">{% if not export %}<a href="?redraw={{published}}">{%endif%}{{caption}}{% if not export %}</a>{%endif%}</caption>
 <thead>
     <tr>
     <th rowspan="3">IEEE Project and Final Document</th>
@@ -38,90 +38,39 @@
     <tbody>
     {% for std in standards %}
     <tr class="{% cycle 'row1' 'row2' as rowcol %}">
-    <td {% if not published %}rowspan="2"{% endif %} class="first"><a name="{{std.task_group|slugify}}"></a>
-    {% if not export %}<a href="{% url timeline.views.edit_project std.pk %}">{% endif %}
-    IEEE Std {{std.name}}{% if not export %}</a>{%endif%}</td>
+    <td {% if not published %}rowspan="2"{% endif %} class="first"><a name="{{std.slug}}"></a>
+    {% if not export %}<a href="{% url timeline.views.edit_project std.pk %}?next={{next_page|escape}}">{% endif %}
+    IEEE Std P{{std.fullname}}{% if not export %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_type}}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.par %}<a href="{{std.par}}">{%endif%}{{std.description}}{% if std.par %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.task_group_url %}<a href="{{std.task_group_url}}">{%endif%}{{std.task_group}}{% if std.task_group_url %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_format}}<br />{% if std.doc_version %}D{{std.doc_version}}{% endif %}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% for base in std.baselines %}{%if not forloop.first%}<br />{%endif%}
-    <a href="#{{base.task_group|slugify}}">{{base.name}}</a>{% endfor %}</td>
+    <a href="#{{base.slug}}">{{base.name}}</a>{% endfor %}</td>
     <td>Actual</td>
     <td class="date">{{std.par_date|date:"Y-m-d"}}{%for h in std.par_history %}<br /><span>({{h}})</span>{%endfor%}{% if std.par_expiry %}<br /><span>[{{std.par_expiry|date:"Y-m-d"}}]</span>{% endif %}</td>
-    <td {% if not std.initial_wg_ballots.all %}colspan="3" class="bspan"{%else%}class="draft"{%endif%}>
-    {% for ballot in std.initial_wg_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}D{{ballot.draft}}{% if not export %}</a>{%endif%}
-    {%empty%}{% if published %}{{std.initial_wg_ballot|date:"M y"}}{% endif %}{% endfor %}</td>
-    {% if std.initial_wg_ballots.all %}
-    <td class="date">{% for ballot in std.initial_wg_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}{{ballot.date|date:"Y-m-d"}}
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    <td class="result">{% for ballot in std.initial_wg_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.result}}%
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    {% endif %}
-    <td {% if not std.recirc_wg_ballots.all %}colspan="3"{%endif%}>{% for ballot in std.recirc_wg_ballots.all %}
-    {%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    D{{ballot.draft}}
-    {% if not export %}</a>{%endif%}
-    {%empty%}{% if std.published %}{{std.recirc_wg_ballot|date:"M y"}}{% endif %}{% endfor %}</td>
-    {% if std.recirc_wg_ballots.all %}
-    <td class="date">{% for ballot in std.recirc_wg_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.date|date:"Y-m-d"}}
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    <td class="result">{% for ballot in std.recirc_wg_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.result}}%
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    {% endif %}
+    {% with std.initial_wg_ballots as ballots %}
+    {% with std.initial_wg_ballot as ballot_date %}
+    {% include "timeline/ballots.html" %}
+	{% endwith %}    
+	{% endwith %}    
+    {% with std.recirc_wg_ballots as ballots %}
+    {% with std.recirc_wg_ballot as ballot_date %}
+    {% include "timeline/ballots.html" %}
+	{% endwith %}    
+	{% endwith %}    
     <td>{% if std.sb_formed %}{{std.sb_form_date|date:"Y-m-d"}}{% endif %}</td>
-    <td>{% if std.mec_completed %}{{std.mec_date|date:"Y-m-d"}}{% endif %}</td>    
-    <td {% if not std.initial_sb_ballots.all %}colspan="3"{%endif%}>{% for ballot in std.initial_sb_ballots.all %}
-    {% if not forloop.first %}<br />{% endif %}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    D{{ballot.draft}}
-    {% if not export %}</a>{%endif%}
-    {%empty%}{% if std.published %}{{std.initial_sb_ballot|date:"M y"}}{% endif %}{% endfor %}</td>
-    {% if std.initial_sb_ballots.all %}
-    <td class="date">{% for ballot in std.initial_sb_ballots.all %}
-    	{% if not forloop.first %}<br />{% endif %}
-    	{% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    	{{ballot.date|date:"Y-m-d"}}
-    	{% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    <td class="result">{% for ballot in std.initial_sb_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.result}}%
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    {% endif %}
-    <td {% if not std.initial_sb_ballots.all %}colspan="3"{%endif%}>{% for ballot in std.recirc_sb_ballots.all %}
-    {%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    D{{ballot.draft}}
-    {% if not export %}</a>{%endif%}
-    {%empty%}{% if std.published %}{{std.recirc_sb_ballot|date:"M y"}}{% endif %}{% endfor %}</td>
-    {% if std.recirc_sb_ballots.all %}
-    <td class="date">{% for ballot in std.recirc_sb_ballots.all %}
-    {%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.date|date:"Y-m-d"}}
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>    
-    <td class="result">{% for ballot in std.recirc_sb_ballots.all %}{%if not forloop.first%}<br />{%endif%}
-    {% if not export %}<a href="{% url timeline.views.edit_ballot ballot.pk %}">{%endif%}
-    {{ballot.result}}%
-    {% if not export %}</a>{%endif%}
-    {% endfor %}</td>
-    {% endif %}
+    <td>{% if std.mec_completed %}{{std.mec_date|date:"Y-m-d"}}{% endif %}</td>
+    {% with std.initial_sb_ballots as ballots %}
+    {% with std.initial_sb_ballot as ballot_date %}
+    {% include "timeline/ballots.html" %}
+	{% endwith %}    
+	{% endwith %}    
+    {% with std.recirc_sb_ballots as ballots %}
+    {% with std.recirc_sb_ballot as ballot_date %}
+    {% include "timeline/ballots.html" %}
+	{% endwith %}    
+	{% endwith %}    
     <td>{% if std.wg_approved %}{{std.wg_approval_date|date:"Y-m-d"}}{% if std.published and not std.wg_approval_date%}C{%endif%}{% endif %}</td>
     <td>{% if std.ec_approved %}{{std.ec_approval_date|date:"Y-m-d"}}{% if std.published and not std.ec_approval_date%}C{%endif%}{% endif %}</td>
     <td>{% if std.published %}{{std.revcom_approval_date|date:"Y-m-d"}}{% endif %}</td>

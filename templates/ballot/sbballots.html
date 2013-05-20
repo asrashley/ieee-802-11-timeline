@@ -1,0 +1,77 @@
+    <table border="1" class="ballot">
+        <col width="85"/>
+        <col width="65"/>
+        <col width="65"/>
+        <col width="65"/>
+        <col width="30"/>
+        <col width="93"/>
+        <col width="35"/>
+        <col width="35"/>
+        <col width="35"/>
+        <col width="35"/>
+        <col width="60" />
+        <col width="35" />
+		<col width="25"/>
+		<col width="35" />
+		<col width="35" />
+		<col width="35" />
+		<col width="45" />        
+      <thead>
+      {% if not completed %}
+      <tr>
+        <td class="notice" colspan="17">
+        <p class="style1">IEEE-SA SPONSOR BALLOTS AS RELATED TO IEEE 802.11 WG</p>
+        <p class="style3">(Note - percentage results are rounded to the nearest integer)</p>
+		</td>
+      </tr>
+      {% endif %}
+      <tr class="table{{completed}}"><td colspan="17">{{caption}}</td></tr>      
+      {% if completed or has_open %}
+	<tr>
+        <th>{% if not export %}<a href="?redraw={{completed}}">{%endif%}Group{% if not export %}</a>{%endif%}</th>
+        <th>Draft</th>
+        <th>Opened</th>
+        <th>Closed</th>
+        <th>Days</th>
+        <th>Ballot Type</th>
+        <th>Pool</th>
+        <th colspan="2">Approve</th>
+        <th colspan="3">Disapprove</th>
+        <th colspan="2">Abstain</th>
+        <th colspan="2">Return</th>
+        <th>#Cmnt</th>
+      </tr>
+      {% endif %}
+  </thead>
+  <tbody>
+  {% for lb in ballots %}
+  <tr>
+  <td rowspan="2">{% if not export %}<a href="{% url timeline.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif %}
+  {{lb.project_name}}{% if not export %}</a>{%endif %}</td>
+  <td rowspan="2">{% if not export %}<a href="{% url ballot.views.edit_ballot lb.pk %}?next={{next_page|escape}}">{%endif %}D{{lb.draft}}
+  {% if not export %}</a>{%endif %}</td>
+  <td rowspan="2">{{lb.opened|date:"Y-m-d"}}</td>
+  <td rowspan="2">{{lb.closed|date:"Y-m-d"}}</td>
+  <td rowspan="2">{{lb.days}}</td>
+  <td rowspan="2">{{lb.description}}</td>
+  <td rowspan="2">{{lb.pool}}</td>
+  <td rowspan="2">{% if completed %}{{lb.vote_for}}{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.result}}%{% endif %}</td>
+  <td>{% if completed %}{{lb.vote_against}}{% endif %}</td>
+  <td>{% if completed %}comment{{lb.vote_against|pluralize}}{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.against_percent}}%{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.vote_abstain}}{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.abstain_percent}}%{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.return_count}}{% endif %}</td>
+  <td rowspan="2">{% if completed %}{{lb.return_percent}}%{% endif %}</td>
+  <td rowspan="2">{% if completed and lb.comments != None %}{{lb.comments}}{% endif %}</td>
+  </tr>
+  <tr>
+  <td>{% if completed %}{{lb.vote_invalid}}{% endif %}</td>
+  <td>{% if completed %}w/o{% endif %}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="17" class="empty">{% if not export %}<a href="?redraw={{completed}}">{%endif%}No ballots are currently open{% if not export %}</a>{%endif%}</td></tr>
+  {%endfor%}
+  </tbody>
+</table>

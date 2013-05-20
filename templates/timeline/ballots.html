@@ -1,0 +1,16 @@
+<td {% if not ballots %}colspan="3" class="bspan"{%else%}class="draft"{%endif%}>
+{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
+{% if not export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}D{{ballot.draft}}{% if not export %}</a>{%endif%}
+{%empty%}{% if published %}{{ballot_date|date:"M y"}}{% endif %}
+{% endfor %}</td>
+{% if ballots %}
+<td class="date">{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
+{% if not export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}{{ballot.closed|date:"Y-m-d"}}
+{% if not export %}</a>{%endif%}
+{% endfor %}</td>
+<td class="result">{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
+{% if not export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}
+{% if ballot.result != None %}{{ballot.result}}%{% else%}TBD{%endif%}
+{% if not export %}</a>{%endif%}
+{% endfor %}</td>
+{% endif %}

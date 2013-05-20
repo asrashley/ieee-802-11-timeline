@@ -1,0 +1,100 @@
+{% load urltools %}
+
+    <table border="1" class="ballot">
+      <col width="36" />
+      <col width="70" />
+      <col width="114" />
+      <col width="90" />
+      <col width="80" />
+      <col width="370" />
+      <col width="90" />
+      <col width="90" />
+      <col width="50" />
+      <col width="75" />
+      <col width="50" />
+      <thead>
+      {% if not completed %}
+      <tr class="blank"><td colspan="11">&nbsp;</td></tr>
+      <tr>
+        <td class="notice" colspan="11">
+        <p class="style1">IEEE 802.11 WG LETTER BALLOTS</p>
+        <p class="style3">Note - percentage results are rounded to the nearest integer</p>
+        <p class="style2">Note - Links to documents in the voting members' private 
+		area (such as drafts) will stop functioning once the project is 
+		complete, e.g., when it's output document has been published by the 
+		IEE-SA.</p></td>
+        </tr>
+        {% endif %}
+        <tr class="table{{completed}}"><td colspan="11">{{caption}}</td></tr>
+        {% if completed or has_open %}
+		<tr>
+        <th>{% if not export %}<a href="?redraw={{completed}}">{%endif%}LB{% if not export %}</a>{%endif%}</th>
+        <th>Group(s)</th>
+        <th>Comment(s)</th>
+        <th>Instructions</th>
+        <th colspan="2">Document(s)</th>
+        <th>Opened</th>
+        <th>Closed</th>
+        <th>Days</th>
+        <th colspan="2">Ballot Results</th>
+      	</tr>
+      	{% endif %}
+      	</thead>
+      	<tbody>
+      	{% for lb in ballots %}
+		<tr>
+      <td rowspan="7">
+      {% if not export %}<a href="{% url ballot.views.edit_ballot lb.number %}?next={{next_page|escape}}">{%endif%}{{lb.number}}
+      	{% if not export %}</a>{%endif%}
+      </td>
+      <td rowspan="7">{% if not export %}<a href="{% url timeline.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif%}
+      	{{lb.task_group}}{% if not export %}</a>{%endif%}</td>
+      <td rowspan="7">{{lb.description}} {{lb.task_group}} Draft {{lb.draft}}</td>
+      <td rowspan="7"><a href="{{lb.instructions_url|urlencode:":/"}}">LB# {{lb.number}}</a></td>
+      <td rowspan="2">Draft</td>
+      <td rowspan="2"><a href="{{lb.draft_url|urlencode:":/"}}">{{lb.draft_url|basename}}</a></td>
+      <td rowspan="7">{{lb.opened|date:"Y-m-d"}}</td>
+      <td rowspan="7">{{lb.closed|date:"Y-m-d"}}</td>
+      <td rowspan="7">{{lb.days}}</td>
+      <td> Pool</td>
+      <td>{{lb.pool}}</td>
+    </tr>
+	<tr>
+      <td class="result{{completed}}">Approve</td>
+      <td class="result{{completed}}">{% if completed %}{{lb.vote_for}}{% else %}N/A{%endif%}</td>
+    </tr>
+	<tr>
+      <td>Redlined Doc</td>
+      <td>{% if lb.redline_url %}<a href="{{lb.redline_url|urlencode:":/"}}">{{lb.redline_url|basename}}</a>{%else%}N/A{%endif%}</td>
+      <td class="result{{completed}}">Disapprove</td>
+      <td class="result{{completed}}">{% if completed %}{{lb.vote_against}}{% else %}N/A{%endif%}</td>
+   	</tr>
+	<tr>
+      <td rowspan="2">
+      <p style="margin-top: 0pt; margin-bottom: 0pt;">Resolution</p>
+      <p style="margin-top: 0pt; margin-bottom: 0pt;">Doc</p>
+      </td>
+      <td rowspan="2" >{% if lb.resolution_url %}<a href="{{lb.resolution_url|urlencode:":/"}}">{{lb.resolution_url|basename}}</a>{%else%}N/A{%endif%}</td>
+      <td class="result{{completed}}" >Abstain</td>
+      <td class="result{{completed}}" >{% if completed %}{{lb.vote_abstain}}{% else %}N/A{%endif%}</td>
+    </tr>
+	<tr>
+      <td class="result{{completed}}" >Return%</td>
+      <td class="result{{completed}}" >{% if completed %}{{lb.return_percent}}{% else %}N/A{%endif%}</td>
+    </tr>
+	<tr>
+      <td >Comment</td>
+      <td > 
+      <a href="{{lb.template_url}}">Template</a></td>
+      <td rowspan="2" class="result{{completed}}">Approve%</td>
+      <td rowspan="2" class="result{{completed}}">{% if completed %}{{lb.result}}{% else %}N/A{%endif%}</td>
+    </tr>
+	<tr>
+      <td>Pool</td>
+      <td ><a href="{{lb.pool_url|urlencode:":/"}}">LB# {{lb.number}} Voters</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="11" class="empty">{% if not export %}<a href="?redraw={{completed}}">{%endif%}No ballots are currently open{% if not export %}</a>{%endif%}</td></tr>
+    {% endfor %}
+    </tbody>
+   </table>

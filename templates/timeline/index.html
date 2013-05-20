@@ -3,16 +3,22 @@
 
 {% block title %}IEEE 802.11 Official Timelines{% endblock %}
 
+{% block extra-head %}
+{% if needs_update %}
+<meta http-equiv="refresh" content="15; URL=''">
+{% endif %}
+{% endblock %}
+
 {% block css %}
 table.timeline caption{
-	font-size: 13pt;
+	font-size: 16pt;
 	font-family: Arial;
 	vertical-align: middle;
 	text-align: center;
 	color:black;
 	height: 40px;
 	border: 1px solid ;
- 	padding: 1px 4px;
+ 	padding-top: 5px;
  	background: rgb(230, 170, 120);
 	}
 table.timeline caption.caption1{
@@ -22,7 +28,14 @@ table.timeline caption.caption2{
  	background: rgb(0, 0, 200);
  	color:white;
 }
+table.timeline caption a:link, table.timeline caption a:visited {
+	text-decoration: none;
+	color: black;
+}
 
+table.timeline caption.caption2 a:link, table.timeline caption.caption2 a:visited {
+	color: white;
+}
 table.timeline {
 	border-color: #333;
 	font-family: Arial;
@@ -111,30 +124,34 @@ table#notes td.value {
 	text-align: left;
 }
 
-div#greeting {
-	float:right;
-	font-size: 10pt;
-	text-align: right;
-}		       
+span.disabled {
+	color: 808080;
+	}
 {% endblock %}
 
-{% block header %}OFFICIAL IEEE 802.11 WORKING GROUP PROJECT TIMELINES - {% now "Y-m-d" %}
+{% block header %}
+{% if needs_update %}
+<a id="logo" href="{% url timeline.views.main_page %}">UPDATES ARE BEING PROCESSED</a>
+{% else %}
+<a id="logo" href="/">OFFICIAL IEEE 802.11 WORKING GROUP PROJECT TIMELINES - {% now "Y-m-d" %}</a>
+{% endif %}
 {% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
 {% endblock %}
 
 {% block menu %}
-{% cache 600 menu user.username export %}
-<div id="menu">
-[<a style="font-family: Arial;" href="https://mentor.ieee.org/802.11/dcn/07/11-07-1952-15-0000-non-procedural-letter-ballot-results.xls">Historical Ballot&nbsp;Timeline</a>]
+{% cache 600 menu user.username export needs_update %}
 {% if not export %}
-&nbsp;[<a href="{% url timeline.views.import_page %}">Import CSV</a>]
-&nbsp;[<a href="{% url timeline.views.export_page %}">Export CSV</a>]
-&nbsp;[<a href="{% url timeline.views.main_page %}timeline.html">Export HTML</a>]
-&nbsp;[<a href="{% url timeline.views.add_project %}">Add Project</a>]
-&nbsp;[<a href="{% url timeline.views.add_ballot %}">Add Ballot</a>]
-{{block.super}}
+{% if needs_update %}
+<span class="disabled">[Export HTML]</span>
+<span class="disabled">&nbsp;[Export SHTML]</span>
+{% else %}
+[<a href="{% url timeline.views.main_page %}timeline.html">Export HTML</a>]
+&nbsp;[<a href="{% url timeline.views.main_page %}timeline.shtml">Export SHTML</a>]
 {% endif %}
-</div>
+{{block.super}}
+{% else %}
+[<a style="font-family: Arial;" href="https://mentor.ieee.org/802.11/dcn/07/11-07-1952-15-0000-non-procedural-letter-ballot-results.xls">Historical Ballot&nbsp;Timeline</a>]
+{% endif %}
 {% endcache %}
 {% endblock %}
 

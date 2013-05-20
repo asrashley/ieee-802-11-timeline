@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
+{% load cache %}
+
 {% block title %}IEEE 802.11 chair's toolbox{% endblock %}
 
 {% block content %}
+{% cache 600 homepage user.username %}
 <h1>IEEE 802.11 chair's toolbox</h1>
 <p>
 This site contains tools for helping the chairs of IEEE 802.11 with the administration
@@ -11,5 +14,7 @@ aspects of their roles.
 <h2>The following applications are available:</h2>
 <ul>
 <li><a href="{% url timeline.views.main_page %}">Timeline tool</a></li>
+<li><a href="{% url ballot.views.main_page %}">Letter Ballot tool</a></li>
 </ul>
+{% endcache %}
 {% endblock %}

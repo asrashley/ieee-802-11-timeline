@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<ul>
+<li><a href="{% url ballot.views.wg_page %}">Working Group Ballots</a></li>
+<li><a href="{% url ballot.views.sponsor_page %}">Sponsor Ballots</a></li>
+<li><a href="{% url ballot.views.add_ballot %}">Add a ballot</a></li>
+</ul>
+
+{% endblock %}

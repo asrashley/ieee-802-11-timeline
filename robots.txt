@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /timeline/
+Disallow: /ballot/
+Disallow: /util/
+Disallow: /admin/
+Disallow: /ah/

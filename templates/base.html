@@ -3,8 +3,10 @@
     dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
     xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
     lang="{% firstof LANGUAGE_CODE 'en' %}">
+{% load staticfiles %}
+{% load cache %}
   <head>
-    <title>{% block title %}IEEE 802.11, The Working Group Setting the Standards for Wireless LANs{% endblock %}</title>
+    <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
 
     <style type="text/css">
 div#header{
@@ -28,7 +30,37 @@ div#menu {
 	text-align: center;
 }
 div#footer {
-text-align:center;
+	text-align:center;
+}
+div#footer table {
+	border:0px;
+	padding: 0px;
+	margin:10px;
+	#width:50px;
+}
+div#footer table td{
+	height: 30px;
+	width:70px;
+	vertical-align: bottom;
+}
+div#footer table img {
+	border:0px;
+}
+div#greeting {
+	float:right;
+	font-size: 10pt;
+	text-align: right;
+}		       
+div.centered {
+	text-align: center;
+}
+p.center {
+	text-align: center;
+}
+
+div.centered table, div#footer table {
+	margin: 0 auto; 
+	text-align: left;
 }
     {% block css %}
     {% endblock %}
@@ -38,19 +70,38 @@ text-align:center;
     {% endblock %}
 
     {% block extra-head %}{% endblock %}
+    
+    {% ifequal export "shtml" %}
+<!--#include file="banner_head.html" -->
+
+<!--#include file="banner_body.html" -->
+
+<!-- Hide error message when lb_block is not there -->
+{% endifequal %}    
   </head>
 
   <body>
-    <div id="header">{% block header %}<a id="logo" href="/">IEEE 802.11, The Working Group Setting the Standards for Wireless LANs</a>{% endblock %}
+  {% if export != "shtml" %}
+    <div id="header">{% block header %}
+    <a id="logo" href="/">IEEE 802.11, The Working Group Setting the Standards for Wireless LANs</a>
+    {% if not export and user %}<div id="greeting">{{user.username}}</div>{%endif %}
+    {% if not user.is_authenticated %}<div id="greeting"><a href="{% url django.contrib.auth.views.login %}">Log in</a></div>{%endif %}
+    {% endblock %}
     </div>
-    <div id="menu">{%block menu %}
+    <div id="menu">{% block menu %}
     {% if user.is_authenticated %}
+    	&nbsp;[<a href="{% url util.views.import_page %}">Import</a>]
+		&nbsp;[<a href="{% url util.views.export_page %}">Export CSV</a>]
+		&nbsp;[<a href="{% url timeline.views.add_project %}{%if next_page %}?next={{next_page|escape}}{%endif%}">Add Project</a>]
+		&nbsp;[<a href="{% url ballot.views.add_ballot %}{%if next_page %}?next={{next_page|escape}}{%endif%}">Add Ballot</a>]
     	{% if user.is_staff %}&nbsp;[<a href="/ah">Google Admin</a>]&nbsp;[<a href="/admin">Django Admin</a>]{%endif %}
 		&nbsp;[<a href="{% url django.contrib.auth.views.password_change %}">Change password</a>]
 		{% if user.logout %}&nbsp;[<a href="{{user.logout}}">Logout</a>]{% else %}&nbsp;[<a href="{% url django.contrib.auth.views.logout %}">Log out</a>]{%endif%}
 	{% endif %}
-    {%endblock%}</div>
-
+    {%endblock%}
+    </div>
+	{% endif %}
+	
     <div class="columns">
       <div id="content" class="column">
         {% block content-header %}
@@ -68,10 +119,27 @@ text-align:center;
     </div>
 
     <div id="footer">
-      <h6 style="text-align:center">
-		<a href="http://www.ieee.org/about/documentation/copyright/">Copyright (c)</a>,
+	<table>
+  <tr>
+    <td><img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}ieeel.gif" alt="IEEE Networking the World"  width="80" 
+    	height="69" /></td>
+    <td><a href="http://standards.ieee.org/search.html">
+    	<img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}search.gif" alt="ZZ Search IEEE" width="54" 
+    	height="58" /></a></td>
+    <td><a href="http://standards.ieee.org/cgi-bin/staffmail">
+    	<img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}email.gif" alt="E-mail IEEE Staff" width="55" 
+    	height="59" /></a></td>
+    <td><a href="http://standards.ieee.org/index.html">
+	    <img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}home.gif" alt="IEEE Standards Home Page" width="52"
+	     height="58" /></a></td>
+    <td><a href="http://www.ieee.org/">
+    	<img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}corp.gif" alt="IEEE Corporate Home Page" width="72" 
+    	height="58" /></a></td>
+    <td><img src="{% if export %}/{%else%}{% get_staticfiles_prefix %}images/{%endif%}802.GIF" width="66" height="68" alt="IEEE 802.11"/></td>
+  </tr>
+</table>
+      <h6 style="text-align:center"><a href="http://www.ieee.org/about/documentation/copyright/">Copyright (c)</a>,
       the Institute of Electrical and Electronics Engineers, Inc. (IEEE). All rights reserved.</h6>
-
       <h6 style="text-align:center">This website may contain names, logos, designs, titles, words, or phrases that may
 constitute trademarks, service marks, or tradenames of the IEEE or other entities which may be registered in certain jurisdictions.</h6>
     </div>
