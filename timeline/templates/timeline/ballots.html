@@ -1,16 +1,17 @@
+{% load url from future %}
 {% if ballots %}
 <td class="draft">{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
-{% if not cache.export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}{% if ballot.draft %}D{{ballot.draft}}{%endif%}{% if not cache.export %}</a>{%endif%}
+{% if not cache.export %}<a href="{% url 'ballot.views.edit_ballot' ballot.pk %}?next={{next_page|escape}}">{%endif%}{% if ballot.draft %}D{{ballot.draft}}{%endif%}{% if not cache.export %}</a>{%endif%}
 {%empty%}<!--ballot1_date-->{% if published %}{{ballot1_date|date:"M y"}}{% endif %}
 {% endfor %}</td>
 
 <td class="date" colspan="2">{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
-{% if not cache.export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}{{ballot.closed|date:"Y-m-d"}}
+{% if not cache.export %}<a href="{% url 'ballot.views.edit_ballot' ballot.pk %}?next={{next_page|escape}}">{%endif%}{{ballot.closed|date:"Y-m-d"}}
 {% if not cache.export %}</a>{%endif%}
 {% endfor %}</td>
 
 <td class="result">{% for ballot in ballots %}{%if not forloop.first%}<br />{%endif%}
-{% if not cache.export %}<a href="{% url ballot.views.edit_ballot ballot.pk %}?next={{next_page|escape}}">{%endif%}
+{% if not cache.export %}<a href="{% url 'ballot.views.edit_ballot' ballot.pk %}?next={{next_page|escape}}">{%endif%}
 {% if ballot.result != None %}{{ballot.result}}%{%else%}{% if not published %}TBD{% endif %}{%endif%}
 {% if not cache.export %}</a>{%endif%}
 {% endfor %}</td>

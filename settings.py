@@ -38,9 +38,9 @@ INSTALLED_APPS = (
                   'django.contrib.contenttypes',
                   'django.contrib.auth',
                   'django.contrib.sessions',
+                  'django.contrib.admin',
                   'djangotoolbox',
                   'autoload',
-                  #'django.contrib.admin',
                   'dbindexer',
                   'timeline',
                   'util',
@@ -55,6 +55,13 @@ TEST_RUNNER = 'djangotoolbox.test.CapturingTestSuiteRunner'
 ADMIN_MEDIA_PREFIX = '/media/admin/'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 TEMPLATE_DIRS = (os.path.join(os.path.dirname(__file__), 'templates'),)
+
+# List of callables that know how to import templates from various sources.
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+#     'django.template.loaders.eggs.load_template_source',
+)
 
 STATICFILES_ROOT = MEDIA_ROOT 
 STATICFILES_URL = '/media/'
@@ -76,6 +83,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ("util.context_processors.site_context",
                                "django.contrib.auth.context_processors.auth",
                                "django.core.context_processors.debug",
                                "django.core.context_processors.request",
+                               "django.core.context_processors.media",
                                "django.contrib.messages.context_processors.messages",
                                )
 #                               "django.contrib.staticfiles.context_processors.staticfiles",

@@ -151,22 +151,28 @@ class Ballot(AbstractBallot):
     
         
 class DenormalizedBallot(AbstractBallot):
-    ballot = models.OneToOneField(Ballot, primary_key=True)
+    #ballot = models.OneToOneField(Ballot, primary_key=True)
+    ballot_pk = models.IntegerField(primary_key=True)
     result = models.IntegerField(null=True, blank=True)
     project_pk = models.IntegerField()
     project_name = models.CharField(max_length=30, help_text=_('Name of standard/amendment'))
     task_group = models.CharField(max_length=10, help_text=_('Name of task group (TG..)'))
     
     def denormalize(self, commit=True):
-        for field in self.ballot._meta.fields:
+        print 'Project count=',Project.objects.count()
+        ballot = Ballot.objects.get(pk=self.ballot_pk)
+        for field in ballot._meta.fields:
             if field.attname!='project':
-                setattr(self,field.attname,getattr(self.ballot,field.attname))
-        self.project_pk = self.ballot.project.pk
-        self.project_name = self.ballot.project.fullname
+                setattr(self,field.attname,getattr(ballot,field.attname))
+        try:
+            self.project_pk = ballot.project.pk
+            self.project_name = ballot.project.fullname
+            self.task_group = ballot.project.task_group
+        except Project.DoesNotExist:
+            print 'Invalid project ',ballot.project_id
         if self.project_name.endswith('-xxxx'):
             self.project_name = self.project_name[:-5]
-        self.task_group = self.ballot.project.task_group
-        self.result = self.ballot.result if self.vote_for is not None else None
+        self.result = ballot.result if self.vote_for is not None else None
         if commit:
             self.save()
     
@@ -174,25 +180,42 @@ class DenormalizedBallot(AbstractBallot):
         return 'LB%03d'%int(self.number)
     
 class BallotBacklog(models.Model):
-    ballot = models.OneToOneField(Ballot, primary_key=True)
+    #ballot = models.OneToOneField(Ballot, primary_key=True)
+    ballot_pk = models.IntegerField(primary_key=True)
+
+    #def __getattribute__(self, *args, **kwargs):
+    #    if args and args[0]=='ballot':
+    #        return Ballot.objects.get(pk=self.ballot_pk)
+    #    return models.Model.__getattribute__(self, *args, **kwargs)
     
-@receiver(post_save, sender=Ballot)
-def add_to_backlog(sender, instance, **kwargs):
-    b = BallotBacklog(ballot=instance)
-    b.save()
-    check_backlog()
+    #def __setattr__(self, *args, **kwargs):
+    #    if args and len(args)>1 and args[0]=='ballot':
+    #        self.ballot_pk= args[1].pk
+    #        return args[1]
+    #    return models.Model.__setattr__(self, *args, **kwargs)
     
-@receiver(pre_delete, sender=Ballot)
-def remove_ballot(sender, instance, **kwargs):
-    try:
-        dn = DenormalizedBallot.objects.get(ballot=instance)
-        dn.delete()
-    except DenormalizedBallot.DoesNotExist:
-        pass
-    
-def check_backlog():
-    needs_update = BallotBacklog.objects.exists()
+def check_backlog(force=False):
+    needs_update = force
+    if not force:
+        needs_update = BallotBacklog.objects.exists()
     if needs_update:
         add_task(name = 'ballot-backlog', url=reverse('ballot.views.backlog_worker'))
     return needs_update
+    
+@receiver(post_save, sender=Ballot)
+def add_to_backlog(sender, instance, **kwargs):
+    b = BallotBacklog(ballot_pk=instance.pk)
+    b.save()
+    check_backlog(True)
+    
+@receiver(pre_delete, sender=Ballot)
+def remove_ballot(sender, instance, **kwargs):
+    #try:
+    DenormalizedBallot.objects.filter(ballot_pk=instance.pk).delete()
+    #except DenormalizedBallot.DoesNotExist:
+    #    pass
+
+@receiver(pre_delete, sender=Ballot)
+def pre_delete_ballot(sender, instance, **kwargs):
+    DenormalizedBallot.objects.filter(pk=instance.pk).delete()
     

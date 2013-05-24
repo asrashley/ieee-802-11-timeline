@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 {% block title %}Finished Importing Projects, Ballots and Meeting Reports{% endblock %}
 {% block css %}
 div.error {
@@ -73,7 +74,7 @@ border: none;
 <th>abstain</th></tr>
 {% endif %}
 <tr> <td>{{b.project}}</td>
-    <td><a href="{% url ballot.views.edit_ballot b.number %}">LB{{b.number}}</a></td>
+    <td><a href="{% url 'ballot.views.edit_ballot' b.number %}">LB{{b.number}}</a></td>
     <td>{{b.draft}}</td>
     <td>{{b.opened|date:"Y-m-d"}} to {{b.closed|date:"Y-m-d"}}</td>
     <td>{{b.ballot_type}}</td>

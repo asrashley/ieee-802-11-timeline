@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool
 #
 #  Author              :    Alex Ashley
 #
@@ -22,7 +22,7 @@
 
 from ballot.models import Ballot, DenormalizedBallot
 from project.models import Project
-from util.tasks import run_test_task_queue
+from util.tasks import run_test_task_queue #, init_test_task_queue
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -87,26 +87,38 @@ class BallotTest(TestCase):
         bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
         bal.closed = bal.opened + datetime.timedelta(days=15)
         bal.save()
+        self.failUnlessEqual(bal.pk,123)
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
         url = reverse('ballot.views.main_page',args=[])
         response = self.client.get(url)
+        self.failUnlessEqual(response.status_code, 200)
+        self.failUnlessEqual(Ballot.objects.count(),1)
         #run_test_task_queue(response.request)
         run_test_task_queue(self.client)
-        dn = DenormalizedBallot.objects.get(number=bal.number)
-        bal = Ballot.objects.get(number=bal.number)
-        bal.delete()
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        dn = DenormalizedBallot.objects.get(ballot_pk=bal.number)
+        self.failIfEqual(dn,None)
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        Ballot.objects.filter(pk=bal.number).delete()
         run_test_task_queue(self.client)
-        self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, number=bal.number)
+        self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, pk=123)
         
     def test_renumber_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
+        self.failUnlessEqual(Project.objects.count(),1)
+        self.failUnlessEqual(Ballot.objects.count(),0)
         bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
         bal.closed = bal.opened + datetime.timedelta(days=15)
         bal.save()
+        self.failUnlessEqual(Ballot.objects.count(),1)
         url = reverse('ballot.views.main_page',args=[])
-        response = self.client.get(url)
+        self.__check_page(url)
+        #response = self.client.get(url)
         run_test_task_queue(self.client)
-        dn = DenormalizedBallot.objects.get(number=bal.number)
+        dn = DenormalizedBallot.objects.get(pk=bal.pk)
         bal2 = Ballot.objects.get(number=bal.number)
         bal2.number = 321
         bal2.save()

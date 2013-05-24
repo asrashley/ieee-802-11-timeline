@@ -21,7 +21,7 @@
 #############################################################################
 
 from project.models import Project, InProgress, Published, Withdrawn
-from timeline.models import DenormalizedProject, ProjectBacklog, check_backlog
+from project.models import DenormalizedProject, ProjectBacklog, check_backlog
 from util.cache import CacheControl
 from util.forms import DateModelForm
 
@@ -53,7 +53,7 @@ class ProjectForm(DateModelForm):
 def main_page(request, export=None):
     if request.GET.get('refresh'):
         for p in Project.objects.all().iterator():
-            ProjectBacklog(project=p).save()
+            ProjectBacklog(project_pk=p.pk).save()
         return http.HttpResponseRedirect(reverse('timeline.views.main_page'))
     if request.GET.get('redraw',None) is not None:
         try:
@@ -141,18 +141,6 @@ def del_project(request,proj):
     return create_update.delete_object(request, model=Project, object_id=proj,
                                        post_delete_redirect=request.GET.get('next','/'))
     
-@csrf_exempt
-def backlog_worker(request):
-    for backlog in ProjectBacklog.objects.all().iterator():
-        try:
-            pd = DenormalizedProject(project=backlog.project)
-            pd.denormalize()
-            backlog.delete()
-        except (Project.DoesNotExist,TypeError):
-            pass
-    message='Timeline backlog complete'
-    return render_to_response('done.html',locals(),context_instance=RequestContext(request))
-
 @receiver(post_save, sender=DenormalizedProject)
 def update_cache(sender, instance, **kwargs):
     # instance is a DenormalizedProject object

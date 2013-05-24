@@ -1,2 +1,1 @@
-set HTTP_HOST=localhost
-manage.py test util ballot project timeline 
+manage.py test project ballot project report timeline util 

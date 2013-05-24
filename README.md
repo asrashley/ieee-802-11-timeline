@@ -50,22 +50,10 @@ Download the following:
 Make sure you select the 1.4 branch for all of the django repositories. The
 following commands should do the job:
 
-    git clone https://github.com/django-nonrel/django
-    cd django
-    git checkout nonrel-1.4
-    cd ..
-    git clone https://github.com/django-nonrel/djangoappengine
-    cd djangoappengine
-    git checkout appengine-1.4
-    cd ..
-    git clone https://github.com/django-nonrel/djangotoolbox
-    cd djangotoolbox
-    git checkout toolbox-1.4
-    cd ..
-    git clone https://github.com/django-nonrel/django-dbindexer
-    cd django-dbindexer
-    git checkout dbindexer-1.4
-    cd ..
+    git clone https://github.com/django-nonrel/django -b nonrel-1.4
+    git clone https://github.com/django-nonrel/djangoappengine -b appengine-1.4
+    git clone https://github.com/django-nonrel/djangotoolbox -b toolbox-1.4
+    git clone https://github.com/django-nonrel/django-dbindexer -b dbindexer-1.4
     hg clone https://bitbucket.org/twanschik/django-autoload
 
 Install the Google App Engine. Copy the following folders into the same 

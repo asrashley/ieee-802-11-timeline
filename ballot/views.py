@@ -21,7 +21,7 @@
 #############################################################################
 
 from ballot.models import Ballot, BallotBacklog, DenormalizedBallot, check_backlog
-from project.models import InProgress, Published, Withdrawn
+from project.models import InProgress, Published, Withdrawn, Project
 from util.cache import CacheControl
 from util.forms import DateModelForm
 
@@ -55,7 +55,7 @@ def main_page(request):
     next_page=reverse('ballot.views.main_page')
     if request.GET.get('refresh'):
         for b in Ballot.objects.all():
-            BallotBacklog(ballot=b).save()
+            BallotBacklog(ballot_pk=b.pk).save()
         return http.HttpResponseRedirect(next_page)
     needs_update = check_backlog()
     return render_to_response('ballot/index.html', locals(), context_instance=RequestContext(request))
@@ -64,7 +64,7 @@ def main_page(request):
 def wg_page(request, export=None):
     if request.GET.get('refresh'):
         for b in Ballot.objects.all():
-            BallotBacklog(ballot=b).save()
+            BallotBacklog(ballot_pk=b.pk).save()
         return http.HttpResponseRedirect(reverse('ballot.views.wg_page'))
     next_page = reverse('ballot.views.wg_page')
     if request.GET.get('redraw',None) is not None:
@@ -85,7 +85,7 @@ def wg_page(request, export=None):
 def sponsor_page(request, export=None):
     if request.GET.get('refresh'):
         for b in Ballot.objects.all():
-            BallotBacklog(ballot=b).save()
+            BallotBacklog(ballot_pk=b.pk).save()
         return http.HttpResponseRedirect(reverse('ballot.views.sponsor_page'))
     next_page=reverse('ballot.views.sponsor_page')
     if request.GET.get('redraw',None) is not None:
@@ -175,14 +175,16 @@ def ballot_page(request, ballots, export, sponsor, next, export_page):
     
 @csrf_exempt
 def backlog_worker(request):
+    done=[]
     for backlog in BallotBacklog.objects.all().iterator():
+        done.append(backlog.ballot_pk)
         try:
-            b = DenormalizedBallot(ballot=backlog.ballot)
+            b = DenormalizedBallot(ballot_pk=backlog.ballot_pk)
             b.denormalize()
         except Ballot.DoesNotExist:
             pass
-        backlog.delete()
     message='Timeline backlog complete'
+    BallotBacklog.objects.filter(pk__in=done).delete()
     return render_to_response('done.html',locals(),context_instance=RequestContext(request))
 
 @receiver(post_save, sender=DenormalizedBallot)

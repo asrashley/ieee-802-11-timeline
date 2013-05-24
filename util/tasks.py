@@ -21,8 +21,10 @@
 #############################################################################
 
 from google.appengine.api import taskqueue 
+from google.appengine.ext import testbed
+from djangoappengine.db.stubs import stub_manager
  
-import time #, sys
+import time, sys
 
 class TaskProxy(object):
     def __init__(self,name,url):
@@ -37,21 +39,15 @@ def add_task(name, url, queue_name='background-processing', countdown=None):
         return True
     except taskqueue.TaskAlreadyExistsError:
         return False
-    #except taskqueue.UnknownQueueError:
-    #    # Assume running in unit test mode
-    #    _test_task_queue.append(TaskProxy(name,url))
-    #    return True
     except taskqueue.TombstonedTaskError:
         taskqueue.add(url=url, method='POST', queue_name=queue_name, countdown=countdown)
         return True
-        
+
 def run_test_task_queue(client):
-    from google.appengine.ext import testbed
-    from djangoappengine.db.stubs import stub_manager
-    
-    stub = stub_manager.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
-    for queue in stub.GetQueues():
-        tasks = stub.GetTasks(queue['name'])
+    test_task_stub = stub_manager.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
+    #stub = stub_manager.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
+    for queue in test_task_stub.GetQueues():
+        tasks = test_task_stub.GetTasks(queue['name'])
         for task in tasks:
             if task['method'].upper()=='POST':
                 content_type = 'multipart/form-data'
@@ -61,9 +57,11 @@ def run_test_task_queue(client):
                         content_type = v
                 if task['body']:
                     data = task['body']
+                #sys.stderr.write('p'.join([task['name'],' - ',task['url'],'\n']))
                 client.post(task['url'],data=data, content_type=content_type)
             else:
+                #sys.stderr.write('g'.join([task['name'],' - ',task['url'],'\n']))
                 client.get(task['url'])
             #sys.stderr.write('r'.join([task['name'],' - ',task['url'],'\n']))
-        stub.FlushQueue(queue['name'])
+        test_task_stub.FlushQueue(queue['name'])
         

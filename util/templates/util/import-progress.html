@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 {% load siteutils %}
 {% block title %}Importing Projects and Ballots{% endblock %}
 
@@ -24,9 +25,9 @@
 {% endblock %}
 {% block extra-head %}
 {% if progress.finished %}
-<meta http-equiv="refresh" content="3; URL='{% url util.views.import_done progress.pk %}'">
+<meta http-equiv="refresh" content="3; URL='{% url 'util.views.import_done' progress.pk %}'">
 {% else %}
-<meta http-equiv="refresh" content="10; URL=''">
+<meta http-equiv="refresh" content="10; URL='{% url 'util.views.import_progress' progress.pk %}'">
 {% endif %}
 {% endblock %}
 

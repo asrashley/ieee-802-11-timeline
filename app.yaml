@@ -1,15 +1,15 @@
 application: ieee80211timeline
-version: 3
+version: 4
 runtime: python27
 api_version: 1
-threadsafe: true
+threadsafe: false
 default_expiration: '365d'
 
 builtins:
 - remote_api: on
 
-inbound_services:
-- warmup
+#inbound_services:
+#- warmup
 
 libraries:
 - name: django
@@ -31,9 +31,9 @@ handlers:
   script: djangoappengine.main.application
   login: admin
   
-- url: /ballot/dn
-  script: djangoappengine.main.application
-  login: admin
+#- url: /ballot/dn
+#  script: djangoappengine.main.application
+#  login: admin
   
 - url: /util/import/work
   script: djangoappengine.main.application

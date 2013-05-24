@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import *
-#from django.contrib import admin
+from django.contrib import admin
 #import dbindexer
 
-#admin.autodiscover()
+admin.autodiscover()
 
 urlpatterns = patterns('util.views',
                        url(r'^import/work/(?P<prog>\d+)$', 'import_worker' ),
@@ -13,6 +13,7 @@ urlpatterns = patterns('util.views',
                        url(r'^export/db$', 'export_db'),
                        url(r'^urls/$', 'edit_urls'),
                        url(r'^update/$', 'update_page'),
+                       url(r'^admin/', include(admin.site.urls)),
                        url(r'^^404/$', 'not_found'),
                        url(r'^$', 'main_page'),
 )

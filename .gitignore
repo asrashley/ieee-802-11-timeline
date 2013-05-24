@@ -5,5 +5,8 @@ dbindexer
 djangotoolbox
 autoload
 .gaedata
+.project
+.pydevproject
+.settings
 *.pyc
 *~

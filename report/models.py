@@ -20,16 +20,8 @@
 #
 #############################################################################
 
-from project.models import Project
-from util.tasks import add_task
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
-from django.core.urlresolvers import reverse
-
-import datetime
 
 class MeetingType(object):
     def __init__(self,code,descr):

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load url from future %}
 {% load cache %}
 {% load siteutils %}
 
@@ -6,7 +7,7 @@
 
 {% block extra-head %}
 {% if needs_update %}
-<meta http-equiv="refresh" content="15; URL=''">
+<meta http-equiv="refresh" content="15">
 {% endif %}
 {% endblock %}
 
@@ -131,7 +132,7 @@ table.timeline td a:link, table.timeline td a:visited {
 
 {% block header %}
 {% if needs_update %}
-<a id="logo" href="{% url timeline.views.main_page %}">UPDATES ARE BEING PROCESSED</a>
+<a id="logo" href="{% url 'timeline.views.main_page' %}">UPDATES ARE BEING PROCESSED</a>
 {% else %}
 <a id="logo" href="/">OFFICIAL IEEE 802.11 WORKING GROUP PROJECT TIMELINES - {% now "Y-m-d" %}</a>
 {% endif %}

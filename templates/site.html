@@ -1,8 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-    dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
-    xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
-    lang="{% firstof LANGUAGE_CODE 'en' %}">
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="{% firstof LANGUAGE_CODE 'en' %}"> <!--<![endif]-->
 {% load siteutils %}
   <head>
     <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>

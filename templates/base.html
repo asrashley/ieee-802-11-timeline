@@ -1,4 +1,5 @@
 {% extends 'site.html' %}
+{% load url from future %}
 {% load cache %}
 {% load siteutils %}
 
@@ -6,7 +7,7 @@
   {% if cache.export != "shtml" %}
     <a id="logo" href="/">IEEE 802.11, The Working Group Setting the Standards for Wireless LANs</a>
     {% if not cache.export %}
-	    {% if user %}<div id="greeting">{{user.username}}</div>{%else%}<div id="greeting"><a href="{% url django.contrib.auth.views.login %}">Log in</a></div>{%endif %}
+	    {% if user %}<div id="greeting">{{user.username}}</div>{%else%}<div id="greeting"><a href="{% url 'django.contrib.auth.views.login' %}">Log in</a></div>{%endif %}
   	{%endif %}
   {%endif %}
 {% endblock %}
@@ -15,45 +16,45 @@
 {% if user.is_authenticated and cache and not cache.export %}
 {% cache cache.timeout menu request.path %}
   <ul>
-    <li><a class="hide" href="{% url util.views.import_page %}">Import</a></li>
-	<li><a class="hide" href="{% url util.views.main_page %}">Export</a>
+    <li><a class="hide" href="{% url 'util.views.import_page' %}">Import</a></li>
+	<li><a class="hide" href="{% url 'util.views.main_page' %}">Export</a>
 	<ul>
-		<li><a href="{% url util.views.export_db %}" title="Export Database">Database</a></li>
+		<li><a href="{% url 'util.views.export_db' %}" title="Export Database">Database</a></li>
 	{% if export_page and not needs_update %}
 		<li><a href="{{export_page}}.html" title="Export as HTML page">HTML</a></li>
 		<li><a href="{{export_page}}.shtml" title="Export as SHTML page">SHTML</a></li>
 	{% endif %}
 	</ul>
     </li>
-    <li><a class="hide" href="{% url ballot.views.main_page %}">Ballots</a>
+    <li><a class="hide" href="{% url 'ballot.views.main_page' %}">Ballots</a>
 	<ul>
-		<li><a href="{% url ballot.views.wg_page %}">Working Group Ballots</a></li>
-		<li><a href="{% url ballot.views.sponsor_page %}">Sponsor Ballots</a></li>
-		<li><a href="{% url timeline.views.add_project %}?next={% url ballot.views.main_page %}" title="Add project">Add project</a></li>
-		<li><a href="{% url ballot.views.add_ballot %}?next={% url ballot.views.main_page %}">Add Ballot</a></li>
+		<li><a href="{% url 'ballot.views.wg_page' %}">Working Group Ballots</a></li>
+		<li><a href="{% url 'ballot.views.sponsor_page' %}">Sponsor Ballots</a></li>
+		<li><a href="{% url 'timeline.views.add_project' %}?next={% url 'ballot.views.main_page' %}" title="Add project">Add project</a></li>
+		<li><a href="{% url 'ballot.views.add_ballot' %}?next={% url 'ballot.views.main_page' %}">Add Ballot</a></li>
 	</ul>
     </li>
-	<li><a class="hide" href="{% url report.views.main_page %}">Reports</a>
+	<li><a class="hide" href="{% url 'report.views.main_page' %}">Reports</a>
 	<ul>
-		<li><a href="{% url report.views.main_page %}">View Reports</a></li>
-		<li><a href="{% url report.views.add_report%}?next={% url report.views.main_page %}">Add Report</a></li>
+		<li><a href="{% url 'report.views.main_page' %}">View Reports</a></li>
+		<li><a href="{% url 'report.views.add_report' %}?next={% url 'report.views.main_page' %}">Add Report</a></li>
 	</ul>
 	</li>
-    <li><a class="hide" href="{% url timeline.views.main_page %}">Timeline</a>
+    <li><a class="hide" href="{% url 'timeline.views.main_page' %}">Timeline</a>
 	<ul>
-		<li><a href="{% url timeline.views.main_page %}">View Timeline</a></li>
-		<li><a href="{% url timeline.views.add_project %}?next={% url timeline.views.main_page %}" title="Add project">Add project</a></li>
-		<li><a href="{% url ballot.views.add_ballot %}?next={% url timeline.views.main_page %}">Add Ballot</a></li>
+		<li><a href="{% url 'timeline.views.main_page' %}">View Timeline</a></li>
+		<li><a href="{% url 'timeline.views.add_project' %}?next={% url 'timeline.views.main_page' %}" title="Add project">Add project</a></li>
+		<li><a href="{% url 'ballot.views.add_ballot' %}?next={% url 'timeline.views.main_page' %}">Add Ballot</a></li>
 	</ul>
     </li>
-	<li><a class="hide" href="{% url util.views.main_page %}">System</a>
+	<li><a class="hide" href="{% url 'util.views.main_page' %}">System</a>
 	<ul>
-		<li><a href="{% url util.views.edit_urls %}{% if next_page %}?next={{next_page|escape}}{% endif %}">Edit URLs</a></li>
-		{% if user.is_staff %}<li><a href="/ah">Google Admin</a></li><li><a href="{% url util.views.main_page %}admin">Django Admin</a></li>{% endif %}
-		<li><a href="{% url django.contrib.auth.views.password_change %}">Change password</a></li>
+		<li><a href="{% url 'util.views.edit_urls' %}{% if next_page %}?next={{next_page|escape}}{% endif %}">Edit URLs</a></li>
+		{% if user.is_staff %}<li><a href="/ah">Google Admin</a></li><li><a href="{% url 'util.views.main_page' %}admin">Django Admin</a></li>{% endif %}
+		<li><a href="{% url 'django.contrib.auth.views.password_change' %}">Change password</a></li>
 	</ul>
 	</li>
-	<li><a class="hide" {% if user.logout %}href="{{user.logout}}"{% else %}href="{% url django.contrib.auth.views.logout %}"{%endif%}>Log out</a></li>
+	<li><a class="hide" {% if user.logout %}href="{{user.logout}}"{% else %}href="{% url 'django.contrib.auth.views.logout' %}"{%endif%}>Log out</a></li>
 </ul>
 {% endcache %}
 {% endif %}

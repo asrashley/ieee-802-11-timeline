@@ -1,4 +1,5 @@
 {% load siteutils %}
+{% load url from future %}
 <table class="timeline">
 <caption class="caption{{published}}">{% if not cache.export %}<a href="?redraw={{published}}">{%endif%}{{caption}}{% if not cache.export %}</a>{%endif%}</caption>
 <thead>
@@ -36,7 +37,7 @@
     {% for std in standards %}
     <tr class="{% cycle 'row1' 'row2' as rowcol %}">
     <td {% if not published %}rowspan="2"{% endif %} class="first"><a name="{{std.slug}}"></a>
-    {% if not cache.export %}<a href="{% url timeline.views.edit_project std.pk %}?next={{next_page|escape}}">{% endif %}
+    {% if not cache.export %}<a href="{% url 'timeline.views.edit_project' std.pk %}?next={{next_page|escape}}">{% endif %}
     IEEE Std P{{std.fullname}}{% if not cache.export %}</a>{%endif%}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{{std.doc_type}}</td>
     <td {% if not published %}rowspan="2"{% endif %}>{% if std.par %}<a href="{{std.par}}">{%endif%}{{std.description}}{% if std.par %}</a>{%endif%}</td>
