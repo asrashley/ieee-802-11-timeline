@@ -1,0 +1,114 @@
+table.timeline caption {
+	font-size: 16pt;
+	font-family: Arial;
+	vertical-align: middle;
+	text-align: center;
+	color: black;
+	height: 40px;
+	border: 1px solid;
+	padding-top: 5px;
+	background: rgb(230, 170, 120);
+}
+table.timeline caption.caption1 {
+	background: rgb(0, 255, 0);
+}
+table.timeline caption.caption2 {
+	background: rgb(0, 0, 200);
+	color: white;
+}
+table.timeline caption a:link, table.timeline caption a:visited {
+	text-decoration: none;
+	color: black;
+}
+table.timeline caption.caption2 a:link, table.timeline caption.caption2 a:visited {
+	color: white;
+}
+table.timeline {
+	border-color: #333;
+	font-family: Arial;
+	font-size: 7pt;
+	text-align: center;
+	padding: 1px;
+	margin: 2px;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+table.timeline td {
+	border: 1px solid black;
+	padding: 1px 2px;
+	height: 30px;
+}
+table.timeline tr.row1 td.first, table.timeline tr.row1 td.est {
+	background: rgb(255, 255, 153);
+}
+table.timeline tr.row2 td.first, table.timeline tr.row2 td.est {
+	background: rgb(255, 204, 153);
+}
+table.timeline th.result {
+	font-size: 6pt;
+	padding: 1px 1px;
+}
+td.conf {
+	background: lime;
+}
+table.timeline th.date div {
+	width: 55px;
+}
+table.timeline th.pardate div {
+	width: 64px;
+}
+table.timeline tr.row1 {
+	background: rgb(192, 192, 192);
+}
+table.timeline tr.row2 {
+	background: white;
+}
+table.timeline th {
+	background: black;
+	border: 1px solid white;
+	color: white;
+	vertical-align: bottom;
+	text-align: center;
+	padding: 2px 4px;
+	font-size: 7pt;
+}
+table.timeline th.first {
+	border-left: 1px solid black;
+}
+table.timeline th.last {
+	border-right: 1px solid black;
+}
+table.timeline th.doctype {
+	padding: 2px 1px;
+}
+table.timeline th a:link, table.timeline th a:visited {
+	color: #f0f000;
+	text-decoration: none;
+}
+table.timeline td a:link, table.timeline td a:visited {
+	text-decoration: none;
+}
+#trademarks {
+	margin: 0 0 0;
+	text-align: center;
+	font-size: 7.5pt;
+	font-family: Arial;
+}
+#maintained {
+	text-align: center;
+}
+#notes {
+	font-size: 7pt;
+	font-family: Arial;
+	width: 120em;
+	margin: 0.5em auto;
+}
+#notes td.key {
+	text-align: right;
+}
+#notes td.value {
+	text-align: left;
+}
+.disabled {
+	color: #808080;
+}

@@ -54,7 +54,10 @@ TEST_RUNNER = 'djangotoolbox.test.CapturingTestSuiteRunner'
 
 ADMIN_MEDIA_PREFIX = '/media/admin/'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
-TEMPLATE_DIRS = (os.path.join(os.path.dirname(__file__), 'templates'),)
+TEMPLATE_DIRS = (
+                 os.path.join(os.path.dirname(__file__), 'templates'),
+                 os.path.join(os.path.dirname(__file__), 'media','css'),
+                 )
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -88,13 +91,3 @@ TEMPLATE_CONTEXT_PROCESSORS = ("util.context_processors.site_context",
                                )
 #                               "django.contrib.staticfiles.context_processors.staticfiles",
 #                               "django.core.context_processors.i18n",
-
-# Activate django-dbindexer if available
-#try:
-#    import dbindexer
-#    DATABASES['native'] = DATABASES['default']
-#    DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
-#    INSTALLED_APPS += ('dbindexer',)
-#except ImportError:
-#    #print 'Warning, unable to import dbindexer'
-#    pass

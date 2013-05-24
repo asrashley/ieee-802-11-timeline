@@ -1,5 +1,4 @@
 <!doctype html>
-<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
@@ -8,57 +7,18 @@
   <head>
     <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
 {% if not cache.export %}
+	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/boilerplate.css" />
 	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/ieeeadmin.css" />
+	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/site.css" />
 {%endif %}
 
-    <style type="text/css">
-    div#header{
-	font-size: 1.5em;
-	font-family: Verdana,Arial,sans-serif;
-	vertical-align: middle;
-	text-align: center;
-	color:#ffffff;
-	height: 2em;
-	width: 100%;
-	border: 1px solid ;
-	line-height: 2em;
- 	padding: 1px 4px;
-  	background: rgb(0, 128, 128) none repeat scroll 0% 50%;
-	}
-	
-div#header a {
-	color: yellow;
-	text-decoration: none;
-}
-
-div#footer {
-	text-align:center;
-}
-div#footer table {
-	border:0px;
-	padding: 0px;
-	margin:10px;
-}
-div#footer table td{
-	height: 2.7em;
-	width:6.4em;
-	vertical-align: bottom;
-}
-div#footer table img {
-	border:0px;
-}
-div.centered {
-	text-align: center;
-}
-p.center {
-	text-align: center;
-}
-
-div.centered table, div#footer table {
-	margin: 0 auto; 
-	text-align: left;
-}
-    
+<style type="text/css">
+{% if cache.export %}
+  {% ifnotequal cache.export "shtml" %}
+    {% include "boilerplate.css" %}
+  {% endifnotequal %}
+  {% include "site.css" %}
+{% endif %}
     {% block css %}
     {% endblock %}
     </style>

@@ -1,0 +1,48 @@
+#header {
+	font-size: 1.5em;
+	font-family: Verdana, Arial, sans-serif;
+	vertical-align: middle;
+	text-align: center;
+	color: #ffffff;
+	height: 2em;
+	width: 100%;
+	border: 1px solid;
+	line-height: 2em;
+	padding: 0.1em 0.25em;
+	background-color: #008080;
+}
+
+#header > a {
+	color: yellow;
+	text-decoration: none;
+}
+
+#footer {
+	text-align: center;
+}
+#footer > table {
+	border: 0;
+	padding: 0;
+	margin: 0.65em;
+}
+#footer > table td {
+	height: 2.7em;
+	width: 6.4em;
+	vertical-align: bottom;
+}
+#footer > table img {
+	border: 0;
+}
+
+div.centered {
+	text-align: center;
+}
+p.center {
+	text-align: center;
+}
+
+div.centered table, #footer table {
+	margin: 0 auto;
+	text-align: left;
+}
+
