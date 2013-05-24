@@ -2,7 +2,7 @@ application: ieee80211timeline
 version: 4
 runtime: python27
 api_version: 1
-threadsafe: false
+threadsafe: true
 default_expiration: '365d'
 
 builtins:
@@ -25,11 +25,14 @@ handlers:
   login: admin
   
 - url: /media/admin
-  static_dir: django/contrib/admin/media/
+  static_dir: django/contrib/admin/static/
 
-- url: /timeline/dn
-  script: djangoappengine.main.application
-  login: admin
+- url: /static/admin
+  static_dir: django/contrib/admin/static/
+
+#- url: /timeline/dn
+#  script: djangoappengine.main.application
+#  login: admin
   
 #- url: /ballot/dn
 #  script: djangoappengine.main.application
