@@ -1,10 +1,11 @@
-Unless you are a member of the IEEE 802.11 executive, this is probably not the
-git repository you are looking for.
+Unless you are a member of the IEEE 802.11 executive, this is not the git
+repository you are looking for.
 
 The application is based upon the model, view, controller paradigm. It uses
-databases to hold information on the IEEE 802.11 projects and ballots, scripts
-to control the “business logic” of viewing and modifying this data, and HTML
-templates that render the data that you see in your web browser.
+databases to hold information on the IEEE 802.11 projects, ballots and meeting
+reports. Scripts are used to control the “business logic” of viewing and
+modifying this data, and HTML templates that render the data that you see in
+your web browser.
 
 The main advantage of this approach is that it allows changes to the visual
 appearance without requiring any change to the data or control logic.
@@ -13,7 +14,7 @@ The IEEE 802.11 timeline tool is a web application that is currently being
 hosted by the Google App Engine. The URL for the site is <http://ieee80211timeline.appspot.com/>
 
 To ensure that this application stays within the free usage quota, access to all
-parts of this website apart from the front page requires a username and
+parts of the website, apart from the front page, requires a username and
 password. Contact me if you would like to request access.
 
 Details of how to use the application can be found on the [IEEE document server][doc]
@@ -24,7 +25,7 @@ Application Environment
 The application is written in the [Python][python] programming language and is based upon
 the [Django][django] web development framework. As the application is hosted on the Google
 App Engine [GAE][GAE], a database abstraction layer is required because Django
-requires the use of a relational database, but the GAE datastore is
+requires the use of a relational database, but the GAE datastore is a
 non-relational database. The timeline tool uses the [django-nonrel][nonrel] abstraction
 layer to allow Django to use the GAE datastore.
 
@@ -34,7 +35,7 @@ layer to allow Django to use the GAE datastore.
   [nonrel]: http://www.allbuttonspressed.com/projects/django-nonrel
 
 To run the timeline tool locally, you need to install Python, the GAE
-development environment, unzip the timeline tool source code and then place the
+development environment, download the timeline tool source code and then place the
 django-nonrel source code in the same directory as the timeline tool source
 code, as described below. At the time of writing, GAE requires the use of
 Python v2.7.
@@ -56,7 +57,7 @@ following commands should do the job:
     git clone https://github.com/django-nonrel/django-dbindexer -b dbindexer-1.4
     hg clone https://bitbucket.org/twanschik/django-autoload
 
-Install the Google App Engine. Copy the following folders into the same 
+Install the Google App Engine. Copy or symbolic link the following folders into the same 
 directory where you have downloaded the source code:
 * django-nonrel/django => <timeline_dir>/django
 * djangotoolbox/djangotoolbox => <timeline_dir>/djangotoolbox
@@ -65,18 +66,19 @@ directory where you have downloaded the source code:
 * django-autload/autoload => <timeline_dir>/autoload
 
 Once finished, you should have a directory that contains:
-
-    <DIR>          autoload
+    <SYMLINKD>     autoload [..\django-autoload\autoload]
     <DIR>          ballot
-    <DIR>          dbindexer
-    <DIR>          django
-    <DIR>          djangoappengine
-    <DIR>          djangotoolbox
+    <SYMLINKD>     dbindexer [..\django-dbindexer\dbindexer]
+    <SYMLINKD>     django [..\django\django]
+    <SYMLINKD>     djangoappengine [..\djangoappengine\djangoap
+    <SYMLINKD>     djangotoolbox [..\djangotoolbox\djangotoolbo
     <DIR>          media
     <DIR>          project
+    <DIR>          report
     <DIR>          templates
     <DIR>          timeline
     <DIR>          util
+    .gitignore
     app.yaml
     cron.yaml
     index.yaml
@@ -84,7 +86,10 @@ Once finished, you should have a directory that contains:
     LICENSE-2.0.txt
     manage.py
     queue.yaml
+    README.md
     robots.txt
+    runtests.bat
+    runtests.sh
     settings.py
     test.bat
     urls.py
@@ -98,15 +103,15 @@ If using Windows, by typing the following in a command prompt window:
 
 If you are running the software on a Unix platform, use:
 
-    manage.py test util ballot project timeline
+    sh ./runtests.sh
 
 This should produce “OK” after running all the tests.
 
 Before you can use the development web server, you need to create the local
 databases and create a super-user account.
 
-    manage.py syncdb
-    manage.py createsuperuser
+    python manage.py syncdb
+    python manage.py createsuperuser
 
 The local development web server can be started using:
 
