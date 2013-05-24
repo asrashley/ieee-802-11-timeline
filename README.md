@@ -66,6 +66,7 @@ directory where you have downloaded the source code:
 * django-autload/autoload => <timeline_dir>/autoload
 
 Once finished, you should have a directory that contains:
+
     <SYMLINKD>     autoload [..\django-autoload\autoload]
     <DIR>          ballot
     <SYMLINKD>     dbindexer [..\django-dbindexer\dbindexer]
