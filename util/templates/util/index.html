@@ -5,7 +5,6 @@
 <ul>
 	<li><a class="hide" href="{% url 'util.views.import_page' %}">Import</a></li>
 	<li><a href="{% url 'util.views.export_db' %}" title="Export Database">Export Database</a></li>
-	<li><a href="{% url 'util.views.export_sw' %}" title="Export Software">Export Software</a></li>
 	<li><a href="{% url 'util.views.edit_urls' %}{% if next_page %}?next={{next_page|escape}}{% endif %}">Edit URLs</a></li>
 	<li><a href="{% url 'util.views.update_page' %}">Rebuild de-normalised database</a></li>
 	{% if user.is_staff %}<li><a href="/ah">Google Admin</a></li><li><a href="/admin">Django Admin</a></li>{% endif %}
