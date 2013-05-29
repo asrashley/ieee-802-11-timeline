@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load siteutils %}
+
+{% block content %}
+<p id="updatemsg">
+	{% if message %}{{message|safe}}{%else%}Done{%endif%}
+</p>
+<div>
+	<p id="projects">Rebuilding projects <progress value="0" max="{{ project_count }}"></progress></p>
+	<p id="ballots">Rebuilding ballots <progress value="0" max="{{ ballot_count }}"></progress></p>
+	<p id="timelines">Rebuilding timelines <progress value="0" max="{{ project_count }}"></progress></p>
+</div>
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery-1.10.0.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+		'use strict';
+		var rebuildCount=3;
+		function pollProjects(id, url){
+			function poll(){
+				$.getJSON(url, function(data, textStatus, jqXHR){
+    				$(id+' progress').attr('value', data.count);
+	    			if(data.backlog==false){
+	    				$(id).append($('<span>', {'class':'done'}).text('done'));
+	    				rebuildCount--;
+	    				if(rebuildCount===0){
+	    					$('#updatemsg').append($('<span>', {'class':'done'}).text('done'));
+	    				}
+    				}
+    				else{
+			    		window.setTimeout(poll,2000);
+					}
+    			});
+			}
+			return poll;
+    	}
+    	window.setTimeout(pollProjects("#projects", "{% url 'project.views.backlog_poll' %}"), 3000);
+    	window.setTimeout(pollProjects("#ballots", "{% url 'ballot.views.backlog_poll' %}"), 3400);
+    	window.setTimeout(pollProjects("#timelines", "{% url 'timeline.views.backlog_poll' %}"), 3800);
+    });
+</script>
+{% endblock %}

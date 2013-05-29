@@ -25,6 +25,8 @@ from project.models import Project, ProjectBacklog, DenormalizedProject
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
 @csrf_exempt
 def backlog_worker(request):
@@ -43,3 +45,9 @@ def backlog_worker(request):
         ProjectBacklog.objects.filter(pk__in=batch).delete()
     message='Project backlog complete'
     return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+
+@login_required
+def backlog_poll(request):
+    status = 'true' if ProjectBacklog.objects.exists() else 'false'
+    denormalized_count = DenormalizedProject.objects.count()
+    return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')

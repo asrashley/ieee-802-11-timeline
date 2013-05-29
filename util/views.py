@@ -21,6 +21,7 @@
 #############################################################################
 
 from util.io import parse_projects_and_ballots
+from util.db import bulk_delete
 from util.models import ImportProgress, SiteURLs
 from project.models import Project
 from report.models import MeetingReport
@@ -28,6 +29,7 @@ from project.models import DenormalizedProject, ProjectBacklog
 from project.models import check_backlog as check_project_backlog 
 from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
 from ballot.models import check_backlog as check_ballot_backlog 
+from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog, check_project_ballot_backlog
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -65,22 +67,6 @@ def main_page(request):
 @login_required
 def export_db(request):    
     return export_csv()
-
-@login_required
-def export_sw(request):
-    try:
-        from django.conf import settings
-        version = '_v%.1f'%settings.APP_VERSION
-    except ImportError:
-        version = ''
-    return redirect('/media/bin/ieee80211timeline%s.zip'%(version))
-
-def batch_delete(model):
-    pks = model.objects.all().values_list('pk',flat=True)
-    while pks:
-        batch = pks[:30]
-        pks = pks[30:]
-        model.objects.filter(pk__in=batch).delete()
         
 @login_required
 def import_page(request, next):
@@ -105,16 +91,18 @@ def import_page(request, next):
             if data['wipe_projects']:
                 #DenormalizedProject.objects.all().delete()
                 #Project.objects.all().delete()
-                batch_delete(DenormalizedProject)
-                batch_delete(Project)
+                bulk_delete(DenormalizedProjectBallots)
+                bulk_delete(DenormalizedProject)
+                bulk_delete(Project)
                 #DenormalizedProject.objects.all().delete()
             if data['wipe_ballots']:
-                batch_delete(DenormalizedBallot)
-                batch_delete(Ballot)
+                bulk_delete(DenormalizedProjectBallots)
+                bulk_delete(DenormalizedBallot)
+                bulk_delete(Ballot)
                 #DenormalizedBallot.objects.all().delete()
                 #Ballot.objects.all().delete()
             if data['wipe_reports']:
-                batch_delete(MeetingReport)
+                bulk_delete(MeetingReport)
             progress = import_projects_and_ballots(request.FILES['file'],debug=debug)
             return http.HttpResponseRedirect(reverse('util.views.import_progress', args=[progress.pk]))
     else:
@@ -156,8 +144,9 @@ def import_done(request,prog):
     
 @login_required
 def update_page(request):
-    update_list = ['Update completed ']
-    for proj in Project.objects.all():
+    title='Updating denormalized data...'
+    update_list = [title]
+    for proj in Project.objects.all().iterator():
         changed = False
         if Project.name_re.match(proj.name):
             changed = True
@@ -168,13 +157,17 @@ def update_page(request):
             proj.save()
         else:
             ProjectBacklog(project_pk=proj.pk).save()
-    for ballot in Ballot.objects.all():
+        pbb = ProjectBallotsBacklog(project_pk=proj.pk, update_initial_wg=True, update_recirc_wg=True, update_initial_sb=True, update_recirc_sb=True)
+        pbb.save()
+    for ballot in Ballot.objects.all().iterator():
         BallotBacklog(ballot_pk=ballot.pk).save()
     check_project_backlog()
     check_ballot_backlog()
+    check_project_ballot_backlog()
     message=' '.join(update_list)
-    title='Update completed'
-    return render_to_response('done.html', locals(), context_instance=RequestContext(request))
+    project_count = Project.objects.count()
+    ballot_count = Ballot.objects.count()
+    return render_to_response('util/update.html', locals(), context_instance=RequestContext(request))
 
 @login_required
 def edit_urls(request):
@@ -192,7 +185,7 @@ def edit_urls(request):
         form = URLForm(instance=object)
     title = 'Edit site URLs'
     return render_to_response('edit-object.html',locals(),context_instance=RequestContext(request))
-
+    
 @csrf_exempt
 def import_worker(request, prog):
     progress = get_object_or_404(ImportProgress,pk=prog)

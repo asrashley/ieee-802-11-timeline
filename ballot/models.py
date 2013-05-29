@@ -124,6 +124,15 @@ class AbstractBallot(models.Model):
     def is_open(self):
         now = datetime.datetime.now()
         return now.toordinal()<=self.closed.toordinal()
+
+    @property    
+    def is_wg_ballot(self):
+        return self.ballot_type==self.WGInitial.code or self.ballot_type==self.WGRecirc.code
+
+    @property    
+    def is_initial_ballot(self):
+        return self.ballot_type==self.WGInitial.code or self.ballot_type==self.SBInitial.code
+        
     
 class Ballot(AbstractBallot):
     FIRST_SPONSOR_LBNUM = 10000
@@ -152,24 +161,23 @@ class Ballot(AbstractBallot):
         
 class DenormalizedBallot(AbstractBallot):
     #ballot = models.OneToOneField(Ballot, primary_key=True)
-    ballot_pk = models.IntegerField(primary_key=True)
+    #ballot_pk = models.IntegerField(primary_key=True)
     result = models.IntegerField(null=True, blank=True)
     project_pk = models.IntegerField()
     project_name = models.CharField(max_length=30, help_text=_('Name of standard/amendment'))
     task_group = models.CharField(max_length=10, help_text=_('Name of task group (TG..)'))
     
     def denormalize(self, commit=True):
-        print 'Project count=',Project.objects.count()
-        ballot = Ballot.objects.get(pk=self.ballot_pk)
+        ballot = Ballot.objects.get(pk=self.number)
         for field in ballot._meta.fields:
-            if field.attname!='project':
+            if field.attname!='project' and field.attname!='project_id':
                 setattr(self,field.attname,getattr(ballot,field.attname))
-        try:
-            self.project_pk = ballot.project.pk
-            self.project_name = ballot.project.fullname
-            self.task_group = ballot.project.task_group
-        except Project.DoesNotExist:
-            print 'Invalid project ',ballot.project_id
+        #try:
+        self.project_pk = ballot.project.pk
+        self.project_name = ballot.project.fullname
+        self.task_group = ballot.project.task_group
+        #except Project.DoesNotExist:
+        #    print 'Invalid project ',ballot.project_id
         if self.project_name.endswith('-xxxx'):
             self.project_name = self.project_name[:-5]
         self.result = ballot.result if self.vote_for is not None else None
@@ -210,12 +218,6 @@ def add_to_backlog(sender, instance, **kwargs):
     
 @receiver(pre_delete, sender=Ballot)
 def remove_ballot(sender, instance, **kwargs):
-    #try:
-    DenormalizedBallot.objects.filter(ballot_pk=instance.pk).delete()
-    #except DenormalizedBallot.DoesNotExist:
-    #    pass
-
-@receiver(pre_delete, sender=Ballot)
-def pre_delete_ballot(sender, instance, **kwargs):
+    BallotBacklog.objects.filter(ballot_pk=instance.pk).delete()
     DenormalizedBallot.objects.filter(pk=instance.pk).delete()
     

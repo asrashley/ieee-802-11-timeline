@@ -16,14 +16,14 @@ indexes:
   - name: __key__
     direction: desc
 
-- kind: timeline_denormalizedproject
+- kind: timeline_denormalizedprojectbalots
   properties:
   - name: __key__
     direction: desc
   - name: sortkey
     direction: desc
 
-- kind: timeline_denormalizedproject
+- kind: project_denormalizedproject
   properties:
   - name: baseline
   - name: order
@@ -40,11 +40,6 @@ indexes:
 
 - kind: ballot_ballot
   properties:
-  - name: __key__
-    direction: desc
-
-- kind: ballot_ballot
-  properties:
   - name: ballot_type
   - name: project_id
   - name: draft
@@ -53,19 +48,3 @@ indexes:
   properties:
   - name: baseline
   - name: order
-
-- kind: report_meetingreport
-  properties:
-  - name: __key__
-    direction: desc
-
-- kind: timeline_ballot
-  properties:
-  - name: __key__
-    direction: desc
-
-- kind: timeline_ballot
-  properties:
-  - name: ballot_type
-  - name: project_id
-  - name: draft

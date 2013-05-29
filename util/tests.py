@@ -226,6 +226,39 @@ class MainPageTest(TestCase):
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
         
+class ExportDatabaseTest(TestCase):
+    fixtures = ['site.json','projects.json', 'ballots.json', 'timelines.json', 'reports.json']
+    
+    def test_export(self):
+        self.assertGreater(Project.objects.count(), 0)
+        self.assertGreater(Ballot.objects.count(), 0)
+        self.assertGreater(MeetingReport.objects.count(), 0)
+        url = reverse('util.views.export_db',args=[])
+        response = self.client.get(url)
+        # not logged in, should redirect to login page
+        self.failUnlessEqual(response.status_code, 302)
+
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+        response = self.client.get(url)
+        for proj in Project.objects.all().iterator():
+            for field in proj._meta.fields:
+                if field.attname!='slug':
+                    value = getattr(proj,field.attname)
+                    if value:
+                        self.assertContains(response, value, msg_prefix='Project.%s'%field.attname)
+        for ballot in Ballot.objects.all().iterator():
+            for field in ballot._meta.fields:
+                value = getattr(ballot,field.attname)
+                if value:
+                    self.assertContains(response, value, msg_prefix='Ballot.%s'%field.attname)
+        for report in MeetingReport.objects.all().iterator():
+            for field in report._meta.fields:
+                value = getattr(report,field.attname)
+                if value:
+                    self.assertContains(response, value, msg_prefix='MeetingReport.%s'%field.attname)
+        
+            
 class EditUrlsPageTest(TestCase):
     fixtures = ['site.json','projects.json']
     

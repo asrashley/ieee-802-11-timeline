@@ -21,6 +21,7 @@
 #############################################################################
 
 from util.tasks import add_task
+from util.db import bulk_delete
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -177,15 +178,9 @@ class Project(AbstractProject):
         super(Project,self).save(*args, **kwargs)
     
 class DenormalizedProject(AbstractProject):
-    from ballot.models import DenormalizedBallot
     project_pk = models.IntegerField(primary_key=True)
     fullname = models.CharField(max_length=30, help_text=_('Name of standard/amendment, WITH year designation'))
     sortkey = models.CharField(max_length=25, editable=False, db_index=True)
-    #denormalized_baselines = models.CharField(max_length=200, blank=True, null=True, editable=False)
-    denormalized_initial_wg = models.CharField(max_length=200, blank=True, null=True, editable=False)
-    denormalized_recirc_wg = models.CharField(max_length=200, blank=True, null=True, editable=False)
-    denormalized_initial_sb = models.CharField(max_length=200, blank=True, null=True, editable=False)
-    denormalized_recirc_sb = models.CharField(max_length=200, blank=True, null=True, editable=False)
     denormalized_baselines_slug = models.CharField(max_length=16*AbstractProject.MAX_AMENDMENTS, blank=True, null=True, editable=False)
     denormalized_baselines_name = models.CharField(max_length=30*AbstractProject.MAX_AMENDMENTS, blank=True, null=True, editable=False)
     
@@ -206,14 +201,6 @@ class DenormalizedProject(AbstractProject):
         bsl = project.baselines
         self.denormalized_baselines_name = ','.join([proj.fullname for proj in bsl])
         self.denormalized_baselines_slug = ','.join([proj.slug for proj in bsl])
-        wi = project.ballot_set.filter(ballot_type='WI').order_by('draft').values_list('pk',flat=True)
-        self.denormalized_initial_wg = ','.join(['%d'%pk for pk in wi])
-        wr = project.ballot_set.filter(ballot_type='WR').order_by('draft').values_list('pk',flat=True)
-        self.denormalized_recirc_wg = ','.join(['%d'%pk for pk in wr])
-        si = project.ballot_set.filter(ballot_type='SI').order_by('draft').values_list('pk',flat=True)
-        self.denormalized_initial_sb = ','.join(['%d'%pk for pk in si])
-        sr = project.ballot_set.filter(ballot_type='SR').order_by('draft').values_list('pk',flat=True)
-        self.denormalized_recirc_sb = ','.join(['%d'%pk for pk in sr])
         a = project.withdrawn_date.strftime('%Y%m%d') if project.withdrawn_date is not None else '00000000'
         b = project.revcom_approval_date.strftime('%Y%m%d') if project.published and project.revcom_approval_date is not None else '00000000'
         c = project.par_date.strftime('%Y%m%d')
@@ -221,35 +208,6 @@ class DenormalizedProject(AbstractProject):
         if commit:
             self.save()
         
-    @property    
-    def wg_ballots(self):
-        return self._get_ballots(self.denormalized_initial_wg)+self._get_ballots(self.denormalized_recirc_wg)
-    
-    @property    
-    def initial_wg_ballots(self):
-        return self._get_ballots(self.denormalized_initial_wg)
-    
-    @property    
-    def recirc_wg_ballots(self):
-        return self._get_ballots(self.denormalized_recirc_wg)
-    
-    @property    
-    def sb_ballots(self):
-        return self._get_ballots(self.denormalized_initial_sb)+self._get_ballots(self.denormalized_recirc_sb)
-    
-    @property    
-    def initial_sb_ballots(self):
-        return self._get_ballots(self.denormalized_initial_sb)
-    
-    @property    
-    def recirc_sb_ballots(self):
-        return self._get_ballots(self.denormalized_recirc_sb)
-                                 
-    def _get_ballots(self,dfield):
-        if not dfield:
-            return []
-        return list(self.DenormalizedBallot.objects.filter(pk__in=dfield.split(',')).only('number','draft','result','closed'))
-    
     def __unicode__(self):
         return self.fullname
     
@@ -276,11 +234,11 @@ def add_to_backlog(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=Project)
 def remove_project(sender, instance, **kwargs):
+    # instance is a Project object
     if instance.baseline is not None:
-        for proj in Project.objects.filter(baseline=instance.baseline).iterator():
-            if proj.pk!=instance.pk:
-                proj.baseline = None
-                proj.save()
+        for proj in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).iterator():
+            proj.baseline = None
+            proj.save()
     ProjectBacklog.objects.filter(project_pk=instance.pk).delete()
     DenormalizedProject.objects.filter(project_pk=instance.pk).delete()
     

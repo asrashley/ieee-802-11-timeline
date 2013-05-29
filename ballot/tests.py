@@ -22,21 +22,18 @@
 
 from ballot.models import Ballot, DenormalizedBallot
 from project.models import Project
-from util.tasks import run_test_task_queue #, init_test_task_queue
+from util.tasks import run_test_task_queue
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 import datetime
 
-class BallotTest(TestCase):
-    fixtures = ['site.json']
-    
-    def __check_page(self,url):
+class BallotBaseTest(TestCase):    
+    def _check_page(self,url):
         response = self.client.get(url)
         # not logged in, should redirect to login page
         self.failUnlessEqual(response.status_code, 302)
-
         login = self.client.login(username='test', password='password')
         self.failUnless(login, 'Could not log in')
         response = self.client.get(url)
@@ -46,31 +43,74 @@ class BallotTest(TestCase):
     def _check_ballot_page(self,url,export):
         from django.conf import settings
         static_url = settings.STATICFILES_URL
-        response = self.__check_page(url)
+        response = self._check_page(url)
         self.assertContains(response, 'ieeel.gif')
         response.content.index(static_url)
         response = self.client.get(export)
         self.failUnlessEqual(response.status_code, 200)
         self.assertContains(response, 'ieeel.gif')
         self.failUnlessRaises(ValueError, response.content.index,static_url)
+        return response
         
+class BallotTest(BallotBaseTest):
+    fixtures = ['site.json', 'projects.json', 'ballots.json']
     def test_main(self):
         url = reverse('ballot.views.main_page',args=[])
-        self.__check_page(url)
-        
+        response = self._check_page(url)
+        url = reverse('ballot.views.wg_page',args=[])
+        self.assertContains(response,url)
+        url = reverse('ballot.views.sponsor_page',args=[])
+        self.assertContains(response,url)
+        url = reverse('ballot.views.add_ballot',args=[])
+        self.assertContains(response,url)
+
+    def _check_ballot(self,ballot,response, prefix):
+        if ballot.draft:
+            self.assertContains(response,ballot.draft, msg_prefix=prefix)
+        if ballot.pool:
+            self.assertContains(response,ballot.pool, msg_prefix=prefix)
+        if ballot.vote_for:
+            self.assertContains(response,ballot.vote_for, msg_prefix=prefix)
+        if ballot.vote_against:
+            self.assertContains(response,ballot.vote_against, msg_prefix=prefix)
+        if ballot.draft_url:
+            self.assertContains(response,ballot.draft_url, msg_prefix=prefix)
+        if ballot.redline_url:
+            self.assertContains(response,ballot.redline_url, msg_prefix=prefix)
+        if ballot.resolution_url:
+            self.assertContains(response,ballot.resolution_url, msg_prefix=prefix)
+        if ballot.template_url:
+            self.assertContains(response,ballot.template_url, msg_prefix=prefix)
+        if ballot.pool_url:
+            self.assertContains(response,ballot.pool_url, msg_prefix=prefix)
+        days = ballot.days
+        if days>0:
+            self.assertContains(response,days, msg_prefix=prefix)            
+                
     def test_wg(self):
         url = reverse('ballot.views.wg_page',args=[])
         export = ''.join([reverse('ballot.views.main_page',args=[]),'LetterBallots.html'])
-        self._check_ballot_page(url, export)
+        response = self._check_ballot_page(url, export)
+        for ballot in Ballot.objects.all():
+            if ballot.ballot_type!=Ballot.SBInitial.code and ballot.ballot_type!=Ballot.SBRecirc.code:
+                self.assertContains(response,ballot.number, msg_prefix='WorkingGroup')
+                self.assertContains(response,ballot.project.task_group, msg_prefix='WorkingGroup')
+                self._check_ballot(ballot, response, 'WorkingGroup')
         
     def test_sponsor(self):
         url = reverse('ballot.views.sponsor_page',args=[])
         export = ''.join([reverse('ballot.views.main_page',args=[]),'SponsorBallots.html'])
-        self._check_ballot_page(url, export)
+        response = self._check_ballot_page(url, export)
+        for ballot in Ballot.objects.all():
+            if ballot.ballot_type==Ballot.SBInitial.code or ballot.ballot_type==Ballot.SBRecirc.code:
+                self.assertContains(response,ballot.project.name, msg_prefix='Sponsor')
+                self._check_ballot(ballot, response, 'Sponsor')
                 
+class BallotTest2(BallotBaseTest):
+    fixtures = ['site.json']
     def test_add_ballot(self):
         url = reverse('ballot.views.add_ballot',args=[])
-        self.__check_page(url)
+        self._check_page(url)
         
     def test_edit_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
@@ -79,7 +119,7 @@ class BallotTest(TestCase):
         bal.closed = bal.opened + datetime.timedelta(days=15)
         bal.save()
         url = reverse('ballot.views.edit_ballot',args=[bal.number])
-        self.__check_page(url)
+        self._check_page(url)
         
     def test_delete_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
@@ -98,7 +138,7 @@ class BallotTest(TestCase):
         #run_test_task_queue(response.request)
         run_test_task_queue(self.client)
         self.failUnlessEqual(Ballot.objects.count(),1)
-        dn = DenormalizedBallot.objects.get(ballot_pk=bal.number)
+        dn = DenormalizedBallot.objects.get(pk=bal.pk)
         self.failIfEqual(dn,None)
         self.failUnlessEqual(Ballot.objects.count(),1)
         Ballot.objects.filter(pk=bal.number).delete()
@@ -115,7 +155,7 @@ class BallotTest(TestCase):
         bal.save()
         self.failUnlessEqual(Ballot.objects.count(),1)
         url = reverse('ballot.views.main_page',args=[])
-        self.__check_page(url)
+        self._check_page(url)
         #response = self.client.get(url)
         run_test_task_queue(self.client)
         dn = DenormalizedBallot.objects.get(pk=bal.pk)

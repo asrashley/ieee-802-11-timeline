@@ -47,12 +47,12 @@
     <a href="#{{base.slug}}">{{base.name}}</a>{% endfor %}</td>
     <td>Actual</td>
     <td class="date">{{std.par_date|date:"Y-m-d"}}{%for h in std.par_history %}<br /><span>({{h}})</span>{%endfor%}{% if std.par_expiry %}<br /><span>[{{std.par_expiry|date:"Y-m-d"}}]</span>{% endif %}</td>
-    {% with std.wg_ballots as ballots %}
+    {% with std.ballots.wg_ballots as ballots %}
     {% include "timeline/ballots.html" %}
 	{% endwith %}    
     <td>{% if std.sb_formed %}{{std.sb_form_date|date:"Y-m-d"}}{% endif %}</td>
     <td>{% if std.mec_completed %}{{std.mec_date|date:"Y-m-d"}}{% endif %}</td>
-    {% with std.sb_ballots as ballots %}
+    {% with std.ballots.sb_ballots as ballots %}
     {% include "timeline/ballots.html" %}
 	{% endwith %}    
     <td>{% if std.wg_approved %}{{std.wg_approval_date|date:"Y-m-d"}}{% if std.published and not std.wg_approval_date%}C{%endif%}{% endif %}</td>
@@ -64,12 +64,12 @@
 	{% if not published %}<tr class="{{rowcol}}">
     <td class="est">Predicted</td>
     <td class="conf">C</td>
-    <td colspan="2" {% if not std.initial_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.initial_wg_ballots %}{{std.initial_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
-    <td colspan="2" {% if not std.recirc_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.recirc_wg_ballots %}{{std.recirc_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.ballots.initial_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.ballots.initial_wg_ballots %}{{std.initial_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.ballots.recirc_wg_ballots %}class="est"{% else %}class="conf"{% endif %}>{% if not std.ballots.recirc_wg_ballots %}{{std.recirc_wg_ballot|date:"M y"}}{% else %}C{% endif %}</td>
     <td {% if std.sb_formed %}class="conf"{%else%}class="est"{%endif %}>{% if not std.sb_formed %}{{std.sb_form_date|date:"M-y"}}{% else %}C{% endif %}</td>
     <td {% if std.mec_completed %}class="conf"{%else%}class="est"{%endif %}>{% if std.mec_completed %}C{%else%}{{std.mec_date|date:"M-y"}}{% endif %}</td>
-   	<td colspan="2" {% if not std.initial_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.initial_sb_ballots %}{{std.initial_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
-    <td colspan="2" {% if not std.recirc_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.recirc_sb_ballots %}{{std.recirc_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+   	<td colspan="2" {% if not std.ballots.initial_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.ballots.initial_sb_ballots %}{{std.initial_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
+    <td colspan="2" {% if not std.ballots.recirc_sb_ballots %}class="est"{%else%}class="conf"{%endif%}>{% if not std.ballots.recirc_sb_ballots %}{{std.recirc_sb_ballot|date:"M y"}}{% else %}C{% endif %}</td>
     <td {% if std.wg_approved %}class="conf"{%else%}class="est"{%endif%}>{% if std.wg_approved %}C{%else%}{{std.wg_approval_date|date:"M-y"}}{% endif %}</td>
     <td {% if std.ec_approved %}class="conf"{%else%}class="est"{%endif%}>{% if std.ec_approved %}C{%else%}{{std.ec_approval_date|date:"M-y"}}{% endif %}</td>
     <td {% if std.published %}class="conf"{%else%}class="est"{%endif%}>{% if std.published %}C{%else%}{{std.revcom_approval_date|date:"M-y"}}{% endif %}</td>

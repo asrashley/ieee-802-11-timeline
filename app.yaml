@@ -38,21 +38,21 @@ handlers:
 #  script: djangoappengine.main.application
 #  login: admin
   
-- url: /util/import/work
-  script: djangoappengine.main.application
-  login: admin
+#- url: /util/import/work
+#  script: djangoappengine.main.application
+#  login: admin
   
-- url: /media/images
-  static_dir: media/images/
+- url: /media
+  static_dir: media/
   
-- url: /media/css
-  static_dir: media/css/
-
-- url: /media/js
-  static_dir: media/js/
+#- url: /media/css
+#  static_dir: media/css/
+#
+#- url: /media/js
+#  static_dir: media/js/
   
-- url: /media/bin
-  static_dir: media/bin/
+#- url: /media/bin
+#  static_dir: media/bin/
 
 
 - url: /favicon.ico

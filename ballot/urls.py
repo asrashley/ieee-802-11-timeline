@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns
 
 urlpatterns = patterns('ballot.views',
                        (r'^edit_ballot/(?P<bal>\d+)$', 'edit_ballot'),
@@ -10,6 +10,7 @@ urlpatterns = patterns('ballot.views',
                        (r'^SponsorBallots.html$', 'sponsor_page', {'export':'html'}),
                        (r'^SponsorBallots.shtml$', 'sponsor_page', {'export':'shtml'}),
                        (r'^sponsor/$', 'sponsor_page'),
+                       (r'^dn/status.json', 'backlog_poll'),
                        (r'^dn/$', 'backlog_worker'),
                        (r'^$', 'main_page')
 )

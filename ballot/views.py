@@ -36,6 +36,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.http import HttpResponse
 
 class BallotForm(DateModelForm):
     curstat = forms.IntegerField(widget=forms.HiddenInput)
@@ -172,14 +173,20 @@ def ballot_page(request, ballots, export, sponsor, next, export_page):
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
     return render_to_response('ballot/ballots.html', context, context_instance=context_instance)
-    
+
+@login_required
+def backlog_poll(request):
+    status = 'true' if BallotBacklog.objects.exists() else 'false'
+    denormalized_count = DenormalizedBallot.objects.count()
+    return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')
+        
 @csrf_exempt
 def backlog_worker(request):
     done=[]
     for backlog in BallotBacklog.objects.all().iterator():
         done.append(backlog.ballot_pk)
         try:
-            b = DenormalizedBallot(ballot_pk=backlog.ballot_pk)
+            b = DenormalizedBallot(number=backlog.ballot_pk)
             b.denormalize()
         except Ballot.DoesNotExist:
             pass

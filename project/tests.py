@@ -37,6 +37,7 @@ class ProjectTest(TestCase):
         self.failUnlessEqual(Project.objects.count(),1)
         run_test_task_queue(self.client)
         self.failUnlessEqual(Project.objects.count(),1)
+        self.failUnlessEqual(DenormalizedProject.objects.count(),1)
         dn = DenormalizedProject.objects.get(project_pk=proj.pk)
         self.failIfEqual(dn,None)
         self.failUnlessEqual(Project.objects.count(),1)

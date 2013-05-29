@@ -21,9 +21,12 @@
 #############################################################################
 
 from project.models import Project, InProgress, Published, Withdrawn
-from project.models import DenormalizedProject, ProjectBacklog, check_backlog
+from project.models import DenormalizedProject, ProjectBacklog
+from project.models import check_backlog as check_project_backlog
+from timeline.models import ProjectBallotsBacklog, DenormalizedProjectBallots, check_project_ballot_backlog 
 from util.cache import CacheControl
 from util.forms import DateModelForm
+from util.db import bulk_delete
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response,  get_object_or_404
@@ -35,8 +38,9 @@ from django.views.generic import create_update
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
-import datetime
+import datetime, sys
 from operator import attrgetter
 
 class ProjectForm(DateModelForm):
@@ -72,8 +76,19 @@ def main_page(request, export=None):
     in_process = []
     published = []
     withdrawn = []
-    needs_update = check_backlog()
+    needs_update = check_project_backlog()
     for pd in DenormalizedProject.objects.all().iterator():
+        try:
+            pd.ballots = DenormalizedProjectBallots.objects.get(project_pk=pd.pk)
+        except DenormalizedProjectBallots.DoesNotExist:
+            pd.ballots = DenormalizedProjectBallots(project_pk=pd.pk)
+            sys.stderr.write('Unable to find DenormalizedBallots for project %d\n'%pd.pk)
+            try:
+                pbb = ProjectBallotsBacklog.objects.get(project_pk=pd.pk)
+            except ProjectBallotsBacklog.DoesNotExist:
+                pbb = ProjectBallotsBacklog(project_pk=pd.pk)
+                pbb.save()
+            check_project_ballot_backlog()
         if pd.withdrawn:
             withdrawn.append(pd)
         elif pd.published:
@@ -100,7 +115,7 @@ def add_project(request):
 def edit_project(request,proj):
     context = {}
     context.update(csrf(request))
-    check_backlog()
+    check_project_backlog()
     next_page = request.GET.get('next','/')
     if proj is None:
         project = Project()
@@ -140,20 +155,34 @@ def edit_project(request,proj):
 def del_project(request,proj):
     return create_update.delete_object(request, model=Project, object_id=proj,
                                        post_delete_redirect=request.GET.get('next','/'))
-    
+
+@login_required
+def backlog_poll(request):
+    status = 'true' if ProjectBacklog.objects.exists() else 'false'
+    denormalized_count = DenormalizedProjectBallots.objects.count()
+    return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')
+
+@csrf_exempt
+def backlog_worker(request):
+    done=[]
+    for backlog in ProjectBallotsBacklog.objects.all().iterator():
+        done.append(backlog.project_pk)
+        try:
+            b = DenormalizedProjectBallots.objects.get(project_pk=backlog.project_pk)
+        except DenormalizedProjectBallots.DoesNotExist:
+            b = DenormalizedProjectBallots(project_pk=backlog.project_pk)
+        try:
+            b.denormalize(backlog)
+        except Project.DoesNotExist:
+            pass
+    message='Timeline backlog complete'
+    bulk_delete(ProjectBallotsBacklog, ProjectBallotsBacklog.objects.filter(pk__in=done))
+    return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+
 @receiver(post_save, sender=DenormalizedProject)
+@receiver(pre_delete, sender=DenormalizedProject)
 def update_cache(sender, instance, **kwargs):
     # instance is a DenormalizedProject object
-    cc = CacheControl()
-    if InProgress.id==instance.status.id:
-        cc.in_progress_ver = cc.in_progress_ver+1
-    if Published.id==instance.status.id:
-        cc.published_ver = cc.published_ver+1
-    if Withdrawn.id==instance.status.id:
-        cc.withdrawn_ver = cc.withdrawn_ver+1
-
-@receiver(pre_delete, sender=DenormalizedProject)
-def update_cache2(sender, instance, **kwargs):
     cc = CacheControl()
     if InProgress.id==instance.status.id:
         cc.in_progress_ver = cc.in_progress_ver+1
