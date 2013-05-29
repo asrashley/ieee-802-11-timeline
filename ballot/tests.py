@@ -54,15 +54,6 @@ class BallotBaseTest(TestCase):
         
 class BallotTest(BallotBaseTest):
     fixtures = ['site.json', 'projects.json', 'ballots.json']
-    def test_main(self):
-        url = reverse('ballot.views.main_page',args=[])
-        response = self._check_page(url)
-        url = reverse('ballot.views.wg_page',args=[])
-        self.assertContains(response,url)
-        url = reverse('ballot.views.sponsor_page',args=[])
-        self.assertContains(response,url)
-        url = reverse('ballot.views.add_ballot',args=[])
-        self.assertContains(response,url)
 
     def _check_ballot(self,ballot,response, prefix):
         if ballot.draft:
@@ -106,11 +97,59 @@ class BallotTest(BallotBaseTest):
                 self.assertContains(response,ballot.project.name, msg_prefix='Sponsor')
                 self._check_ballot(ballot, response, 'Sponsor')
                 
-class BallotTest2(BallotBaseTest):
+class BallotTestNoData(BallotBaseTest):
     fixtures = ['site.json']
-    def test_add_ballot(self):
+    def test_main(self):
+        url = reverse('ballot.views.main_page',args=[])
+        response = self._check_page(url)
+        url = reverse('ballot.views.wg_page',args=[])
+        self.assertContains(response,url)
+        url = reverse('ballot.views.sponsor_page',args=[])
+        self.assertContains(response,url)
         url = reverse('ballot.views.add_ballot',args=[])
-        self._check_page(url)
+        self.assertContains(response,url)
+
+    def test_add_ballot(self):
+        self.failUnlessEqual(Project.objects.count(),0)
+        self.failUnlessEqual(Ballot.objects.count(),0)
+        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj.save()
+        self.failUnlessEqual(Project.objects.count(),1)
+        url = reverse('ballot.views.add_ballot',args=[])
+        response = self._check_page(url)
+        data = {
+                'project' : proj.pk,
+                'number':123,
+                'draft': 1.0,
+                'opened' : '2013-05-01',
+                'closed' : '2013-05-16',
+                'ballot_type' : Ballot.WGInitial.code,
+                'pool': 321,
+                'vote_for':'',
+                'vote_against':'',
+                'vote_abstain':'',
+                'vote_invalid':'',
+                'comments':'',
+                'instructions_url': 'http://grouper.ieee.org/instructions',
+                'draft_url': 'http://grouper.ieee.org/draft',
+                'redline_url':'',
+                'resolution_url':'',
+                'template_url': 'http://grouper.ieee.org/template',
+                'pool_url': 'http://grouper.ieee.org/pool',
+                'curstat': response.context['form'].initial['curstat'],
+                'curpk':'',
+                'submit':'Save'
+                }
+        response = self.client.post(url, data, follow=True)      
+        self.failUnlessEqual(response.status_code, 200)
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        data['draft'] = 2.0
+        del data['submit']
+        data['cancel'] = 'Cancel' 
+        data['number'] += 1
+        response = self.client.post(url, data, follow=True)      
+        self.failUnlessEqual(response.status_code, 200)
+        self.failUnlessEqual(Ballot.objects.count(),1)
         
     def test_edit_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
