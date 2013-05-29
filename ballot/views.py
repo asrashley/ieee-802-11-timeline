@@ -129,7 +129,10 @@ def edit_ballot(request,bal):
             data = form.cleaned_data
             ballot = form.save()
             if data['curpk'] and data['curpk']!=ballot.pk:
-                Ballot.objects.get(pk=data['curpk']).delete()
+                try:
+                    Ballot.objects.get(pk=data['curpk']).delete()
+                except Ballot.DoesNotExist:
+                    pass
             cc = CacheControl()
             if data['curstat'] != ballot.project.status.id:
                 if InProgress.id==data['curstat']:
