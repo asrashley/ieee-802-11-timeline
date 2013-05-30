@@ -19,8 +19,8 @@
 #  Author              :    Alex Ashley
 #
 #############################################################################
-from project.models import Project
-from ballot.models import Ballot
+from project.models import Project, DenormalizedProject
+from ballot.models import Ballot, DenormalizedBallot
 from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog, check_project_ballot_backlog
 from util.tasks import run_test_task_queue
 
@@ -53,6 +53,19 @@ class TimelineTestBase(TestCase):
         self.assertContains(response, 'ieeel.gif')
         #response.content.index(static_url)
         self.assertContains(response,static_url)
+        if DenormalizedProject.objects.exists():
+            for proj in Project.objects.all().iterator():
+                for field in ['name','description', 'task_group', 'task_group_url','doc_version']: #proj._meta.fields:
+                    value = getattr(proj,field)
+                    if value:
+                        self.assertContains(response, value, msg_prefix='%s.%s'%(proj.task_group,field))
+        if DenormalizedProjectBallots.objects.exists() and DenormalizedBallot.objects.exists():            
+            for ballot in DenormalizedBallot.objects.all().iterator():
+                if ballot.ballot_type!=Ballot.Procedural.code:
+                    for field in ['draft','closed','result']:
+                        value = getattr(ballot,field)
+                        if value:
+                            self.assertContains(response, value, msg_prefix='%s LB%d.%s'%(ballot.project_name,ballot.number,field))
         
     def test_html_export(self):
         static_url = settings.STATICFILES_URL
