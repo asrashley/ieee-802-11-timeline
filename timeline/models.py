@@ -28,61 +28,87 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.urlresolvers import reverse
 
+import datetime, json
+
+class BallotProxy(object):
+    def __init__(self,data):
+        self.pk = self.number = data['number']
+        self.draft = data['draft']
+        self.result = data['result']
+        self.closed = datetime.date.fromordinal(data['closed']) 
+        
 class DenormalizedProjectBallots(models.Model):
     project_pk = models.IntegerField(primary_key=True)
-    denormalized_initial_wg = models.CharField(max_length=200, blank=True, null=True, editable=False, db_index=False)
-    denormalized_recirc_wg = models.CharField(max_length=200, blank=True, null=True, editable=False, db_index=False)
-    denormalized_initial_sb = models.CharField(max_length=200, blank=True, null=True, editable=False, db_index=False)
-    denormalized_recirc_sb = models.CharField(max_length=200, blank=True, null=True, editable=False, db_index=False)
+    denormalized_initial_wg = models.TextField(blank=True, null=True, editable=False, db_index=False)
+    denormalized_recirc_wg = models.TextField(blank=True, null=True, editable=False, db_index=False)
+    denormalized_initial_sb = models.TextField(blank=True, null=True, editable=False, db_index=False)
+    denormalized_recirc_sb = models.TextField(blank=True, null=True, editable=False, db_index=False)
     
     def denormalize(self, backlog, commit=True):
         project= Project.objects.get(pk=self.project_pk)
         if self.denormalized_initial_wg is None or backlog.update_initial_wg==True:
-            wi = project.ballot_set.filter(ballot_type='WI').order_by('draft').values_list('pk',flat=True)
-            self.denormalized_initial_wg = ','.join(['%d'%pk for pk in wi])
+            self.denormalized_initial_wg = self._denormalize_ballot(project, Ballot.WGInitial)
         if self.denormalized_recirc_wg is None or backlog.update_recirc_wg==True:
-            wr = project.ballot_set.filter(ballot_type='WR').order_by('draft').values_list('pk',flat=True)
-            self.denormalized_recirc_wg = ','.join(['%d'%pk for pk in wr])
+            self.denormalized_recirc_wg = self._denormalize_ballot(project, Ballot.WGRecirc)
         if self.denormalized_initial_sb is None or backlog.update_initial_sb==True:
-            si = project.ballot_set.filter(ballot_type='SI').order_by('draft').values_list('pk',flat=True)
-            self.denormalized_initial_sb = ','.join(['%d'%pk for pk in si])
+            self.denormalized_initial_sb = self._denormalize_ballot(project, Ballot.SBInitial)
         if self.denormalized_recirc_sb is None or backlog.update_recirc_sb==True:
-            sr = project.ballot_set.filter(ballot_type='SR').order_by('draft').values_list('pk',flat=True)
-            self.denormalized_recirc_sb = ','.join(['%d'%pk for pk in sr])
+            self.denormalized_recirc_sb= self._denormalize_ballot(project, Ballot.SBRecirc)
         if commit:
             self.save()
     
+    def _denormalize_ballot(self,project,ballot_type):
+        wi=[]
+        for ballot in project.ballot_set.filter(ballot_type=ballot_type.code).order_by('draft'): #.only('number','draft','vote_for','vote_against','closed')
+            wi.append({ 'number':ballot.number, 'draft':str(ballot.draft), 'result':ballot.result, 'closed':ballot.closed.toordinal()})
+        return json.dumps(wi)
+        
     @property    
     def wg_ballots(self):
-        rv = self._get_ballots(self.denormalized_initial_wg)
-        rv += self._get_ballots(self.denormalized_recirc_wg)
+        rv = self._get_ballots(Ballot.WGInitial,self.denormalized_initial_wg)
+        rv += self._get_ballots(Ballot.WGRecirc,self.denormalized_recirc_wg)
         return rv
     
     @property    
     def initial_wg_ballots(self):
-        return self._get_ballots(self.denormalized_initial_wg)
+        return self._get_ballots(Ballot.WGInitial,self.denormalized_initial_wg)
     
     @property    
     def recirc_wg_ballots(self):
-        return self._get_ballots(self.denormalized_recirc_wg)
+        return self._get_ballots(Ballot.WGRecirc,self.denormalized_recirc_wg)
     
     @property    
     def sb_ballots(self):
-        return self._get_ballots(self.denormalized_initial_sb)+self._get_ballots(self.denormalized_recirc_sb)
+        return self._get_ballots(Ballot.SBInitial,self.denormalized_initial_sb)+self._get_ballots(Ballot.SBRecirc,self.denormalized_recirc_sb)
     
     @property    
     def initial_sb_ballots(self):
-        return self._get_ballots(self.denormalized_initial_sb)
+        return self._get_ballots(Ballot.SBInitial,self.denormalized_initial_sb)
     
     @property    
     def recirc_sb_ballots(self):
-        return self._get_ballots(self.denormalized_recirc_sb)
+        return self._get_ballots(Ballot.SBRecirc,self.denormalized_recirc_sb)
                                  
-    def _get_ballots(self,dfield):
+    def _get_ballots(self,ballot_type, dfield):
         if not dfield:
             return []
-        dfield = [pk for pk in dfield.split(',') if pk!='']
-        return list(DenormalizedBallot.objects.filter(pk__in=dfield).only('number','draft','result','closed'))
+        try:
+            return [BallotProxy(i) for i in json.loads(dfield)]
+        except ValueError:
+            try:
+                pbb = ProjectBallotsBacklog.objects.get(project_pk=self.project_pk)
+            except ProjectBallotsBacklog.DoesNotExist:
+                pbb = ProjectBallotsBacklog(project_pk=self.project_pk)
+            if ballot_type==Ballot.WGInitial:
+                pbb.update_initial_wg=True
+            elif ballot_type==Ballot.WGRecirc:
+                pbb.update_recirc_wg=True
+            elif ballot_type==Ballot.SBInitial:
+                pbb.update_initial_sb=True
+            else:
+                pbb.update_recirc_sb=True
+            pbb.save()
+            return []
 
 class ProjectBallotsBacklog(models.Model):
     project_pk = models.IntegerField(primary_key=True)

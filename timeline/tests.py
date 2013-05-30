@@ -93,6 +93,10 @@ class TestProjectsAndBallots(TimelineTestBase):
     PROJECT_COUNT = 37
     BALLOT_COUNT = 269
     
+    def _check_denormalized_project(self,ballots):
+        for b in ballots:
+            self.assertEqual(b.pk, b.number)
+            
     def test_denormalise(self):
         self.assertEqual(Project.objects.count(),self.PROJECT_COUNT)
         self.assertEqual(Ballot.objects.count(),self.BALLOT_COUNT)
@@ -113,6 +117,11 @@ class TestProjectsAndBallots(TimelineTestBase):
         self.assertEqual(len(dpb.recirc_wg_ballots),4)
         self.assertEqual(len(dpb.initial_sb_ballots),1)
         self.assertEqual(len(dpb.recirc_sb_ballots),6)
+        for dpb in DenormalizedProjectBallots.objects.all().iterator():
+            self._check_denormalized_project(dpb.initial_wg_ballots)
+            self._check_denormalized_project(dpb.recirc_wg_ballots)
+            self._check_denormalized_project(dpb.initial_sb_ballots)
+            self._check_denormalized_project(dpb.recirc_sb_ballots)
         self.test_html_export()
             
 class TestProjectsAndBallotsDN(TimelineTestBase):

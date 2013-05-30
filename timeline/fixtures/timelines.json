@@ -3,334 +3,334 @@
 		"pk": 38,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "160,162,163,167",
-			"denormalized_recirc_sb": "10089,10092,10094,10095,10098,10100",
-			"denormalized_initial_sb": "10085",
-			"denormalized_initial_wg": "149"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 160, \"closed\": 733780, \"result\": 89}, {\"draft\": \"3.00\", \"number\": 162, \"closed\": 733887, \"result\": 89}, {\"draft\": \"4.00\", \"number\": 163, \"closed\": 733948, \"result\": 89}, {\"draft\": \"5.00\", \"number\": 167, \"closed\": 734003, \"result\": 92}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"7.00\", \"number\": 10089, \"closed\": 734186, \"result\": 90}, {\"draft\": \"8.00\", \"number\": 10092, \"closed\": 734241, \"result\": 92}, {\"draft\": \"9.00\", \"number\": 10094, \"closed\": 734310, \"result\": 93}, {\"draft\": \"10.00\", \"number\": 10095, \"closed\": 734387, \"result\": 92}, {\"draft\": \"11.00\", \"number\": 10098, \"closed\": 734432, \"result\": 94}, {\"draft\": \"12.00\", \"number\": 10100, \"closed\": 734454, \"result\": 97}]",
+			"denormalized_initial_sb": "[{\"draft\": \"6.00\", \"number\": 10085, \"closed\": 734081, \"result\": 87}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 149, \"closed\": 733585, \"result\": 87}]"
 		}
 	}, {
 		"pk": 40,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "159,161,165,166",
-			"denormalized_recirc_sb": "10088,10090,10091,10093",
-			"denormalized_initial_sb": "10084",
-			"denormalized_initial_wg": "93,126,147"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 159, \"closed\": 733780, \"result\": 85}, {\"draft\": \"5.00\", \"number\": 161, \"closed\": 733877, \"result\": 89}, {\"draft\": \"6.00\", \"number\": 165, \"closed\": 733951, \"result\": 89}, {\"draft\": \"7.00\", \"number\": 166, \"closed\": 733997, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"8.00\", \"number\": 10088, \"closed\": 734147, \"result\": 96}, {\"draft\": \"9.00\", \"number\": 10090, \"closed\": 734201, \"result\": 95}, {\"draft\": \"10.00\", \"number\": 10091, \"closed\": 734236, \"result\": 97}, {\"draft\": \"11.00\", \"number\": 10093, \"closed\": 734264, \"result\": 97}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10084, \"closed\": 734077, \"result\": 95}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 93, \"closed\": 732682, \"result\": 48}, {\"draft\": \"2.00\", \"number\": 126, \"closed\": 733165, \"result\": 61}, {\"draft\": \"3.00\", \"number\": 147, \"closed\": 733531, \"result\": 79}]"
 		}
 	}, {
 		"pk": 55,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "172,176,180,181",
-			"denormalized_recirc_sb": "10099,10102,10104",
-			"denormalized_initial_sb": "10096",
-			"denormalized_initial_wg": "169"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 172, \"closed\": 734186, \"result\": 86}, {\"draft\": \"3.00\", \"number\": 176, \"closed\": 734253, \"result\": 89}, {\"draft\": \"4.00\", \"number\": 180, \"closed\": 734306, \"result\": 96}, {\"draft\": \"5.00\", \"number\": 181, \"closed\": 734353, \"result\": 96}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"6.00\", \"number\": 10099, \"closed\": 734439, \"result\": 96}, {\"draft\": \"7.00\", \"number\": 10102, \"closed\": 734484, \"result\": 100}, {\"draft\": \"8.00\", \"number\": 10104, \"closed\": 734506, \"result\": 100}, {\"draft\": \"10.00\", \"number\": 10114, \"closed\": 735019, \"result\": 0}]",
+			"denormalized_initial_sb": "[{\"draft\": \"5.00\", \"number\": 10096, \"closed\": 734389, \"result\": 95}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 169, \"closed\": 734072, \"result\": 81}]"
 		}
 	}, {
 		"pk": 59,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "10053,10052,10051,10050",
-			"denormalized_initial_sb": "10054",
-			"denormalized_initial_wg": "74,75,76,77"
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[{\"draft\": \"6.00\", \"number\": 10053, \"closed\": 732441, \"result\": 90}, {\"draft\": \"7.00\", \"number\": 10052, \"closed\": 732503, \"result\": 91}, {\"draft\": \"8.00\", \"number\": 10051, \"closed\": 732563, \"result\": 96}, {\"draft\": \"9.00\", \"number\": 10050, \"closed\": 732622, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"5.00\", \"number\": 10054, \"closed\": 732270, \"result\": 86}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 74, \"closed\": 732074, \"result\": 91}, {\"draft\": \"2.00\", \"number\": 75, \"closed\": 732144, \"result\": 94}, {\"draft\": \"3.00\", \"number\": 76, \"closed\": 732177, \"result\": 95}, {\"draft\": \"4.00\", \"number\": 77, \"closed\": 732208, \"result\": 96}]"
 		}
 	}, {
 		"pk": 64,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "137,142,148,152,156",
-			"denormalized_recirc_sb": "10013,10008,10005,10003,10087",
-			"denormalized_initial_sb": "10022",
-			"denormalized_initial_wg": "107,122,132"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 137, \"closed\": 733323, \"result\": 78}, {\"draft\": \"5.00\", \"number\": 142, \"closed\": 733458, \"result\": 82}, {\"draft\": \"6.00\", \"number\": 148, \"closed\": 733521, \"result\": 90}, {\"draft\": \"7.00\", \"number\": 152, \"closed\": 733577, \"result\": 88}, {\"draft\": \"8.00\", \"number\": 156, \"closed\": 733637, \"result\": 93}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"9.00\", \"number\": 10013, \"closed\": 733885, \"result\": 92}, {\"draft\": \"10.00\", \"number\": 10008, \"closed\": 733961, \"result\": 94}, {\"draft\": \"11.00\", \"number\": 10005, \"closed\": 733997, \"result\": 96}, {\"draft\": \"12.00\", \"number\": 10003, \"closed\": 734027, \"result\": 98}, {\"draft\": \"13.00\", \"number\": 10087, \"closed\": 734097, \"result\": 99}]",
+			"denormalized_initial_sb": "[{\"draft\": \"8.00\", \"number\": 10022, \"closed\": 733718, \"result\": 90}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 107, \"closed\": 732865, \"result\": 64}, {\"draft\": \"2.00\", \"number\": 122, \"closed\": 733116, \"result\": 70}, {\"draft\": \"3.00\", \"number\": 132, \"closed\": 733235, \"result\": 77}]"
 		}
 	}, {
 		"pk": 71,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "146,150,155",
-			"denormalized_recirc_sb": "10017,10014,10011,10009,10007,10002,10000,10001,10086",
-			"denormalized_initial_sb": "10021",
-			"denormalized_initial_wg": "108,123,133,140"
+			"denormalized_recirc_wg": "[{\"draft\": \"5.00\", \"number\": 146, \"closed\": 733501, \"result\": 83}, {\"draft\": \"6.00\", \"number\": 150, \"closed\": 733570, \"result\": 90}, {\"draft\": \"7.00\", \"number\": 155, \"closed\": 733626, \"result\": 92}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"9.00\", \"number\": 10017, \"closed\": 733820, \"result\": 84}, {\"draft\": \"10.00\", \"number\": 10014, \"closed\": 733875, \"result\": 87}, {\"draft\": \"11.00\", \"number\": 10011, \"closed\": 733933, \"result\": 92}, {\"draft\": \"12.00\", \"number\": 10009, \"closed\": 733960, \"result\": 94}, {\"draft\": \"13.00\", \"number\": 10007, \"closed\": 733981, \"result\": 98}, {\"draft\": \"14.00\", \"number\": 10002, \"closed\": 734009, \"result\": 98}, {\"draft\": \"15.00\", \"number\": 10000, \"closed\": 734063, \"result\": 98}, {\"draft\": \"15.00\", \"number\": 10001, \"closed\": 734045, \"result\": 98}, {\"draft\": \"16.00\", \"number\": 10086, \"closed\": 734091, \"result\": 98}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10021, \"closed\": 733718, \"result\": 81}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 108, \"closed\": 732918, \"result\": 63}, {\"draft\": \"2.00\", \"number\": 123, \"closed\": 733116, \"result\": 67}, {\"draft\": \"3.00\", \"number\": 133, \"closed\": 733236, \"result\": 69}, {\"draft\": \"4.00\", \"number\": 140, \"closed\": 733395, \"result\": 81}]"
 		}
 	}, {
 		"pk": 74,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "115,124,129,134,136,138",
-			"denormalized_recirc_sb": "10030,10029,10027,10023,10025",
-			"denormalized_initial_sb": "10032",
-			"denormalized_initial_wg": "84,97"
+			"denormalized_recirc_wg": "[{\"draft\": \"3.00\", \"number\": 115, \"closed\": 732976, \"result\": 85}, {\"draft\": \"4.00\", \"number\": 124, \"closed\": 733144, \"result\": 88}, {\"draft\": \"5.00\", \"number\": 129, \"closed\": 733205, \"result\": 90}, {\"draft\": \"6.00\", \"number\": 134, \"closed\": 733259, \"result\": 91}, {\"draft\": \"7.00\", \"number\": 136, \"closed\": 733315, \"result\": 94}, {\"draft\": \"7.00\", \"number\": 138, \"closed\": 733378, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"8.00\", \"number\": 10030, \"closed\": 733472, \"result\": 80}, {\"draft\": \"9.00\", \"number\": 10029, \"closed\": 733501, \"result\": 81}, {\"draft\": \"10.00\", \"number\": 10027, \"closed\": 733557, \"result\": 88}, {\"draft\": \"11.00\", \"number\": 10023, \"closed\": 733591, \"result\": 91}, {\"draft\": \"11.00\", \"number\": 10025, \"closed\": 733578, \"result\": 90}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10032, \"closed\": 733417, \"result\": 78}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 84, \"closed\": 732430, \"result\": 47}, {\"draft\": \"2.00\", \"number\": 97, \"closed\": 732744, \"result\": 83}]"
 		}
 	}, {
 		"pk": 76,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 77,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "192,195",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": "171,189"
+			"denormalized_recirc_wg": "[{\"draft\": \"3.00\", \"number\": 192, \"closed\": 734907, \"result\": 87}, {\"draft\": \"4.00\", \"number\": 195, \"closed\": 734975, \"result\": 92}]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 171, \"closed\": 734192, \"result\": 62}, {\"draft\": \"2.00\", \"number\": 189, \"closed\": 734734, \"result\": 79}]"
 		}
 	}, {
 		"pk": 78,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "174,177,183,185,186",
-			"denormalized_recirc_sb": "10108,10109,10110,10111,10112",
-			"denormalized_initial_sb": "10105",
-			"denormalized_initial_wg": "168"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 174, \"closed\": 734232, \"result\": 88}, {\"draft\": \"3.00\", \"number\": 177, \"closed\": 734289, \"result\": 92}, {\"draft\": \"4.00\", \"number\": 183, \"closed\": 734358, \"result\": 95}, {\"draft\": \"5.00\", \"number\": 185, \"closed\": 734416, \"result\": 94}, {\"draft\": \"5.00\", \"number\": 186, \"closed\": 734465, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"6.00\", \"number\": 10108, \"closed\": 734592, \"result\": 90}, {\"draft\": \"7.00\", \"number\": 10109, \"closed\": 734634, \"result\": 95}, {\"draft\": \"8.00\", \"number\": 10110, \"closed\": 734670, \"result\": 97}, {\"draft\": \"9.00\", \"number\": 10111, \"closed\": 734712, \"result\": 98}, {\"draft\": \"9.00\", \"number\": 10112, \"closed\": 734727, \"result\": 98}]",
+			"denormalized_initial_sb": "[{\"draft\": \"5.00\", \"number\": 10105, \"closed\": 734507, \"result\": 86}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 168, \"closed\": 734069, \"result\": 87}]"
 		}
 	}, {
 		"pk": 79,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "188,190,191,194",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "10113",
-			"denormalized_initial_wg": "178,187"
+			"denormalized_recirc_wg": "[{\"draft\": \"3.00\", \"number\": 188, \"closed\": 734679, \"result\": 91}, {\"draft\": \"4.00\", \"number\": 190, \"closed\": 734808, \"result\": 94}, {\"draft\": \"5.00\", \"number\": 191, \"closed\": 734900, \"result\": 95}, {\"draft\": \"5.00\", \"number\": 194, \"closed\": 734962, \"result\": 96}]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[{\"draft\": \"5.00\", \"number\": 10113, \"closed\": 734993, \"result\": 93}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 178, \"closed\": 734313, \"result\": 74}, {\"draft\": \"2.00\", \"number\": 187, \"closed\": 734551, \"result\": 89}]"
 		}
 	}, {
 		"pk": 80,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "170,173,175,179,182,184",
-			"denormalized_recirc_sb": "10101,10103,10106",
-			"denormalized_initial_sb": "10097",
-			"denormalized_initial_wg": "164"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 170, \"closed\": 734114, \"result\": 79}, {\"draft\": \"3.00\", \"number\": 173, \"closed\": 734192, \"result\": 81}, {\"draft\": \"4.00\", \"number\": 175, \"closed\": 734236, \"result\": 85}, {\"draft\": \"5.00\", \"number\": 179, \"closed\": 734305, \"result\": 90}, {\"draft\": \"6.00\", \"number\": 182, \"closed\": 734358, \"result\": 94}, {\"draft\": \"6.00\", \"number\": 184, \"closed\": 734380, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"7.00\", \"number\": 10101, \"closed\": 734467, \"result\": 96}, {\"draft\": \"8.00\", \"number\": 10103, \"closed\": 734504, \"result\": 99}, {\"draft\": \"9.00\", \"number\": 10106, \"closed\": 734529, \"result\": 100}]",
+			"denormalized_initial_sb": "[{\"draft\": \"6.00\", \"number\": 10097, \"closed\": 734422, \"result\": 93}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 164, \"closed\": 733963, \"result\": 78}]"
 		}
 	}, {
 		"pk": 111,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 113,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "143,153,157",
-			"denormalized_recirc_sb": "10016,10012,10010,10006,10004",
-			"denormalized_initial_sb": "10020",
-			"denormalized_initial_wg": "127,135,139"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 143, \"closed\": 733471, \"result\": 88}, {\"draft\": \"5.00\", \"number\": 153, \"closed\": 733581, \"result\": 92}, {\"draft\": \"6.00\", \"number\": 157, \"closed\": 733645, \"result\": 96}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"7.00\", \"number\": 10016, \"closed\": 733830, \"result\": 87}, {\"draft\": \"8.00\", \"number\": 10012, \"closed\": 733896, \"result\": 94}, {\"draft\": \"9.00\", \"number\": 10010, \"closed\": 733933, \"result\": 95}, {\"draft\": \"11.00\", \"number\": 10006, \"closed\": 733988, \"result\": 95}, {\"draft\": \"13.00\", \"number\": 10004, \"closed\": 734013, \"result\": 98}]",
+			"denormalized_initial_sb": "[{\"draft\": \"6.00\", \"number\": 10020, \"closed\": 733718, \"result\": 87}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 127, \"closed\": 733165, \"result\": 64}, {\"draft\": \"2.00\", \"number\": 135, \"closed\": 733274, \"result\": 66}, {\"draft\": \"3.00\", \"number\": 139, \"closed\": 733394, \"result\": 84}]"
 		}
 	}, {
 		"pk": 114,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "104,106,109,112,116",
-			"denormalized_recirc_sb": "10038,10036,10035,10034",
-			"denormalized_initial_sb": "10044",
-			"denormalized_initial_wg": "94"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 104, \"closed\": 732801, \"result\": 84}, {\"draft\": \"3.00\", \"number\": 106, \"closed\": 732847, \"result\": 91}, {\"draft\": \"4.00\", \"number\": 109, \"closed\": 732909, \"result\": 94}, {\"draft\": \"5.00\", \"number\": 112, \"closed\": 732962, \"result\": 96}, {\"draft\": \"6.00\", \"number\": 116, \"closed\": 733018, \"result\": 99}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"8.00\", \"number\": 10038, \"closed\": 733109, \"result\": 93}, {\"draft\": \"9.00\", \"number\": 10036, \"closed\": 733128, \"result\": 96}, {\"draft\": \"10.00\", \"number\": 10035, \"closed\": 733119, \"result\": 97}, {\"draft\": \"11.00\", \"number\": 10034, \"closed\": 733213, \"result\": 97}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10044, \"closed\": 733071, \"result\": 93}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 94, \"closed\": 732683, \"result\": 76}]"
 		}
 	}, {
 		"pk": 115,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "102,114,117,121,128",
-			"denormalized_recirc_sb": "10031,10028,10026,10024",
-			"denormalized_initial_sb": "10033",
-			"denormalized_initial_wg": "88"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 102, \"closed\": 732798, \"result\": 89}, {\"draft\": \"3.00\", \"number\": 114, \"closed\": 732968, \"result\": 92}, {\"draft\": \"4.00\", \"number\": 117, \"closed\": 733046, \"result\": 92}, {\"draft\": \"5.00\", \"number\": 121, \"closed\": 733092, \"result\": 95}, {\"draft\": \"6.00\", \"number\": 128, \"closed\": 733150, \"result\": 97}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"7.00\", \"number\": 10031, \"closed\": 733425, \"result\": 88}, {\"draft\": \"9.00\", \"number\": 10028, \"closed\": 733550, \"result\": 92}, {\"draft\": \"10.00\", \"number\": 10026, \"closed\": 733572, \"result\": 93}, {\"draft\": \"11.00\", \"number\": 10024, \"closed\": 733586, \"result\": 95}]",
+			"denormalized_initial_sb": "[{\"draft\": \"6.00\", \"number\": 10033, \"closed\": 733309, \"result\": 86}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 88, \"closed\": 732634, \"result\": 86}]"
 		}
 	}, {
 		"pk": 116,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "82,87,91,98,105",
-			"denormalized_recirc_sb": "10046,10040,10042",
-			"denormalized_initial_sb": "10048",
-			"denormalized_initial_wg": "79"
+			"denormalized_recirc_wg": "[{\"draft\": \"2.00\", \"number\": 82, \"closed\": 732405, \"result\": 88}, {\"draft\": \"3.00\", \"number\": 87, \"closed\": 732598, \"result\": 86}, {\"draft\": \"4.00\", \"number\": 91, \"closed\": 732649, \"result\": 92}, {\"draft\": \"5.00\", \"number\": 98, \"closed\": 732770, \"result\": 95}, {\"draft\": \"6.00\", \"number\": 105, \"closed\": 732840, \"result\": 97}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"8.00\", \"number\": 10046, \"closed\": 732956, \"result\": 90}, {\"draft\": \"9.00\", \"number\": 10040, \"closed\": 733073, \"result\": 97}, {\"draft\": \"9.00\", \"number\": 10042, \"closed\": 733058, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10048, \"closed\": 732918, \"result\": 86}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 79, \"closed\": 732315, \"result\": 81}]"
 		}
 	}, {
 		"pk": 117,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "141,144,151,154,158",
-			"denormalized_recirc_sb": "10018,10015",
-			"denormalized_initial_sb": "10019",
-			"denormalized_initial_wg": "81,92,110,125"
+			"denormalized_recirc_wg": "[{\"draft\": \"5.00\", \"number\": 141, \"closed\": 733381, \"result\": 85}, {\"draft\": \"6.00\", \"number\": 144, \"closed\": 733497, \"result\": 89}, {\"draft\": \"7.00\", \"number\": 151, \"closed\": 733571, \"result\": 85}, {\"draft\": \"8.00\", \"number\": 154, \"closed\": 733624, \"result\": 89}, {\"draft\": \"9.00\", \"number\": 158, \"closed\": 733690, \"result\": 93}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"10.00\", \"number\": 10018, \"closed\": 733819, \"result\": 96}, {\"draft\": \"11.00\", \"number\": 10015, \"closed\": 733869, \"result\": 99}]",
+			"denormalized_initial_sb": "[{\"draft\": \"9.00\", \"number\": 10019, \"closed\": 733733, \"result\": 93}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 81, \"closed\": 732412, \"result\": 59}, {\"draft\": \"2.00\", \"number\": 92, \"closed\": 732681, \"result\": 67}, {\"draft\": \"3.00\", \"number\": 110, \"closed\": 732931, \"result\": 74}, {\"draft\": \"4.00\", \"number\": 125, \"closed\": 733165, \"result\": 79}]"
 		}
 	}, {
 		"pk": 119,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "83,86,90,96,103",
-			"denormalized_recirc_sb": "10047,10045,10043,10039,10041,10037",
-			"denormalized_initial_sb": "10049",
-			"denormalized_initial_wg": "111,118,71,73,78"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 83, \"closed\": 732401, \"result\": 81}, {\"draft\": \"5.00\", \"number\": 86, \"closed\": 732570, \"result\": 85}, {\"draft\": \"6.00\", \"number\": 90, \"closed\": 732631, \"result\": 91}, {\"draft\": \"7.00\", \"number\": 96, \"closed\": 732720, \"result\": 92}, {\"draft\": \"7.00\", \"number\": 103, \"closed\": 732801, \"result\": 93}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"9.00\", \"number\": 10047, \"closed\": 732953, \"result\": 89}, {\"draft\": \"10.00\", \"number\": 10045, \"closed\": 733018, \"result\": 91}, {\"draft\": \"11.00\", \"number\": 10043, \"closed\": 733058, \"result\": 95}, {\"draft\": \"12.00\", \"number\": 10039, \"closed\": 733086, \"result\": 95}, {\"draft\": \"12.00\", \"number\": 10041, \"closed\": 733073, \"result\": 95}, {\"draft\": \"13.00\", \"number\": 10037, \"closed\": 733119, \"result\": 97}]",
+			"denormalized_initial_sb": "[{\"draft\": \"8.00\", \"number\": 10049, \"closed\": 732901, \"result\": 90}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 111, \"closed\": 732930, \"result\": 90}, {\"draft\": \"0.00\", \"number\": 118, \"closed\": 733046, \"result\": 100}, {\"draft\": \"1.00\", \"number\": 71, \"closed\": 731835, \"result\": 95}, {\"draft\": \"2.00\", \"number\": 73, \"closed\": 732020, \"result\": 86}, {\"draft\": \"3.00\", \"number\": 78, \"closed\": 732262, \"result\": 80}]"
 		}
 	}, {
 		"pk": 120,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "66,68",
-			"denormalized_recirc_sb": "10061",
-			"denormalized_initial_sb": "10062",
-			"denormalized_initial_wg": "56,64"
+			"denormalized_recirc_wg": "[{\"draft\": \"1.30\", \"number\": 66, \"closed\": 731651, \"result\": 94}, {\"draft\": \"1.40\", \"number\": 68, \"closed\": 731691, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"1.60\", \"number\": 10061, \"closed\": 731807, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"1.50\", \"number\": 10062, \"closed\": 731764, \"result\": 88}]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 56, \"closed\": 731347, \"result\": 68}, {\"draft\": \"1.20\", \"number\": 64, \"closed\": 731594, \"result\": 89}]"
 		}
 	}, {
 		"pk": 121,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "57,60,61,62",
-			"denormalized_recirc_sb": "10066,10065,10064",
-			"denormalized_initial_sb": "10067",
-			"denormalized_initial_wg": "35,52"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 57, \"closed\": 731372, \"result\": 78}, {\"draft\": \"5.00\", \"number\": 60, \"closed\": 731446, \"result\": 87}, {\"draft\": \"6.00\", \"number\": 61, \"closed\": 731497, \"result\": 92}, {\"draft\": \"7.00\", \"number\": 62, \"closed\": 731523, \"result\": 95}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"8.00\", \"number\": 10066, \"closed\": 731652, \"result\": 92}, {\"draft\": \"9.00\", \"number\": 10065, \"closed\": 731681, \"result\": 98}, {\"draft\": \"10.00\", \"number\": 10064, \"closed\": 731709, \"result\": 98}]",
+			"denormalized_initial_sb": "[{\"draft\": \"7.00\", \"number\": 10067, \"closed\": 731569, \"result\": 89}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 35, \"closed\": 730974, \"result\": 77}, {\"draft\": \"3.00\", \"number\": 52, \"closed\": 731227, \"result\": 76}]"
 		}
 	}, {
 		"pk": 122,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "42,48",
-			"denormalized_recirc_sb": "10068,10070",
-			"denormalized_initial_sb": "10077",
-			"denormalized_initial_wg": "29,36"
+			"denormalized_recirc_wg": "[{\"draft\": \"0.00\", \"number\": 42, \"closed\": 731094, \"result\": 90}, {\"draft\": \"2.20\", \"number\": 48, \"closed\": 731155, \"result\": 97}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"3.11\", \"number\": 10068, \"closed\": 731392, \"result\": 98}, {\"draft\": \"3.60\", \"number\": 10070, \"closed\": 731335, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"3.00\", \"number\": 10077, \"closed\": 731252, \"result\": 92}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 29, \"closed\": 730731, \"result\": 0}, {\"draft\": \"0.00\", \"number\": 36, \"closed\": 730975, \"result\": 76}]"
 		}
 	}, {
 		"pk": 123,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "49,54",
-			"denormalized_recirc_sb": "10072,10069",
-			"denormalized_initial_sb": "10074",
-			"denormalized_initial_wg": "33,41,50"
+			"denormalized_recirc_wg": "[{\"draft\": \"4.00\", \"number\": 49, \"closed\": 731155, \"result\": 87}, {\"draft\": \"6.10\", \"number\": 54, \"closed\": 731250, \"result\": 89}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"7.10\", \"number\": 10072, \"closed\": 731313, \"result\": 85}, {\"draft\": \"8.20\", \"number\": 10069, \"closed\": 731349, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"6.20\", \"number\": 10074, \"closed\": 731283, \"result\": 84}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 33, \"closed\": 730920, \"result\": 45}, {\"draft\": \"0.00\", \"number\": 41, \"closed\": 731094, \"result\": 83}, {\"draft\": \"5.00\", \"number\": 50, \"closed\": 731223, \"result\": 88}]"
 		}
 	}, {
 		"pk": 124,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "59,63,65,67",
-			"denormalized_recirc_sb": "10060,10059,10058,10057,10055,10056",
-			"denormalized_initial_sb": "10063",
-			"denormalized_initial_wg": "27,30,39,51"
+			"denormalized_recirc_wg": "[{\"draft\": \"5.00\", \"number\": 59, \"closed\": 731449, \"result\": 97}, {\"draft\": \"6.00\", \"number\": 63, \"closed\": 731569, \"result\": 89}, {\"draft\": \"7.00\", \"number\": 65, \"closed\": 731626, \"result\": 93}, {\"draft\": \"8.00\", \"number\": 67, \"closed\": 731650, \"result\": 94}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"9.00\", \"number\": 10060, \"closed\": 731824, \"result\": 87}, {\"draft\": \"10.00\", \"number\": 10059, \"closed\": 731862, \"result\": 92}, {\"draft\": \"11.00\", \"number\": 10058, \"closed\": 731896, \"result\": 95}, {\"draft\": \"12.00\", \"number\": 10057, \"closed\": 731938, \"result\": 96}, {\"draft\": \"13.00\", \"number\": 10055, \"closed\": 732052, \"result\": 99}, {\"draft\": \"13.00\", \"number\": 10056, \"closed\": 731995, \"result\": 96}]",
+			"denormalized_initial_sb": "[{\"draft\": \"8.00\", \"number\": 10063, \"closed\": 731731, \"result\": 85}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 27, \"closed\": 730620, \"result\": 0}, {\"draft\": \"0.00\", \"number\": 30, \"closed\": 730866, \"result\": 55}, {\"draft\": \"0.00\", \"number\": 39, \"closed\": 731033, \"result\": 49}, {\"draft\": \"4.00\", \"number\": 51, \"closed\": 731223, \"result\": 83}]"
 		}
 	}, {
 		"pk": 125,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "21,22",
-			"denormalized_recirc_sb": "10081",
-			"denormalized_initial_sb": "10083",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[{\"draft\": \"0.00\", \"number\": 21, \"closed\": 730214, \"result\": 0}, {\"draft\": \"0.00\", \"number\": 22, \"closed\": 730297, \"result\": 0}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"3.00\", \"number\": 10081, \"closed\": 730588, \"result\": 100}]",
+			"denormalized_initial_sb": "[{\"draft\": \"2.00\", \"number\": 10083, \"closed\": 730545, \"result\": 93}]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 126,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 127,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": "15"
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 15, \"closed\": 729702, \"result\": 0}]"
 		}
 	}, {
 		"pk": 128,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 129,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "38",
-			"denormalized_recirc_sb": "10078,10075,10073",
-			"denormalized_initial_sb": "10080",
-			"denormalized_initial_wg": "26,28,32"
+			"denormalized_recirc_wg": "[{\"draft\": \"0.00\", \"number\": 38, \"closed\": 731017, \"result\": 96}]",
+			"denormalized_recirc_sb": "[{\"draft\": \"4.10\", \"number\": 10078, \"closed\": 731203, \"result\": 95}, {\"draft\": \"5.00\", \"number\": 10075, \"closed\": 731263, \"result\": 97}, {\"draft\": \"6.00\", \"number\": 10073, \"closed\": 731313, \"result\": 98}]",
+			"denormalized_initial_sb": "[{\"draft\": \"4.00\", \"number\": 10080, \"closed\": 731151, \"result\": 88}]",
+			"denormalized_initial_wg": "[{\"draft\": \"0.00\", \"number\": 26, \"closed\": 730620, \"result\": 0}, {\"draft\": \"0.00\", \"number\": 28, \"closed\": 730731, \"result\": 0}, {\"draft\": \"0.00\", \"number\": 32, \"closed\": 730919, \"result\": 82}]"
 		}
 	}, {
 		"pk": 130,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "10071,10076",
-			"denormalized_initial_sb": "10079",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[{\"draft\": \"0.00\", \"number\": 10071, \"closed\": 731314, \"result\": 99}, {\"draft\": \"0.00\", \"number\": 10076, \"closed\": 731248, \"result\": 99}]",
+			"denormalized_initial_sb": "[{\"draft\": \"0.00\", \"number\": 10079, \"closed\": 731222, \"result\": 99}]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 334,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": "101"
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 101, \"closed\": 732812, \"result\": 76}]"
 		}
 	}, {
 		"pk": 343,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "10082",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[{\"draft\": \"1.50\", \"number\": 10082, \"closed\": 730588, \"result\": 98}]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 198001,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 244001,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": "193"
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[{\"draft\": \"1.00\", \"number\": 193, \"closed\": 734929, \"result\": 88}]"
 		}
 	}, {
 		"pk": 247001,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 251001,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}, {
 		"pk": 253001,
 		"model": "timeline.denormalizedprojectballots",
 		"fields": {
-			"denormalized_recirc_wg": "",
-			"denormalized_recirc_sb": "",
-			"denormalized_initial_sb": "",
-			"denormalized_initial_wg": ""
+			"denormalized_recirc_wg": "[]",
+			"denormalized_recirc_sb": "[]",
+			"denormalized_initial_sb": "[]",
+			"denormalized_initial_wg": "[]"
 		}
 	}
 ]

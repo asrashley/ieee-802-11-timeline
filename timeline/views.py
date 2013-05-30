@@ -82,7 +82,7 @@ def main_page(request, export=None):
             pd.ballots = DenormalizedProjectBallots.objects.get(project_pk=pd.pk)
         except DenormalizedProjectBallots.DoesNotExist:
             pd.ballots = DenormalizedProjectBallots(project_pk=pd.pk)
-            sys.stderr.write('Unable to find DenormalizedBallots for project %d\n'%pd.pk)
+            sys.stderr.write('Unable to find DenormalizedProjectBallots for project %d\n'%pd.pk)
             try:
                 pbb = ProjectBallotsBacklog.objects.get(project_pk=pd.pk)
             except ProjectBallotsBacklog.DoesNotExist:
