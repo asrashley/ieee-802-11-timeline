@@ -25,8 +25,7 @@ from util.db import bulk_delete
 from util.models import ImportProgress, SiteURLs
 from project.models import Project
 from report.models import MeetingReport
-from project.models import DenormalizedProject, ProjectBacklog
-from project.models import check_backlog as check_project_backlog 
+from project.models import DenormalizedProject, ProjectBacklog, check_project_backlog 
 from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
 from ballot.models import check_backlog as check_ballot_backlog 
 from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog, check_project_ballot_backlog
