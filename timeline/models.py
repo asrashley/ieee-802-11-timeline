@@ -95,19 +95,7 @@ class DenormalizedProjectBallots(models.Model):
         try:
             return [BallotProxy(i) for i in json.loads(dfield)]
         except ValueError:
-            try:
-                pbb = ProjectBallotsBacklog.objects.get(project_pk=self.project_pk)
-            except ProjectBallotsBacklog.DoesNotExist:
-                pbb = ProjectBallotsBacklog(project_pk=self.project_pk)
-            if ballot_type==Ballot.WGInitial:
-                pbb.update_initial_wg=True
-            elif ballot_type==Ballot.WGRecirc:
-                pbb.update_recirc_wg=True
-            elif ballot_type==Ballot.SBInitial:
-                pbb.update_initial_sb=True
-            else:
-                pbb.update_recirc_sb=True
-            pbb.save()
+            ProjectBallotsBacklog.request_update(self.project_pk, ballot_type)
             return []
 
 class ProjectBallotsBacklog(models.Model):
@@ -116,6 +104,22 @@ class ProjectBallotsBacklog(models.Model):
     update_recirc_wg = models.BooleanField(default=False)
     update_initial_sb = models.BooleanField(default=False)
     update_recirc_sb = models.BooleanField(default=False)
+
+    @classmethod    
+    def request_update(clz,project_pk,ballot_type=None):
+        try:
+            pbb = ProjectBallotsBacklog.objects.get(project_pk=project_pk)
+        except ProjectBallotsBacklog.DoesNotExist:
+            pbb = ProjectBallotsBacklog(project_pk=project_pk)
+        if ballot_type==Ballot.WGInitial:
+            pbb.update_initial_wg=True
+        elif ballot_type==Ballot.WGRecirc:
+            pbb.update_recirc_wg=True
+        elif ballot_type==Ballot.SBInitial:
+            pbb.update_initial_sb=True
+        elif ballot_type==Ballot.SBRecirc:
+            pbb.update_recirc_sb=True
+        pbb.save()
 
 def check_project_ballot_backlog(needs_update=False):
     if not needs_update:
