@@ -22,10 +22,12 @@
 
 from util.io import from_isodatetime, flatten
 from util.tasks import run_test_task_queue
-from ballot.models import Ballot
-from project.models import Project
-from report.models import MeetingReport
 from util.models import SiteURLs
+from util.db import bulk_delete
+from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
+from project.models import Project, DenormalizedProject, ProjectBacklog
+from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog
+from report.models import MeetingReport
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -34,6 +36,17 @@ from django.db.models.fields import URLField
 import datetime, decimal
 import unittest
 
+class LoginBasedTest(TestCase):    
+    def _check_page(self,url):
+        response = self.client.get(url)
+        # not logged in, should redirect to login page
+        self.failUnlessEqual(response.status_code, 302)
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+        response = self.client.get(url)
+        self.failUnlessEqual(response.status_code, 200)
+        return response
+        
 class UtilTest(unittest.TestCase):
     def test_from_isodatetime(self):
         """
@@ -73,11 +86,11 @@ class ImportPageTest(TestCase):
         tasks._test_task_queue = []
         tasks._completed_tasks = []
 
-    def _post_import(self,url,filename,length=0):
+    def _post_import(self,url,filename,length=0, wipe_projects=False, wipe_ballots=False):
         testfile = open(filename,'r')
         data = {
-                'wipe_projects' : False,
-                'wipe_ballots': False,
+                'wipe_projects' : wipe_projects,
+                'wipe_ballots': wipe_ballots,
                 'import' : 'Import',
                 'file' : testfile
                 }
@@ -102,6 +115,9 @@ class ImportPageTest(TestCase):
             response = self.client.get(progress_url)
             self.failUnlessEqual(response.status_code, 200)
             progress = response.context['progress']
+        done_url = reverse('util.views.import_done',args=[progress.pk])
+        response = self.client.get(done_url)
+        self.failUnlessEqual(response.status_code, 200)
         return response
         
 class ImportHtmlPageTest(ImportPageTest):
@@ -148,7 +164,8 @@ class ImportHtmlPageTest(ImportPageTest):
                                  (m._meta.verbose_name,m.objects.count(),tmodels[m]))
             counts[m] = m.objects.count()
             
-        # Check that a second attempt to import the data does not cause errors and does not add any new objects to the database
+        # Check that a second attempt to import the data does not cause errors 
+        # and does not add any new objects to the database
         response = self._post_import(url, self.SB_BALLOT_HTML)
         for m in tmodels.keys():
             self.failUnlessEqual(m.objects.count(),counts[m],msg='%s model had %d items, but after a second import has %d'%
@@ -156,7 +173,6 @@ class ImportHtmlPageTest(ImportPageTest):
      
 class ImportCsvPageTest(ImportPageTest):
     fixtures = ['site.json']
-    #TESTFILE = 'util/fixtures/timeline-2010-10-27-1146.csv' 
     TESTFILE = ('util/fixtures/timeline-2010-11-02-1439.csv' ,187)
     MODELS = [Ballot, Project]
     
@@ -198,12 +214,10 @@ class ImportCsvPageTest(ImportPageTest):
         
 class ImportCsvPageTest2(ImportCsvPageTest):
     fixtures = ['site.json','projects.json'] 
-    #TESTFILE = 'util/fixtures/ballots-2010-10-27-1410.csv' 
     TESTFILE = ('util/fixtures/ballots-2010-11-02-1439.csv',153)
      
 class ImportCsvPageTest3(ImportCsvPageTest):
     fixtures = ['site.json','projects.json'] 
-    #TESTFILE = 'util/fixtures/ballots-2010-10-27-1410.csv' 
     TESTFILE = ('util/fixtures/ballots-zero-fields.csv',3) 
     NOT_IDEMPOTENT = [Ballot]
     
@@ -212,6 +226,51 @@ class ImportCsvPageTest4(ImportCsvPageTest):
     TESTFILE = ('util/fixtures/timeline-2011-03-20-1740.csv', 384)
     MODELS = [Project, Ballot, MeetingReport]
     
+    def test_cancel_import(self):
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+        testfile = open(self.TESTFILE[0],'r')
+        data = {
+                'wipe_projects' : False,
+                'wipe_ballots': False,
+                'cancel' : 'Cancel',
+                'file' : testfile
+                }
+        url = reverse('util.views.import_page',args=[])
+        try:
+            response = self.client.post(url, data, follow=True)
+        except:
+            raise
+        finally:
+            testfile.close()
+        try:
+            progress = response.context['progress']
+            raise AssertionError('Cancelling import failed')
+        except KeyError:
+            pass
+        self.failUnlessEqual(response.redirect_chain[0][1],302)
+        
+class ImportCsvWipeTest(ImportPageTest):
+    fixtures = ['site.json','projects.json','ballots.json','timelines.json','reports.json']
+    TESTFILE = ('util/fixtures/timeline-2013-05-23-1708.csv', 452)
+    MODELS = [Project, Ballot, MeetingReport]
+    
+    def test_wipe_import(self):
+        self.assertEqual(Project.objects.count(),37)
+        self.assertEqual(Ballot.objects.count(),269)
+        self.assertEqual(MeetingReport.objects.count(),141)
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+        url = reverse('util.views.import_page',args=[])
+        response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1], wipe_projects=True, wipe_ballots=True)
+        self.assertEqual(len(response.context['projects']),Project.objects.count())
+        self.assertEqual(len(response.context['ballots']),Ballot.objects.count())
+        self.assertEqual(len(response.context['reports']),MeetingReport.objects.count())
+        self.assertEqual(len(response.context['errors']),0)
+        self.assertEqual(Project.objects.count(),37)
+        self.assertEqual(Ballot.objects.count(),269)
+        self.assertEqual(MeetingReport.objects.count(),141)
+        
 class MainPageTest(TestCase):
     fixtures = ['site.json']
     
@@ -225,7 +284,26 @@ class MainPageTest(TestCase):
         # Check some response details
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
+
+class UtilPagesTest(LoginBasedTest):
+    fixtures = ['site.json','projects.json','ballots.json']
+    
+    def test_util_index(self):
+        url = reverse('util.views.main_page')
+        self._check_page(url)
         
+    def test_update_page(self):
+        url = reverse('util.views.update_page')
+        bulk_delete(DenormalizedProjectBallots)
+        bulk_delete(DenormalizedBallot)
+        bulk_delete(DenormalizedProject)
+        response = self._check_page(url)
+        while BallotBacklog.objects.exists() or ProjectBacklog.objects.exists() or ProjectBallotsBacklog.objects.exists():
+            run_test_task_queue(self.client)
+        self.failUnlessEqual(Project.objects.count(),DenormalizedProject.objects.count())
+        self.failUnlessEqual(Ballot.objects.count(),DenormalizedBallot.objects.count())
+        self.failUnlessEqual(Project.objects.count(),DenormalizedProjectBallots.objects.count())
+
 class ExportDatabaseTest(TestCase):
     fixtures = ['site.json','projects.json', 'ballots.json', 'timelines.json', 'reports.json']
     
@@ -300,3 +378,8 @@ class EditUrlsPageTest(TestCase):
                 self.failIfEqual(a,dft)
                 if field.editable:
                     self.failUnlessEqual(a,post[field.attname])
+        del post['submit']
+        post['cancel']='Cancel'
+        post['timeline_history'] = 'http://example.domain.com/cancel/test'
+        self.client.post(url, post, follow=True)
+        self.failIfEqual(post['timeline_history'], new_urls.timeline_history)
