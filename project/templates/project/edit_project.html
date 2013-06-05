@@ -1,0 +1,15 @@
+{% extends "edit-object.html" %}
+{% block intro %}
+<p class="intro">To define a stand-alone standard, set the &quot;Document Type&quot;
+	field to &quot;Standard&quot;, the order field to zero and the baseline field to empty. </p>
+	<p class="intro">To define a revision standard that incorporates all the prior
+		amendments (e.g. REVmc), set the document type to &quot;Standard&quot;, the baseline
+		field to the standard that is being revised (e.g. 802-11 2012) and
+		the order field to a number that is greater than the number of incorporated
+		amendments.</p>
+		<p class="intro">To define an amendment, set the document type field to 
+			&quot;Amendment&quot;, the baseline field to the baseline standard 
+			(e.g. REVmc) and the order field to the amendment's publication order.
+			For example the first amendment to REVmc would have the baseline
+			field set to "REVmc" and the order field set to one.</p>
+{% endblock %}
