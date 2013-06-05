@@ -4,9 +4,11 @@ djangoappengine
 dbindexer
 djangotoolbox
 autoload
+htmlcov
 .gaedata
 .project
 .pydevproject
 .settings
+.coverage
 *.pyc
 *~
