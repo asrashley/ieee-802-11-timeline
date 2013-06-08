@@ -44,13 +44,21 @@ project_fields = ['pk', 'name', 'description', 'doc_type','par', 'task_group',
                   'withdrawn', 'history', 'wg_approved', 'ec_approved', 'published', 'slug']
 #project_fields = [ field.attname for field in Project._meta.fields]
 
-html_project_fields = ['name', 'doc_type','description', 'task_group',
+html_project_fields_actual = ['name', 'doc_type','description', 'task_group',
                   'doc_format', 'baseline', 'actual', 'par_date',
-                  'initial_wg_ballot_ver','initial_wg_ballot_date',
-                  'recirc_wg_ballot_ver', 'recirc_wg_ballot_date',
+                  'wg_ballot_ver','wg_ballot_date',
+                  'wg_ballot_result',
                   'sb_form_date', 'mec_date',
-                  'initial_sb_ballot_ver', 'initial_sb_ballot_date',
-                  'recirc_sb_ballot_ver', 'recirc_sb_ballot_date',
+                  'sb_ballot_ver', 'sb_ballot_date',
+                  'sb_ballot_result',
+                  'wg_approval_date', 'ec_approval_date',
+                  'revcom_approval_date','ansi_approval_date', 'withdrawn_date']
+
+html_project_fields_predicted = ['name', 'doc_type','description', 'task_group',
+                  'doc_format', 'baseline', 'actual', 'par_date',
+                  'initial_wg_ballot_date','recirc_wg_ballot_date',
+                  'sb_form_date', 'mec_date',
+                  'initial_sb_ballot_date', 'recirc_sb_ballot_date',
                   'wg_approval_date', 'ec_approval_date',
                   'revcom_approval_date','ansi_approval_date', 'withdrawn_date']
 
@@ -100,6 +108,9 @@ class Cache(object):
         self._pdict = {}
         #self._bdict = {}
         self._misc = {}
+        self._next_project_pk=1
+        for pk in Project.objects.all().values_list('pk',flat=True):
+            self._next_project_pk = max(self._next_project_pk,pk)
         
     def get(self,key):
         return self._misc[key]
@@ -115,10 +126,16 @@ class Cache(object):
         return self._pdict['pk-%d'%pk]
         
     def put_project(self,project):
-        self._pdict['pk-%d'%int(project.pk)] = project
+        if project.pk:
+            self._pdict['pk-%d'%int(project.pk)] = project
         self._pdict['task_group-%s'%project.task_group] = project
         self._pdict['name-%s'%project.name] = project
         
+    def get_next_project_pk(self):
+        rv = self._next_project_pk
+        self._next_project_pk += 1
+        return rv
+    
     def get_report(self,session):
         return self._misc['report-%03d'%int(session)]
     
@@ -179,6 +196,7 @@ def parse_projects_and_ballots(progress):
     #source = ImportLine.objects.all().order_by('line')
     handler = None
     model = None
+    html_project_re = re.compile('IEEE Project and Final Document')
     cache = Cache()
     last = LastObject(progress)
     for linenum in range(1,progress.linecount+1):
@@ -208,7 +226,7 @@ def parse_projects_and_ballots(progress):
             handler = import_ballot_v1
             last.set(None)
             continue
-        elif len(text)>1 and text[0]=='IEEE Project and Final Document':
+        elif len(text)>1 and html_project_re.search(text[0]):
             model = Project
             handler = import_html_project
             last.set(None)
@@ -229,7 +247,6 @@ def parse_projects_and_ballots(progress):
             last.set(None)
             continue
         if handler is None or model is None:
-            #print text
             continue
         try:
             o = handler(impline, last.get(), cache)
@@ -281,12 +298,37 @@ def is_section_header(item,section):
     return True
     #return item[:len(section)]==section
     
+def parse_ballot_dates(dates,results):
+    if not dates or not results:
+        return None,None
+    dates = dates.split(',')
+    results = [ r.replace('%','') for r in results.split(',')]
+    initial = dates[0]
+    recirc = None
+    for d,r in zip(dates,results):
+        try:
+            if recirc is None and int(r)>=75:
+                recirc = d
+        except ValueError:
+            pass
+    return initial,recirc
+    
 def import_html_project(item,last_project,cache):
-    entry = item.as_dict(html_project_fields)
+    entry = item.as_dict(html_project_fields_actual)
+    if not entry['actual']:
+        return None
     if entry['actual'].lower()=='actual':
+        #print 'entry',entry
         # Start of a project line
         # remove the "IEEE Std" from in front of the name, and any text after the name
         entry['name'] = entry['name'].split(' ')[2]
+        if ',' in entry['par_date']:
+            dates = entry['par_date'].split(',')
+            entry['par_date']=dates[0]
+            entry['par_expiry']=dates[-1] 
+            entry['par_expiry'] = entry['par_expiry'].replace('[]','')
+        else:
+            entry['par_expiry']=None
         try:
             p = Project.objects.get(name=entry['name'])            
         except Project.DoesNotExist:
@@ -294,16 +336,38 @@ def import_html_project(item,last_project,cache):
         p.description = entry['description']
         p.doc_type = entry['doc_type']
         set_date(p,'par_date', entry['par_date'])
+        if entry['par_expiry']:
+            set_date(p,'par_expiry', entry['par_expiry'])
         p.task_group = entry['task_group']
         p.doc_format = entry['doc_format']
         if entry['mec_date']:
             set_date(p, 'mec_date',entry['mec_date'])
             p.mec_completed = True
-        set_date(p,'initial_wg_ballot',entry['initial_wg_ballot_date'])
-        set_date(p,'recirc_wg_ballot',entry['recirc_wg_ballot_date'])
+            
+        #html_project_v2_fields_actual = ['name', 'doc_type','description', 'task_group',
+        #       'doc_format', 'baseline', 'actual', 'par_date',
+        #          'wg_ballot_ver','wg_ballot_date',
+        #          'wg_ballot_result',
+        #          'sb_form_date', 'mec_date',
+        #          'sb_ballot_ver', 'sb_ballot_date',
+        #          'sb_ballot_result',
+        #          'wg_approval_date', 'ec_approval_date',
+        #          'revcom_approval_date','ansi_approval_date', 'withdrawn_date']
+            
+        set_date_if_none(p,'initial_wg_ballot',entry['wg_ballot_date'])
+        if entry['wg_ballot_date']:
+            initial,recirc = parse_ballot_dates(entry['wg_ballot_date'],entry['wg_ballot_result'])
+            if p.initial_wg_ballot is None and initial is not None: 
+                set_date(p,'initial_wg_ballot',initial)
+            if p.recirc_wg_ballot is None and recirc is not None: 
+                set_date(p,'recirc_wg_ballot',recirc)
+        if entry['sb_ballot_date']:
+            initial,recirc = parse_ballot_dates(entry['sb_ballot_date'],entry['sb_ballot_result'])
+            if p.initial_sb_ballot is None and initial is not None: 
+                set_date(p,'initial_sb_ballot',initial)
+            if p.recirc_sb_ballot is None and recirc is not None: 
+                set_date(p,'recirc_sb_ballot',recirc)
         set_date(p,'sb_form_date',entry['sb_form_date'])
-        set_date(p,'initial_sb_ballot', entry['initial_sb_ballot_date'])
-        set_date(p,'recirc_sb_ballot', entry['recirc_sb_ballot_date'])
         set_date(p,'wg_approval_date', entry['wg_approval_date'])
         set_date(p,'ec_approval_date', entry['ec_approval_date'])
         set_date(p,'revcom_approval_date', entry['revcom_approval_date'])
@@ -311,11 +375,14 @@ def import_html_project(item,last_project,cache):
         set_date(p,'withdrawn_date','withdrawn_date')
         if p.withdrawn_date is not None and p.withdrawn_date.toordinal()<=datetime.datetime.utcnow().toordinal():
             p.withdrawn = True
+        if not p.pk:
+            p.pk = cache.get_next_project_pk()
         cache.put_project(p)
         return p
     if last_project is None:
         return None
     if entry['actual'].lower()=='predicted':
+        entry = item.as_dict(html_project_fields_predicted)
         p = last_project
         #p. = entry['initial_wg_ballot_ver']
         set_date(p,'initial_wg_ballot',entry['initial_wg_ballot_date'])
@@ -384,7 +451,7 @@ def import_html_letter_ballot(item,last_ballot,cache):
         set_date(b,'opened', entry['opened'])
         set_date(b,'closed', entry['closed'])
         if b.opened is None or b.closed is None:
-            raise Exception("Failed to find date")
+            raise Exception("Failed to find date in "+str(entry))
         comments = entry['comments'].lower() 
         if comments.find('recirculation')>=0:
             b.ballot_type = Ballot.WGRecirc.code
@@ -720,31 +787,53 @@ def from_isodatetime(date_time):
 
 
 date_hacks = [(re.compile('Apri[^l]'),'Apr '), (re.compile('Sept[^e]'),'Sep '),
-              (re.compile(r'(\w{3} \d{1,2} \d{4})\s*-\s*(.*$)'), r'\1 \2' ), 
-              (re.compile(r'(.+) (CT|EDT|ET)$'),r'\1')
+              (re.compile(r'(\w{3} \d{1,2},? \d{4})\s*-\s*(.*$)'), r'\1 \2' ), 
+              (re.compile(r'(\w{3} \d{1,2}), (\d{4}\s*\d{1,2}:\d{2})'), r'\1 \2' ), 
+              (re.compile(r'(\w{3})-(\d{2})$'), r'\1 \2' ), 
+              (re.compile(r'(.+) ([PCE][SD]?T)$'),r'\1')
               ]
 
-def set_date(obj,dest,date, format=None):
-    formats = ["%m/%d/%y", "%m/%d/%Y", "%b-%y", "%m/xx/%y", "%a %b %d %Y",
-               "%B %d %Y %H:%M", "%b %d %Y %H:%M", 
-               "%B %d %Y", "%b %d %Y"]
+def parse_date(date, format=None):
+    formats = ["%Y-%m-%d",  "%m/%d/%y", "%m/%d/%Y", "%b %y", "%m/xx/%y", "%a %b %d %Y",
+               "%B %d %Y %H:%M", "%b %d %Y %H:%M", "%b %d %Y %H:%M %Z", 
+               "%B %d %Y", "%b %d %Y",'%a %b %d, %Y']
     if format is not None:
         formats.insert(0,format)
     if date.__class__!=str:
         date = str(date)
+    d = date
+    tz = datetime.timedelta(0)
+    if re.match('.+\s+ES?T$',date):
+        tz = datetime.timedelta(hours=5)
+    elif re.match('.+\s+EDT$',date):
+        tz = datetime.timedelta(hours=4)
+    elif re.match('.+\s+PS?T$',date):
+        tz = datetime.timedelta(hours=8)
+    elif re.match('.+\s+PDT$',date):
+        tz = datetime.timedelta(hours=7)
     for regex,sub in date_hacks:
-        date = regex.sub(sub,date)
-    for format in formats:
+        d = regex.sub(sub,d)
+    for f in formats:
         try:
-            setattr(obj, dest, datetime.datetime.strptime(date, format))
-            return
+            rv = datetime.datetime.strptime(d, f)
+            rv += tz;
+            return rv
         except ValueError:
             pass
     try:
-        setattr(obj, dest, time.strptime(date))
-        return
+        return time.strptime(date)
     except ValueError:
         pass
+    return None
+
+def set_date(obj,dest,date, format=None):
+    date = parse_date(date,format)
+    if date is not None:
+        setattr(obj, dest, date)
+    
+def set_date_if_none(obj,dest,date, format=None):
+    if getattr(obj,dest) is None and date:
+        set_date(obj,dest,date,format)
     
 def as_int(v):
     try:

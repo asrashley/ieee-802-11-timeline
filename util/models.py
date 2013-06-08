@@ -138,6 +138,9 @@ class CacheImportLine(object):
         rv = ','.join(rv)
         return ''.join(['CacheImportLine(',rv,')'])
     
+    def __len__(self):
+        return 0 if self.text is None else len(self.text)
+        
     @classmethod
     def get(cls,line):
         key = 'imp%04d'%line
