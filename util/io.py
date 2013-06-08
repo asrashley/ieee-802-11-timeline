@@ -794,8 +794,8 @@ date_hacks = [(re.compile('Apri[^l]'),'Apr '), (re.compile('Sept[^e]'),'Sep '),
               ]
 
 def parse_date(date, format=None):
-    formats = ["%Y-%m-%d",  "%m/%d/%y", "%m/%d/%Y", "%b %y", "%m/xx/%y", "%a %b %d %Y",
-               "%B %d %Y %H:%M", "%b %d %Y %H:%M", "%b %d %Y %H:%M %Z", 
+    formats = ["%Y-%m-%d",  "%m/%d/%y", "%m/%d/%Y", "%b %Y", "%b %y", "%m/xx/%y",
+               "%a %b %d %Y", "%B %d %Y %H:%M", "%b %d %Y %H:%M",
                "%B %d %Y", "%b %d %Y",'%a %b %d, %Y']
     if format is not None:
         formats.insert(0,format)
