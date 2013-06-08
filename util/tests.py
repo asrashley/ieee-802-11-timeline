@@ -20,31 +20,41 @@
 #
 #############################################################################
 
-from util.io import from_isodatetime, flatten
+from util.io import from_isodatetime, flatten, parse_date
 from util.tasks import run_test_task_queue
 from util.models import SiteURLs
 from util.db import bulk_delete
+from util.views import import_page, import_progress
 from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
 from project.models import Project, DenormalizedProject, ProjectBacklog
 from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog
 from report.models import MeetingReport
 
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
+from django.contrib.auth import authenticate
 from django.db.models.fields import URLField
+from django.conf import settings
+from django.utils import http
 
 import datetime, decimal
 import unittest
 
 class LoginBasedTest(TestCase):    
-    def _check_page(self,url):
+    def setUp(self):
+        self.login = None
+        
+    def _check_page(self,url, status_code=200):
         response = self.client.get(url)
-        # not logged in, should redirect to login page
-        self.failUnlessEqual(response.status_code, 302)
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
+        if not self.login:
+            # not logged in, should redirect to login page
+            self.failUnlessEqual(response.status_code, 302)
+            self.assertRedirects(response,settings.LOGIN_URL+'?next='+http.urlquote(url))
+            self.login = self.client.login(username='test', password='password')
+            self.failUnless(self.login, 'Could not log in')
         response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
+        self.failUnlessEqual(response.status_code, status_code)
         return response
         
 class UtilTest(unittest.TestCase):
@@ -78,13 +88,35 @@ class UtilTest(unittest.TestCase):
             f = flatten(test[0])
             self.failUnlessEqual(f,test[1])
             
-class ImportPageTest(TestCase):
+    def test_date_parse(self):
+        dates = [
+                 ('2008-05-03', datetime.datetime(2008,5,3)), 
+                 ('05/30/06', datetime.datetime(2006,5,30)), 
+                 ('05/30/2006', datetime.datetime(2006,5,30)), 
+                 ('Mon Sep 27, 2010', datetime.datetime(2010,9,27)),
+                 ('Sep 16 2007 - 23:59 ET', datetime.datetime(2007,9,17,4,59)),
+                 ('October 16 2007 - 23:59 ET', datetime.datetime(2007,10,17,4,59)),
+                 ('May 2, 2007 - 23:59 ET', datetime.datetime(2007,5,3,4,59)),
+                 ('Sep-14', datetime.datetime(2014,9,1)),
+                 ('09/xx/14', datetime.datetime(2014,9,1)), 
+                 ('May 14', datetime.datetime(2014,5,1)), 
+                 ('Oct 2014', datetime.datetime(2014,10,1)), 
+                 ('October 7 2014', datetime.datetime(2014,10,7)) ,
+                 ('Jul 26 2013', datetime.datetime(2013,7,26)) 
+                 ]
+        for s,d in dates:
+            v = parse_date(s)
+            self.failIfEqual(v,None,s)
+            self.failUnlessEqual(v,d,s)
+                   
+            
+class ImportPageTest(LoginBasedTest):
     NOT_IDEMPOTENT = []
 
-    def setUp(self):
-        from util import tasks 
-        tasks._test_task_queue = []
-        tasks._completed_tasks = []
+    #def setUp(self):
+    #    super(ImportPageTest,self).setUp()
+    #    self.user = authenticate(username='test', password='password')
+    #    self.factory = RequestFactory()
 
     def _post_import(self,url,filename,length=0, wipe_projects=False, wipe_ballots=False):
         testfile = open(filename,'r')
@@ -96,23 +128,27 @@ class ImportPageTest(TestCase):
                 }
         try:
             response = self.client.post(url, data, follow=True)
+            #request = self.factory.post(url, data)
+            #request.user = self.user 
+            #response = import_page(request, next='/')
         except:
             raise
         finally:
             testfile.close()
+        #progress_url =  response.get('Location')
+        self.failUnlessEqual(response.redirect_chain[0][1],302)
         progress = response.context['progress']
         progress_url = reverse('util.views.import_progress',args=[progress.pk])
-        self.failUnlessEqual(response.redirect_chain[0][1],302)
         self.failUnless(response.redirect_chain[0][0].endswith(progress_url))
-        #print response.content
         #self.failIf(response.context['errors'])
-        #print response.content
         if length:
             self.assertContains(response, 'input file contains %d line'%length)
-        #self.assertContains(response, 'Finished Importing')
         while progress.finished is None:
             run_test_task_queue(self.client)
             response = self.client.get(progress_url)
+            #request = self.factory.get(progress_url)
+            #request.user = self.user 
+            #response = import_progress(request, progress.pk)
             self.failUnlessEqual(response.status_code, 200)
             progress = response.context['progress']
         done_url = reverse('util.views.import_done',args=[progress.pk])
@@ -120,30 +156,21 @@ class ImportPageTest(TestCase):
         self.failUnlessEqual(response.status_code, 200)
         return response
         
-class ImportHtmlPageTest(ImportPageTest):
+class ImportHtmlBallotTest(ImportPageTest):
     fixtures = ['site.json','projects.json']
     LB_BALLOT_HTML = 'util/fixtures/LetterBallots.htm'
     SB_BALLOT_HTML = 'util/fixtures/SponsorBallots.htm'
     
-    def test_html_import(self):
+    def test_ballot_import(self):
         """
         Tests import page
         """
-
         url = reverse('util.views.import_page',args=[])
-        response = self.client.get(url)
-        # not logged in, should redirect to login page
-        self.failUnlessEqual(response.status_code, 302)
-
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
+        response = self._check_page(url)
         self.assertContains(response, '<input type="submit" name="submit"')
         
         response = self._post_import(url, self.LB_BALLOT_HTML)
-
-        #print 'results',response.context['results']
+        print response
         counts = {}
         tmodels = { Ballot:0, Project: 0 }
         for m in tmodels.keys():
@@ -170,7 +197,23 @@ class ImportHtmlPageTest(ImportPageTest):
         for m in tmodels.keys():
             self.failUnlessEqual(m.objects.count(),counts[m],msg='%s model had %d items, but after a second import has %d'%
                                  (m._meta.verbose_name,counts[m],m.objects.count()))
-     
+            
+class ImportHtmlTimelineTest(ImportPageTest):
+    fixtures = ['site.json']
+    LB_BALLOT_HTML = 'util/fixtures/LetterBallots.htm'
+    SB_BALLOT_HTML = 'util/fixtures/SponsorBallots.htm'
+    TIMELINE_HTML = 'util/fixtures/Timelines.htm'
+    
+    def test_timeline_import(self):
+        """
+        Tests import page with a timelines.html
+        """
+        url = reverse('util.views.import_page',args=[])
+        self._check_page(url)
+        response = self._post_import(url, self.TIMELINE_HTML)
+        #print 'response',response
+        self.assertEqual(Project.objects.count(),37)
+
 class ImportCsvPageTest(ImportPageTest):
     fixtures = ['site.json']
     TESTFILE = ('util/fixtures/timeline-2010-11-02-1439.csv' ,187)
