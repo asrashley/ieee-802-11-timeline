@@ -20,7 +20,7 @@ DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
 AUTOLOAD_SITECONF = 'indexes'
 
 SITE_ID = 1
-APP_VERSION = 3.3
+APP_VERSION = 4.0
 
 if on_production_server==True:
     from production_server import SECRET_KEY 
