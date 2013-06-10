@@ -30,7 +30,7 @@
 	<ul>
 		<li><a href="{% url 'ballot.views.wg_page' %}">Working Group Ballots</a></li>
 		<li><a href="{% url 'ballot.views.sponsor_page' %}">Sponsor Ballots</a></li>
-		<li><a href="{% url 'timeline.views.add_project' %}?next={% url 'ballot.views.main_page' %}" title="Add project">Add project</a></li>
+		<li><a href="{% url 'project.views.add_project' %}?next={% url 'ballot.views.main_page' %}" title="Add project">Add project</a></li>
 		<li><a href="{% url 'ballot.views.add_ballot' %}?next={% url 'ballot.views.main_page' %}">Add Ballot</a></li>
 	</ul>
     </li>
@@ -43,7 +43,7 @@
     <li><a class="hide" href="{% url 'timeline.views.main_page' %}">Timeline</a>
 	<ul>
 		<li><a href="{% url 'timeline.views.main_page' %}">View Timeline</a></li>
-		<li><a href="{% url 'timeline.views.add_project' %}?next={% url 'timeline.views.main_page' %}" title="Add project">Add project</a></li>
+		<li><a href="{% url 'project.views.add_project' %}?next={% url 'timeline.views.main_page' %}" title="Add project">Add project</a></li>
 		<li><a href="{% url 'ballot.views.add_ballot' %}?next={% url 'timeline.views.main_page' %}">Add Ballot</a></li>
 	</ul>
     </li>
