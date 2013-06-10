@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% load url from future %}
 {% block content %}
 <div id="tools">
-<p class="heading">Letter Ballot tools</p>
+<p class="heading">Project tools</p>
 <ul>
-<li><a href="{% url ballot.views.wg_page %}">View and edit Working Group ballots</a></li>
-<li><a href="{% url ballot.views.sponsor_page %}">View and edit Sponsor Ballots</a></li>
-<li><a href="{% url ballot.views.add_ballot %}">Add a new ballot</a></li>
+<li><a href="{% url 'project.views.add_project' %}">Add a new project</a></li>
 </ul>
 </div>
 {% endblock %}
