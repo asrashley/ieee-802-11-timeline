@@ -66,17 +66,30 @@ class ProjectProxy(object):
 InProgress = Status(1,_('In Progress'))
 Published = Status(2, _('Published'))
 Withdrawn = Status(3, _('Withdrawn'))
+
+class DocType(object):
+    def __init__(self,code,descr):
+        self.code = code
+        self.description = descr
+        
+    def __str__(self):
+        return '%s'%self.description
+    
+    def __unicode__(self):
+        return self.description
   
 class AbstractProject(models.Model):
-    _PROJECT_TYPES = ( ( 'A', 'Amendment'),
-                       ( 'STD', 'Standard'),
-                       ( 'RP', 'Recommended Practice'),
-                       ( 'COR' , 'Corrigendum') )
+    Amendment = DocType('A', 'Amendment')
+    Standard = DocType('STD', 'Standard')
+    RecommendedPractice = DocType( 'RP', 'Recommended Practice')
+    Corrigendum = DocType( 'COR' , 'Corrigendum')
+    
+    _PROJECT_TYPES = [ (b.code,b.description) for b in Amendment, Standard, RecommendedPractice, Corrigendum] 
     MAX_AMENDMENTS = 20
     name = models.CharField(max_length=20, help_text=_('Name of standard/amendment (e.g. 802.11aa), WITHOUT year designation'))
     slug = models.SlugField(max_length=15, unique=True, editable=False, null=True, blank=True)
     description = models.CharField(max_length=100, help_text=_('Project Description'))
-    doc_type = models.CharField(max_length=4, choices=_PROJECT_TYPES, help_text='Amendment, Standard, Recommended Practice or Corrigendum')
+    doc_type = models.CharField("Document type", max_length=4, choices=_PROJECT_TYPES, help_text='Amendment, Standard, Recommended Practice or Corrigendum')
     par = models.URLField(null=False, blank=True, help_text=_('URL pointing to PAR document'))
     task_group = models.CharField(max_length=10, help_text=_('Name of task group (TG..)'))
     task_group_url = models.URLField(null=True, blank=True, help_text=_('URL pointing to TG status page'))
@@ -214,7 +227,7 @@ class DenormalizedProject(AbstractProject):
 class ProjectBacklog(models.Model):
     project_pk = models.IntegerField(primary_key=True)
 
-def check_backlog(needs_update=False):
+def check_project_backlog(needs_update=False):
     if not needs_update:
         needs_update = ProjectBacklog.objects.exists()
     if needs_update:
@@ -227,10 +240,14 @@ def add_to_backlog(sender, instance, **kwargs):
     b = ProjectBacklog(project_pk=instance.pk)
     b.save()
     if instance.baseline is not None:
-        for dproj in DenormalizedProject.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).iterator():
-            b = ProjectBacklog(project_pk=dproj.project.pk)
+        for p in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).iterator():
+            b = ProjectBacklog(project_pk=p.pk)
             b.save()
-    check_backlog(True)
+    if instance.doc_type==Project.Standard.code:
+        for p in Project.objects.filter(baseline=instance.pk).iterator():
+            b = ProjectBacklog(project_pk=p.pk)
+            b.save()
+    check_project_backlog(True)
 
 @receiver(pre_delete, sender=Project)
 def remove_project(sender, instance, **kwargs):
