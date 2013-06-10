@@ -21,6 +21,7 @@
 #############################################################################
 
 from ballot.models import Ballot, DenormalizedBallot
+from ballot.views import BallotForm
 from project.models import Project
 from util.tasks import run_test_task_queue
 
@@ -28,26 +29,21 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 import datetime
+from django.conf import settings
+from util.tests import LoginBasedTest
 
-class BallotBaseTest(TestCase):    
-    def _check_page(self,url):
-        response = self.client.get(url)
-        # not logged in, should redirect to login page
-        self.failUnlessEqual(response.status_code, 302)
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
-        return response
-        
-    def _check_ballot_page(self,url,export):
-        from django.conf import settings
+class BallotBaseTest(LoginBasedTest):            
+    def _check_ballot_page(self,url,export, redirect=False):
         static_url = settings.STATICFILES_URL
-        response = self._check_page(url)
+        status_code = 302 if redirect else 200
+        response = self._check_page(url, status_code)
+        if redirect:
+            url=response.get('Location')
+            response = self._check_page(url)
+        self.failUnlessEqual(response.status_code, 200)
         self.assertContains(response, 'ieeel.gif')
         response.content.index(static_url)
         response = self.client.get(export)
-        self.failUnlessEqual(response.status_code, 200)
         self.assertContains(response, 'ieeel.gif')
         self.failUnlessRaises(ValueError, response.content.index,static_url)
         return response
@@ -78,8 +74,10 @@ class BallotTest(BallotBaseTest):
         if days>0:
             self.assertContains(response,days, msg_prefix=prefix)            
                 
-    def test_wg(self):
+    def test_wg(self, params=None):
         url = reverse('ballot.views.wg_page',args=[])
+        if params is not None:
+            url += '?'+'&'.join(['%s=%s'%(k,str(v)) for k,v in params.iteritems()])
         export = ''.join([reverse('ballot.views.main_page',args=[]),'LetterBallots.html'])
         response = self._check_ballot_page(url, export)
         for ballot in Ballot.objects.all():
@@ -87,20 +85,38 @@ class BallotTest(BallotBaseTest):
                 self.assertContains(response,ballot.number, msg_prefix='WorkingGroup')
                 self.assertContains(response,ballot.project.task_group, msg_prefix='WorkingGroup')
                 self._check_ballot(ballot, response, 'WorkingGroup')
-        
-    def test_sponsor(self):
+                
+    def test_refresh_wg(self):
+        url = reverse('ballot.views.wg_page',args=[])
+        response = self._check_page(url+'?refresh=1', status_code=302)
+        run_test_task_queue(self.client)
+        response = self._check_page(url+'?redraw=0', status_code=302)
+        run_test_task_queue(self.client)
+        response = self._check_page(url+'?redraw=1', status_code=302)
+        run_test_task_queue(self.client)
+            
+    def test_sponsor(self, params=None,redirect=False):
         url = reverse('ballot.views.sponsor_page',args=[])
+        if params is not None:
+            url += '?'+'&'.join(['%s=%s'%(k,str(v)) for k,v in params.iteritems()])
         export = ''.join([reverse('ballot.views.main_page',args=[]),'SponsorBallots.html'])
-        response = self._check_ballot_page(url, export)
+        response = self._check_ballot_page(url, export, redirect=redirect)
         for ballot in Ballot.objects.all():
             if ballot.ballot_type==Ballot.SBInitial.code or ballot.ballot_type==Ballot.SBRecirc.code:
                 self.assertContains(response,ballot.project.name, msg_prefix='Sponsor')
                 self._check_ballot(ballot, response, 'Sponsor')
+        self.assertContains(response,'IEEE-SA SPONSOR BALLOTS AS RELATED TO IEEE 802.11 WG')
+                
+    def test_refresh_sb(self):
+        self.test_sponsor({'refresh':1}, redirect=True)
+        self.test_sponsor({'redraw':0}, redirect=True)
+        self.test_sponsor({'redraw':1}, redirect=True)
                 
 class BallotTestNoData(BallotBaseTest):
     fixtures = ['site.json']
     def test_main(self):
         url = reverse('ballot.views.main_page',args=[])
+        self._check_page(url+'?refresh=1', status_code=302)
         response = self._check_page(url)
         url = reverse('ballot.views.wg_page',args=[])
         self.assertContains(response,url)
@@ -108,11 +124,12 @@ class BallotTestNoData(BallotBaseTest):
         self.assertContains(response,url)
         url = reverse('ballot.views.add_ballot',args=[])
         self.assertContains(response,url)
+        self._check_page(url+'?refresh=1')
 
     def test_add_ballot(self):
         self.failUnlessEqual(Project.objects.count(),0)
         self.failUnlessEqual(Ballot.objects.count(),0)
-        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(name='test',order=0, doc_type='STD', description='ballot test', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
         self.failUnlessEqual(Project.objects.count(),1)
         url = reverse('ballot.views.add_ballot',args=[])
@@ -150,15 +167,43 @@ class BallotTestNoData(BallotBaseTest):
         response = self.client.post(url, data, follow=True)      
         self.failUnlessEqual(response.status_code, 200)
         self.failUnlessEqual(Ballot.objects.count(),1)
+        ballot = Ballot.objects.get(pk=123)
+        self.failUnless(ballot.is_wg_ballot)
+        self.failUnless(ballot.is_initial_ballot)
         
     def test_edit_ballot(self):
-        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(name='test',order=0, doc_type='STD', description='test edit ballot', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
-        bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
+        bal = Ballot(number=123,project=proj, ballot_type=Ballot.WGInitial.code, draft='1.0', opened=datetime.datetime.now(), pool=100)
         bal.closed = bal.opened + datetime.timedelta(days=15)
         bal.save()
         url = reverse('ballot.views.edit_ballot',args=[bal.number])
-        self._check_page(url)
+        response = self._check_page(url)
+        data = response.context['form'].initial
+        for key in data.keys():
+            if data[key] is None:
+                data[key] = ''
+        data['curpk'] = bal.pk
+        data['draft'] = '2.0'
+        data['submit']='Save'
+        form = BallotForm(data, instance=bal)
+        valid = form.is_valid()
+        self.failUnless(valid)
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        bal = Ballot.objects.get(pk=123)
+        self.failUnlessEqual(float(bal.draft),2.0)
+        # test renumbering the ballot, which should cause the old ballot object to be deleted
+        data['number'] = 125
+        form = BallotForm(data, instance=bal)
+        valid = form.is_valid()
+        self.failUnless(valid)
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        self.failUnlessEqual(Ballot.objects.count(),1)
+        bal = Ballot.objects.get(pk=125)
+        self.failUnlessRaises(Ballot.DoesNotExist,Ballot.objects.get,pk=123)
         
     def test_delete_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
