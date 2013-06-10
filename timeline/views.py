@@ -20,12 +20,9 @@
 #
 #############################################################################
 
-from project.models import Project, InProgress, Published, Withdrawn
-from project.models import DenormalizedProject, ProjectBacklog
-from project.models import check_backlog as check_project_backlog
+from project.models import Project, InProgress, Published, Withdrawn, DenormalizedProject, ProjectBacklog, check_project_backlog
 from timeline.models import ProjectBallotsBacklog, DenormalizedProjectBallots, check_project_ballot_backlog 
 from util.cache import CacheControl
-from util.forms import DateModelForm
 from util.db import bulk_delete
 
 from django.template import RequestContext
@@ -34,7 +31,6 @@ from django import forms,http
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
-from django.views.generic import create_update
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.decorators import login_required
@@ -42,16 +38,6 @@ from django.http import HttpResponse
 
 import datetime, sys
 from operator import attrgetter
-
-class ProjectForm(DateModelForm):
-    curstat = forms.IntegerField(widget=forms.HiddenInput)
-    base = forms.ModelChoiceField(label='Baseline',queryset=Project.objects.filter(doc_type='STD'),
-                                  required=False,
-                                  help_text='Baseline standard. (NOTE-Amendment ordering will be automatically calculated via ordering)')
-            
-    class Meta:
-        model = Project
-        exclude=('baseline',)
 
 @login_required
 def main_page(request, export=None):
@@ -106,55 +92,6 @@ def main_page(request, export=None):
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
     return render_to_response('timeline/index.html', context, context_instance=context_instance)
-
-@login_required
-def add_project(request):
-    return edit_project(request,proj=None)
-
-@login_required
-def edit_project(request,proj):
-    context = {}
-    context.update(csrf(request))
-    check_project_backlog()
-    next_page = request.GET.get('next','/')
-    if proj is None:
-        project = Project()
-    else:
-        project = get_object_or_404(Project,pk=proj)
-    if request.method == 'POST':
-        if request.POST.has_key('cancel'):
-            return http.HttpResponseRedirect(next_page)
-        if request.POST.has_key('delete'):
-            return http.HttpResponseRedirect(reverse('timeline.views.del_project',args=[proj])+'?next='+next_page)
-        form = ProjectForm(request.POST, request.FILES, instance=project)
-        if form.is_valid():
-            data = form.cleaned_data
-            p = form.save(commit=False)
-            if data['base'] is None:
-                p.baseline = None
-            else:
-                p.baseline = data['base'].pk
-            
-            p.save()
-            if data['curstat']!=project.status.id:
-                cc = CacheControl()
-                if InProgress.id==data['curstat']:
-                    cc.in_progress_ver = cc.in_progress_ver+1
-                if Published.id==data['curstat']:
-                    cc.published_ver = cc.published_ver+1
-                if Withdrawn.id==data['curstat']:
-                    cc.withdrawn_ver = cc.withdrawn_ver+1
-            return http.HttpResponseRedirect(next_page)
-    else:
-        form = ProjectForm(instance=project, initial={'base':project.baseline,'curstat':project.status.id})
-    context['form'] = form
-    context['object'] = project
-    return render_to_response('edit-object.html',context, context_instance=RequestContext(request))
-
-@login_required
-def del_project(request,proj):
-    return create_update.delete_object(request, model=Project, object_id=proj,
-                                       post_delete_redirect=request.GET.get('next','/'))
 
 @login_required
 def backlog_poll(request):
