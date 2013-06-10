@@ -24,13 +24,8 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import testbed
 from djangoappengine.db.stubs import stub_manager
  
-import time, sys
+import time
 
-class TaskProxy(object):
-    def __init__(self,name,url):
-        self.name = name
-        self.url = url
-    
 def add_task(name, url, queue_name='background-processing', countdown=None):
     #sys.stderr.write('a'.join([name,' - ',url,'\n']))
     try:
