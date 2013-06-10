@@ -24,7 +24,7 @@ from HTMLParser import HTMLParser
 import StringIO
 
 def clean(string):
-    okchars=' /.-_:?=()%&'
+    okchars=' /,;.-_:?=()%&[]'
     return ''.join([s for s in string if s.isalnum() or s in okchars])
             
 class TableRow(object):
@@ -84,6 +84,8 @@ class TableHTMLParser(HTMLParser):
             for k,v in attrs:
                 if k=='rowspan':
                     self.rowspan[self.x] = (self.y+1,self.y+int(v)-1)
+        elif tag=='br':
+            self.item.write(',')
 
     def handle_data(self,data):
         if self.item is not None:
@@ -107,3 +109,12 @@ class TableHTMLParser(HTMLParser):
             self.row = None
             self.y += 1
         
+    def handle_entityref(self,name):
+        if not self.active:
+            return
+        if name=='nbsp':
+            self.item.write(' ')
+        if name=='lt':
+            self.item.write('<')
+        if name=='gt':
+            self.item.write('>')
