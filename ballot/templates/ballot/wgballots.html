@@ -65,7 +65,7 @@
       {% if not export %}<a href="{% url ballot.views.edit_ballot lb.number %}?next={{next_page|escape}}">{%endif%}{{lb.number}}
       	{% if not export %}</a>{%endif%}
       </td>
-      <td rowspan="7">{% if not export %}<a href="{% url timeline.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif%}
+      <td rowspan="7">{% if not export %}<a href="{% url project.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif%}
       	{{lb.task_group}}{% if not export %}</a>{%endif%}</td>
       <td rowspan="7">{{lb.description}} {{lb.task_group}}{% if lb.draft %} Draft {{lb.draft}}{% endif %}</td>
       <td rowspan="7"><a href="{{lb.instructions_url}}">LB# {{lb.number}}</a></td>
