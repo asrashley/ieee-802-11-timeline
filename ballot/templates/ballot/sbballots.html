@@ -46,7 +46,7 @@
   <tbody>
   {% for lb in ballots %}
   <tr>
-  <td rowspan="2">{% if not export %}<a href="{% url timeline.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif %}
+  <td rowspan="2">{% if not export %}<a href="{% url project.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif %}
   {{lb.project_name}}{% if not export %}</a>{%endif %}</td>
   <td rowspan="2">{% if not export %}<a href="{% url ballot.views.edit_ballot lb.pk %}?next={{next_page|escape}}">{%endif %}D{{lb.draft}}
   {% if not export %}</a>{%endif %}</td>
