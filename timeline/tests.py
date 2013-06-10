@@ -55,6 +55,7 @@ class TimelineTestBase(TestCase):
         self.assertContains(response,static_url)
         if DenormalizedProject.objects.exists():
             for proj in Project.objects.all().iterator():
+                self.assertContains(response, reverse('project.views.edit_project',args=[proj.pk]))
                 for field in ['name','description', 'task_group', 'task_group_url','doc_version']: #proj._meta.fields:
                     value = getattr(proj,field)
                     if value:
@@ -62,6 +63,7 @@ class TimelineTestBase(TestCase):
         if DenormalizedProjectBallots.objects.exists() and DenormalizedBallot.objects.exists():            
             for ballot in DenormalizedBallot.objects.all().iterator():
                 if ballot.ballot_type!=Ballot.Procedural.code:
+                    self.assertContains(response, reverse('ballot.views.edit_ballot',args=[ballot.pk]))
                     for field in ['draft','closed','result']:
                         value = getattr(ballot,field)
                         if value:
