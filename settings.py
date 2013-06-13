@@ -5,7 +5,11 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DATABASES['native'] = DATABASES['default']
-DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
+DATABASES['default'] = {
+                        'ENGINE': 'dbindexer',
+                        'TARGET': 'native',
+                        'HIGH_REPLICATION':True
+                        }
 
 #DATABASES = {
 #    'native': {
@@ -19,6 +23,9 @@ DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
 #}
 AUTOLOAD_SITECONF = 'indexes'
 
+# People who get code error notifications.
+ADMINS = ( ('Alex Ashley', 'webmaster@digital-video.org.uk'))
+
 SITE_ID = 1
 APP_VERSION = 4.0
 
@@ -27,12 +34,25 @@ if on_production_server==True:
 else:
     SECRET_KEY = '=r-$b*8hglm+858&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
     DEBUG = True
+    DATABASES['default']['DEV_APPSERVER_OPTIONS']= {      
+                                                  'use_sqlite': True,
+                                                  #'port_sqlite_data':True
+                                                  }
     
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-USE_I18N = False
-USE_L10N = True
 USE_TZ = False
+# First day of week, to be used on calendars
+# 0 means Sunday, 1 means Monday...
+FIRST_DAY_OF_WEEK = 1
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = False
+
+# If you set this to True, Django will format dates, numbers and calendars
+# according to user current locale.
+USE_L10N = False
 
 INSTALLED_APPS = (
                   'django.contrib.contenttypes',
