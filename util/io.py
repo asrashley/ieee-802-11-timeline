@@ -344,16 +344,6 @@ def import_html_project(item,last_project,cache):
             set_date(p, 'mec_date',entry['mec_date'])
             p.mec_completed = True
             
-        #html_project_v2_fields_actual = ['name', 'doc_type','description', 'task_group',
-        #       'doc_format', 'baseline', 'actual', 'par_date',
-        #          'wg_ballot_ver','wg_ballot_date',
-        #          'wg_ballot_result',
-        #          'sb_form_date', 'mec_date',
-        #          'sb_ballot_ver', 'sb_ballot_date',
-        #          'sb_ballot_result',
-        #          'wg_approval_date', 'ec_approval_date',
-        #          'revcom_approval_date','ansi_approval_date', 'withdrawn_date']
-            
         set_date_if_none(p,'initial_wg_ballot',entry['wg_ballot_date'])
         if entry['wg_ballot_date']:
             initial,recirc = parse_ballot_dates(entry['wg_ballot_date'],entry['wg_ballot_result'])
@@ -684,14 +674,17 @@ def import_html_report(item,last_report,cache):
             report = MeetingReport(session=session, venue=entry['Location'], location=entry['Place'])
     year = int(cache.get('repyear'))
     month = entry['Month']
+    entry['Date'] = re.sub(r'(st|nd|rd|th)','',str(entry['Date']))
     start,end = entry['Date'].split('-')
     if '/' in month:
         sm,em = month.split('/')
-        set_date(report,'start','%s %s %d'%(sm,start,year))
-        set_date(report,'end','%s %s %d'%(em,end,year))
+        start='%s %s %d'%(sm.strip(),start.strip(),year)
+        end='%s %s %d'%(em.strip(),end.strip(),year)
     else:
-        set_date(report,'start','%s %s %d'%(month,start,year))
-        set_date(report,'end','%s %s %d'%(month,end,year))
+        start = '%s %s %d'%(month.strip(),start.strip(),year)
+        end = '%s %s %d'%(month.strip(),end.strip(),year)
+    set_date(report,'start',start)
+    set_date(report,'end',end)
     if entry['Type'].lower().find('plenary')>=0:
         report.meeting_type = MeetingReport.Plenary.code
     elif entry['Type'].lower().find('interim')>=0:
