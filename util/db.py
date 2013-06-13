@@ -24,8 +24,8 @@
 '''
 def bulk_delete(model, query=None):
     if query is None:
-        query = model.objects.all()
-    pks = query.values_list('pk',flat=True)
+        query = model.objects
+    pks = list(query.values_list('pk',flat=True))
     while pks:
         batch = pks[:30]
         pks = pks[30:]
