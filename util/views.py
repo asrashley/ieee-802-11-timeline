@@ -26,11 +26,10 @@ from util.models import ImportProgress, SiteURLs
 from project.models import Project
 from report.models import MeetingReport
 from project.models import DenormalizedProject, ProjectBacklog, check_project_backlog 
-from ballot.models import Ballot, DenormalizedBallot, BallotBacklog
-from ballot.models import check_backlog as check_ballot_backlog 
+from ballot.models import Ballot, DenormalizedBallot, BallotBacklog, check_ballot_backlog
 from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog, check_project_ballot_backlog
 
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
