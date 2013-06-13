@@ -20,13 +20,14 @@
 #
 #############################################################################
 
-import datetime
+import datetime, re, json
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test.client import RequestFactory
+from django.contrib.auth import authenticate
 
-from project.models import Project, DenormalizedProject
-from project.views import ProjectForm
+from project.models import Project, DenormalizedProject, ProjectBacklog, InProgress
+from project.views import ProjectForm, backlog_poll
 from util.tasks import run_test_task_queue 
 from util.tests import LoginBasedTest
 
@@ -35,7 +36,7 @@ class ProjectTest(LoginBasedTest):
                     
     def test_add_remove_project(self):
         self.failUnlessEqual(Project.objects.count(),0)
-        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(name='test',order=0, doc_type='STD', description='test_add_remove_project', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
         self.failUnlessEqual(Project.objects.count(),1)
         run_test_task_queue(self.client)
@@ -112,7 +113,7 @@ class ProjectTest(LoginBasedTest):
                 'ansi_approval_date':'',
                 'withdrawn_date':'',
                 'base':'',
-                'curstat': response.context['form'].initial['curstat'],
+                'curstat': InProgress.id,
                 'submit':'Save'
                 }
         # This should fail because the data is for an amendment without a baseline
@@ -125,9 +126,11 @@ class ProjectTest(LoginBasedTest):
         mc = Project.objects.all()[0]
         TGak['base'] = mc.pk
         self.assertEqual(float(mc.doc_version),TGmc['doc_version'])
-        response = self.client.post(url, TGmc, follow=True)      
+        response = self.client.post(url, TGak, follow=True)      
         self.failUnlessEqual(response.status_code, 200)
         self.failUnlessEqual(Project.objects.count(),2)
+        proj_ak = Project.objects.get(name='802.11ak')
+        self.assertEqual(proj_ak.baseline_name(), TGmc['name'] )
         TGak['name']='cancel test'
         TGak['task_group']='TGt'
         del TGak['submit']
@@ -157,13 +160,11 @@ class ProjectTest(LoginBasedTest):
         self.failUnlessEqual(proj.name,'newname')
         
     def test_delete_project(self):
-        proj = Project(pk=123, name='test',order=0, doc_type=Project.Standard.code, description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(pk=123, name='test',order=0, doc_type=Project.Standard.code, \
+                       description='delete test', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
         url = reverse('project.views.main_page',args=[])
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
+        response = self._check_page(url)
         self.failUnlessEqual(Project.objects.count(),1)
         run_test_task_queue(self.client)
         self.failUnlessEqual(Project.objects.count(),1)
@@ -172,3 +173,51 @@ class ProjectTest(LoginBasedTest):
         Project.objects.filter(pk=proj.pk).delete()
         run_test_task_queue(self.client)
         self.failUnlessRaises(DenormalizedProject.DoesNotExist, DenormalizedProject.objects.get, pk=123)
+        proj = Project(pk=235, name='test',order=0, doc_type=Project.Standard.code, \
+                       description='delete test 2', task_group='TGx', par_date=datetime.datetime.now())
+        proj.save()
+        run_test_task_queue(self.client)
+        DenormalizedProject.objects.get(pk=proj.pk)
+        url = reverse('project.views.edit_project',args=[proj.pk])
+        response = self._check_page(url)
+        data = response.context['form'].initial
+        for key in data.keys():
+            if data[key] is None:
+                data[key] = ''
+        data['delete']='Delete'
+        form = ProjectForm(data, instance=proj)
+        valid = form.is_valid()
+        self.failUnless(valid)
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        url = response.get('Location')
+        response = self._check_page(url)
+        match = re.search(r'input type="submit" name="confirm"', str(response), re.IGNORECASE)
+        self.assertTrue(match)
+        data = {"confirm":"Yes, I'm sure"}
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        self.failUnlessEqual(Project.objects.count(),0)
+        
+    def test_refresh(self):
+        proj = Project(pk=123, name='test',order=0, doc_type=Project.Standard.code, \
+                       description='refresh test', task_group='TGx', par_date=datetime.datetime.now())
+        proj.save()
+        url = reverse('project.views.main_page',args=[])+'?refresh=1'
+        self._check_page(url, status_code=302)
+        self.failUnlessEqual(Project.objects.count(),1)
+        self.failUnlessEqual(ProjectBacklog.objects.count(),1)
+        poll_url = reverse('project.views.backlog_poll',args=[])
+        request = self.get_request(poll_url)
+        poll = backlog_poll(request)
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],True)
+        self.failUnlessEqual(status['count'],0)
+        run_test_task_queue(self.client)
+        request = self.get_request(poll_url)
+        poll = backlog_poll(request)
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],False)
+        self.failUnlessEqual(Project.objects.count(),1)
+        self.failUnlessEqual(status['count'],Project.objects.count())
+        DenormalizedProject.objects.get(pk=proj.pk)

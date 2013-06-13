@@ -20,17 +20,17 @@
 #
 #############################################################################
 
-from ballot.models import Ballot, DenormalizedBallot
-from ballot.views import BallotForm
+from ballot.models import Ballot, DenormalizedBallot, check_ballot_backlog
+from ballot.views import BallotForm, backlog_poll
 from project.models import Project
 from util.tasks import run_test_task_queue
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-import datetime
+import datetime, re, json
 from django.conf import settings
 from util.tests import LoginBasedTest
+from util.db import bulk_delete
 
 class BallotBaseTest(LoginBasedTest):            
     def _check_ballot_page(self,url,export, redirect=False):
@@ -88,11 +88,25 @@ class BallotTest(BallotBaseTest):
                 
     def test_refresh_wg(self):
         url = reverse('ballot.views.wg_page',args=[])
+        bulk_delete(DenormalizedBallot)
+        self.failUnlessEqual(DenormalizedBallot.objects.count(),0)
+        poll_url = reverse('ballot.views.backlog_poll',args=[])
         response = self._check_page(url+'?refresh=1', status_code=302)
+        poll = backlog_poll(self.get_request(poll_url))
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],True)
+        self.failUnlessEqual(status['count'],0)
+        check_ballot_backlog()
         run_test_task_queue(self.client)
+        poll = backlog_poll(self.get_request(poll_url))
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],False)
+        self.failUnlessEqual(status['count'],Ballot.objects.count())
         response = self._check_page(url+'?redraw=0', status_code=302)
         run_test_task_queue(self.client)
         response = self._check_page(url+'?redraw=1', status_code=302)
+        run_test_task_queue(self.client)
+        response = self._check_page(url+'?redraw=badNumber', status_code=302)
         run_test_task_queue(self.client)
             
     def test_sponsor(self, params=None,redirect=False):
@@ -111,6 +125,11 @@ class BallotTest(BallotBaseTest):
         self.test_sponsor({'refresh':1}, redirect=True)
         self.test_sponsor({'redraw':0}, redirect=True)
         self.test_sponsor({'redraw':1}, redirect=True)
+        self.test_sponsor({'redraw':'badNumber'}, redirect=True)
+        
+    def test_refresh_main(self):
+        url = reverse('ballot.views.main_page',args=[])
+        self._check_page(url+'?refresh=1', status_code=302)
                 
 class BallotTestNoData(BallotBaseTest):
     fixtures = ['site.json']
@@ -206,20 +225,20 @@ class BallotTestNoData(BallotBaseTest):
         self.failUnlessRaises(Ballot.DoesNotExist,Ballot.objects.get,pk=123)
         
     def test_delete_ballot(self):
-        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(name='test',order=0, doc_type='STD', \
+                       description='test_delete_ballot', task_group='TGx', \
+                       par_date=datetime.datetime.now())
         proj.save()
-        bal = Ballot(number=123,project=proj, draft='1.0', opened=datetime.datetime.now(), pool=100)
+        bal = Ballot(number=123,project=proj, draft='1.0', \
+                     opened=datetime.datetime.now(), pool=100, \
+                     ballot_type=Ballot.WGInitial.code)
         bal.closed = bal.opened + datetime.timedelta(days=15)
         bal.save()
         self.failUnlessEqual(bal.pk,123)
         self.failUnlessEqual(Ballot.objects.count(),1)
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
         url = reverse('ballot.views.main_page',args=[])
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
+        response = self._check_page(url)
         self.failUnlessEqual(Ballot.objects.count(),1)
-        #run_test_task_queue(response.request)
         run_test_task_queue(self.client)
         self.failUnlessEqual(Ballot.objects.count(),1)
         dn = DenormalizedBallot.objects.get(pk=bal.pk)
@@ -228,6 +247,35 @@ class BallotTestNoData(BallotBaseTest):
         Ballot.objects.filter(pk=bal.number).delete()
         run_test_task_queue(self.client)
         self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, pk=123)
+        bal = Ballot(number=124,project=proj, draft='2.0', opened=datetime.datetime.now(), \
+                     pool=100, ballot_type=Ballot.WGInitial.code)
+        bal.closed = bal.opened + datetime.timedelta(days=15)
+        bal.save()
+        run_test_task_queue(self.client)
+        url = reverse('ballot.views.edit_ballot',args=[bal.number])
+        response = self._check_page(url)
+        data = response.context['form'].initial
+        for key in data.keys():
+            if data[key] is None:
+                data[key] = ''
+        data['curpk'] = bal.pk
+        data['delete']='Delete'
+        form = BallotForm(data, instance=bal)
+        valid = form.is_valid()
+        self.failUnless(valid)
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        url = reverse('ballot.views.del_ballot',args=[bal.number])
+        response.get('Location').index(url)
+        response = self._check_page(url)
+        match = re.search(r'input\s+type="submit"\s+name="confirm"', str(response), re.IGNORECASE)
+        self.assertTrue(match)
+        data = {"confirm":"Yes, I'm sure"}
+        response = self.client.post(url,data)
+        self.failIf(response.status_code!=302 and response.status_code!=303)
+        self.failUnlessRaises(Ballot.DoesNotExist, Ballot.objects.get, pk=124)
+        run_test_task_queue(self.client)
+        self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, pk=124)
         
     def test_renumber_ballot(self):
         proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())

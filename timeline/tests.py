@@ -22,28 +22,21 @@
 from project.models import Project, DenormalizedProject
 from ballot.models import Ballot, DenormalizedBallot
 from timeline.models import DenormalizedProjectBallots, ProjectBallotsBacklog, check_project_ballot_backlog
+from timeline.views import backlog_poll
 from util.tasks import run_test_task_queue
+from util.tests import LoginBasedTest
+from util.cache import CacheControl
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
-class TimelineTestBase(TestCase):
+import json
+
+class TimelineTestBase(LoginBasedTest):
     fixtures = ['site.json']
     PROJECT_COUNT = 0
     BALLOT_COUNT = 0
-    
-    def _check_page(self,url):
-        response = self.client.get(url)
-        # not logged in, should redirect to login page
-        self.failUnlessEqual(response.status_code, 302)
-
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
-        return response
-    
+        
     def test_timeline(self):
         static_url = settings.STATICFILES_URL
         self.assertEqual(Project.objects.count(),self.PROJECT_COUNT)
@@ -126,7 +119,82 @@ class TestProjectsAndBallots(TimelineTestBase):
             self._check_denormalized_project(dpb.recirc_sb_ballots)
         self.test_html_export()
             
+    def test_refresh_main(self):
+        self.failUnlessEqual(ProjectBallotsBacklog.objects.count(),0)
+        poll_url = reverse('timeline.views.backlog_poll',args=[])
+        poll = backlog_poll(self.get_request(poll_url))
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],False)
+        self.failUnlessEqual(status['count'],0)
+
+        url = reverse('timeline.views.main_page',args=[])
+        self._check_page(url+'?refresh=1', status_code=302)
+        poll = backlog_poll(self.get_request(poll_url))
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['backlog'],True)
+        run_test_task_queue(self.client)
+        #response = self._check_page(url)
+        poll = backlog_poll(self.get_request(poll_url))
+        status = json.loads(poll.content)
+        self.failUnlessEqual(status['count'],self.PROJECT_COUNT)
+        self.failUnlessEqual(status['backlog'],False)
+        self.assertEqual(DenormalizedProjectBallots.objects.count(),self.PROJECT_COUNT)
+        proj = Project.objects.get(pk=38)
+        dpb = DenormalizedProjectBallots.objects.get(project_pk=proj.pk)
+        self.assertEqual(len(dpb.initial_wg_ballots),1)
+        self.assertEqual(len(dpb.recirc_wg_ballots),4)
+        self.assertEqual(len(dpb.initial_sb_ballots),1)
+        self.assertEqual(len(dpb.recirc_sb_ballots),6)
+        for dpb in DenormalizedProjectBallots.objects.all().iterator():
+            self._check_denormalized_project(dpb.initial_wg_ballots)
+            self._check_denormalized_project(dpb.recirc_wg_ballots)
+            self._check_denormalized_project(dpb.initial_sb_ballots)
+            self._check_denormalized_project(dpb.recirc_sb_ballots)
+        cc = CacheControl()
+        in_progress_ver = cc.in_progress_ver
+        published_ver = cc.published_ver
+        withdrawn_ver = cc.withdrawn_ver
+        self._check_page(url+'?redraw=0', status_code=302)
+        self.failIfEqual(in_progress_ver, cc.in_progress_ver)
+        self.failUnlessEqual(published_ver, cc.published_ver)
+        self.failUnlessEqual(withdrawn_ver, cc.withdrawn_ver)
+        run_test_task_queue(self.client)
+        
+        in_progress_ver = cc.in_progress_ver
+        published_ver = cc.published_ver
+        withdrawn_ver = cc.withdrawn_ver
+        self._check_page(url+'?redraw=1', status_code=302)
+        self.failUnlessEqual(in_progress_ver, cc.in_progress_ver)
+        self.failUnlessEqual(withdrawn_ver, cc.withdrawn_ver)
+        self.failIfEqual(published_ver, cc.published_ver)
+        run_test_task_queue(self.client)
+        
+        in_progress_ver = cc.in_progress_ver
+        published_ver = cc.published_ver
+        withdrawn_ver = cc.withdrawn_ver
+        self._check_page(url+'?redraw=2', status_code=302)
+        self.failUnlessEqual(in_progress_ver, cc.in_progress_ver)
+        self.failUnlessEqual(published_ver, cc.published_ver)
+        self.failIfEqual(withdrawn_ver, cc.withdrawn_ver)
+        run_test_task_queue(self.client)
+
+        in_progress_ver = cc.in_progress_ver
+        published_ver = cc.published_ver
+        withdrawn_ver = cc.withdrawn_ver
+        self._check_page(url+'?redraw=badNumber', status_code=302)
+        self.failUnlessEqual(in_progress_ver, cc.in_progress_ver)
+        self.failUnlessEqual(published_ver, cc.published_ver)
+        self.failUnlessEqual(withdrawn_ver, cc.withdrawn_ver)
+        
 class TestProjectsAndBallotsDN(TimelineTestBase):
     fixtures = ['site.json', 'projects.json', 'ballots.json', 'timelines.json']
     PROJECT_COUNT = 37
     BALLOT_COUNT = 269
+    
+    def test_request_update(self):
+        DenormalizedProjectBallots.objects.filter(pk=38).delete()
+        ProjectBallotsBacklog.request_update(38)
+        check_project_ballot_backlog(True)
+        run_test_task_queue(self.client)
+        DenormalizedProjectBallots.objects.get(pk=38)
+        

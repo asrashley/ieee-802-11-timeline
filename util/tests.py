@@ -43,19 +43,38 @@ import unittest
 
 class LoginBasedTest(TestCase):    
     def setUp(self):
-        self.login = None
+        self.logged_in = None
+        self._user = None
+        self._factory = None
         
     def _check_page(self,url, status_code=200):
         response = self.client.get(url)
-        if not self.login:
+        if not self.logged_in:
             # not logged in, should redirect to login page
             self.failUnlessEqual(response.status_code, 302)
             self.assertRedirects(response,settings.LOGIN_URL+'?next='+http.urlquote(url))
-            self.login = self.client.login(username='test', password='password')
-            self.failUnless(self.login, 'Could not log in')
+            self.logged_in = self.client.login(username='test', password='password')
+            self.failUnless(self.logged_in, 'Could not log in')
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, status_code)
         return response
+    
+    @property
+    def user(self):
+        if self._user is None:
+            self._user = authenticate(username='test', password='password')
+        return self._user
+    
+    @property
+    def factory(self):
+        if self._factory is None:
+            self._factory = RequestFactory()
+        return self._factory
+    
+    def get_request(self,url):
+        request = self.factory.get(url)
+        request.user = self.user 
+        return request
         
 class UtilTest(unittest.TestCase):
     def test_from_isodatetime(self):
@@ -102,7 +121,8 @@ class UtilTest(unittest.TestCase):
                  ('May 14', datetime.datetime(2014,5,1)), 
                  ('Oct 2014', datetime.datetime(2014,10,1)), 
                  ('October 7 2014', datetime.datetime(2014,10,7)) ,
-                 ('Jul 26 2013', datetime.datetime(2013,7,26)) 
+                 ('Jul 26 2013', datetime.datetime(2013,7,26)), 
+                 ('March 26 2013', datetime.datetime(2013,3,26)) 
                  ]
         for s,d in dates:
             v = parse_date(s)
@@ -213,6 +233,15 @@ class ImportHtmlTimelineTest(ImportPageTest):
         response = self._post_import(url, self.TIMELINE_HTML)
         #print 'response',response
         self.assertEqual(Project.objects.count(),37)
+
+class ImportHtmlReportTest(ImportPageTest):
+    fixtures = ['site.json']
+    
+    def test_meeting_import(self):
+        url = reverse('util.views.import_page',args=[])
+        self._check_page(url)
+        response = self._post_import(url, 'util/fixtures/MeetingReports.htm')
+        self.assertEqual(MeetingReport.objects.count(),135+7-1)
 
 class ImportCsvPageTest(ImportPageTest):
     fixtures = ['site.json']
