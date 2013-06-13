@@ -161,22 +161,6 @@ class Project(AbstractProject):
         except Project.DoesNotExist:
             return []
     
-    @property    
-    def initial_wg_ballots(self):
-        return self.ballot_set.filter(ballot_type='WI').order_by('draft')
-    
-    @property    
-    def recirc_wg_ballots(self):
-        return self.ballot_set.filter(ballot_type='WR').order_by('draft')
-    
-    @property    
-    def initial_sb_ballots(self):
-        return self.ballot_set.filter(ballot_type='SI').order_by('draft')
-    
-    @property    
-    def recirc_sb_ballots(self):
-        return self.ballot_set.filter(ballot_type='SR').order_by('draft')
-
     @property
     def fullname(self):
         if self.published:
@@ -236,6 +220,9 @@ def check_project_backlog(needs_update=False):
     
 @receiver(post_save, sender=Project)
 def add_to_backlog(sender, instance, **kwargs):
+    if kwargs.get('raw',False):
+        #don't create a backlog when loading a fixture in a unit test
+        return
     # instance is a Project object
     b = ProjectBacklog(project_pk=instance.pk)
     b.save()
