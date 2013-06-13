@@ -20,8 +20,10 @@
 #
 #############################################################################
 
-from project.models import Project, InProgress, Published, Withdrawn, DenormalizedProject, ProjectBacklog, check_project_backlog
-from timeline.models import ProjectBallotsBacklog, DenormalizedProjectBallots, check_project_ballot_backlog 
+from project.models import Project, InProgress, Published, Withdrawn, \
+    DenormalizedProject, ProjectBacklog, check_project_backlog
+from timeline.models import ProjectBallotsBacklog, DenormalizedProjectBallots, \
+    check_project_ballot_backlog 
 from util.cache import CacheControl
 from util.db import bulk_delete
 
@@ -44,12 +46,15 @@ def main_page(request, export=None):
     if request.GET.get('refresh'):
         for p in Project.objects.all().iterator():
             ProjectBacklog(project_pk=p.pk).save()
+            ProjectBallotsBacklog.request_update(p.pk)
+        check_project_backlog(True)
+        check_project_ballot_backlog(True)
         return http.HttpResponseRedirect(reverse('timeline.views.main_page'))
     if request.GET.get('redraw',None) is not None:
         try:
-            redraw = int(request.GET.get('redraw',0))
+            redraw = int(request.GET.get('redraw',-1))
         except ValueError:
-            redraw = 0
+            redraw = -1
         cc = CacheControl()
         if redraw==0:
             cc.in_progress_ver = cc.in_progress_ver+1
@@ -95,7 +100,7 @@ def main_page(request, export=None):
 
 @login_required
 def backlog_poll(request):
-    status = 'true' if ProjectBacklog.objects.exists() else 'false'
+    status = 'true' if ProjectBallotsBacklog.objects.exists() else 'false'
     denormalized_count = DenormalizedProjectBallots.objects.count()
     return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')
 
@@ -127,3 +132,10 @@ def update_cache(sender, instance, **kwargs):
         cc.published_ver = cc.published_ver+1
     if Withdrawn.id==instance.status.id:
         cc.withdrawn_ver = cc.withdrawn_ver+1
+        
+@receiver(post_save, sender=DenormalizedProjectBallots)
+@receiver(pre_delete, sender=DenormalizedProjectBallots)
+def update_cache_ballots(sender, instance, **kwargs):
+    # assume that any voting is on an in-progress project
+    cc = CacheControl()
+    cc.in_progress_ver = cc.in_progress_ver+1
