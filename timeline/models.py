@@ -21,7 +21,7 @@
 #############################################################################
 from util.tasks import add_task
 from project.models import Project
-from ballot.models import Ballot, DenormalizedBallot
+from ballot.models import Ballot
 
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
@@ -132,6 +132,9 @@ def check_project_ballot_backlog(needs_update=False):
 @receiver(post_save, sender=Ballot)
 def post_ballot_save(sender, instance, **kwargs):
     # instance is a Ballot object
+    if kwargs.get('raw',False):
+        #don't create a backlog when loading a fixture in a unit test
+        return
     try:
         b = ProjectBallotsBacklog.objects.get(project_pk=instance.project.pk)
     except ProjectBallotsBacklog.DoesNotExist:
