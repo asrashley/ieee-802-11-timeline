@@ -202,7 +202,7 @@ class BallotBacklog(models.Model):
     #        return args[1]
     #    return models.Model.__setattr__(self, *args, **kwargs)
     
-def check_backlog(force=False):
+def check_ballot_backlog(force=False):
     needs_update = force
     if not force:
         needs_update = BallotBacklog.objects.exists()
@@ -212,9 +212,12 @@ def check_backlog(force=False):
     
 @receiver(post_save, sender=Ballot)
 def add_to_backlog(sender, instance, **kwargs):
+    if kwargs.get('raw',False):
+        #don't create a backlog when loading a fixture in a unit test
+        return
     b = BallotBacklog(ballot_pk=instance.pk)
     b.save()
-    check_backlog(True)
+    check_ballot_backlog(True)
     
 @receiver(pre_delete, sender=Ballot)
 def remove_ballot(sender, instance, **kwargs):
