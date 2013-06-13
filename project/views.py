@@ -65,7 +65,7 @@ def main_page(request):
     next_page=reverse('project.views.main_page')
     if request.GET.get('refresh'):
         for b in Project.objects.all():
-            ProjectBacklog(ballot_pk=b.pk).save()
+            ProjectBacklog(project_pk=b.pk).save()
         return http.HttpResponseRedirect(next_page)
     needs_update = check_project_backlog()
     return render_to_response('project/index.html', locals(), context_instance=RequestContext(request))
@@ -88,7 +88,7 @@ def edit_project(request,proj):
         if request.POST.has_key('cancel'):
             return http.HttpResponseRedirect(next_page)
         if request.POST.has_key('delete'):
-            return http.HttpResponseRedirect(reverse('timeline.views.del_project',args=[proj])+'?next='+next_page)
+            return http.HttpResponseRedirect(reverse('project.views.del_project',args=[proj])+'?next='+next_page)
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             data = form.cleaned_data
