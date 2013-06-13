@@ -6,7 +6,7 @@
 
 #menu {
 	text-align: center;
-	font-size: 1.05em;
+	font-size: 1em;
 }
 
 #menu a {
@@ -21,7 +21,7 @@
 	float:right;
 	font-size: 0.7em;
 	text-align: right;
-}		       
+}
 
 #tools {
 	/*margin-left: auto;
@@ -50,7 +50,7 @@
 	/*width: 300px; */
 	font-size: 18pt;
 }
-	
+
 #tools a {
 	text-decoration: none;
 }
@@ -79,16 +79,16 @@ text-decoration:none;
     border: 1px solid #CCCCCC;
     margin-bottom: 5px;
 }
-ul.errorlist { 
-	color: red; 
-	font-weight: bold; 
-	display:inline; 
+ul.errorlist {
+	color: red;
+	font-weight: bold;
+	display:inline;
 	font-size: 10pt;
 	}
-	
+
 sup.requ { color: red; font-size: 8pt; }
 
-.help_text { 
+.help_text {
 	font-size: 8pt;
 	font-family: Arial;
 	color: #808080;
@@ -96,7 +96,7 @@ sup.requ { color: red; font-size: 8pt; }
 p.help_text {
 	vertical-align: top;
 	margin-top: 0px;
-} 
+}
 input, select, input.vURLField {
 	width: 450px;
 }
@@ -118,5 +118,19 @@ border: none;
 .intro {
 	margin: 0.5em 3em;
 	font-size: 1.1em;
+}
+
+@media only screen and (max-width:65em){
+	#menu {
+		font-size: 0.9em;
+	}
+}
+@media only screen and (min-width:72em){
+	#menu {
+		font-size: 1.05em;
+	}
+	#menu ul li a, #menu ul li a:visited {
+		width: 9.5em;
+	}
 }
 
