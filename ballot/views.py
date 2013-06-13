@@ -20,8 +20,8 @@
 #
 #############################################################################
 
-from ballot.models import Ballot, BallotBacklog, DenormalizedBallot, check_backlog
-from project.models import InProgress, Published, Withdrawn, Project
+from ballot.models import Ballot, BallotBacklog, DenormalizedBallot, check_ballot_backlog
+from project.models import InProgress, Published, Withdrawn
 from util.cache import CacheControl
 from util.forms import DateModelForm
 
@@ -58,7 +58,7 @@ def main_page(request):
         for b in Ballot.objects.all():
             BallotBacklog(ballot_pk=b.pk).save()
         return http.HttpResponseRedirect(next_page)
-    needs_update = check_backlog()
+    needs_update = check_ballot_backlog()
     return render_to_response('ballot/index.html', locals(), context_instance=RequestContext(request))
     
 @login_required        
@@ -157,22 +157,24 @@ def del_ballot(request,bal):
                                        post_delete_redirect=next_page)
 
 def ballot_page(request, ballots, export, sponsor, next, export_page):
-    closed = []
-    open = []
-    needs_update = check_backlog()
+    closed_ballots = []
+    open_ballots = []
+    needs_update = check_ballot_backlog()
     for b in ballots:
         if b.is_open:
-            open.append(b)
+            open_ballots.append(b)
         else:
-            closed.append(b)
+            closed_ballots.append(b)
     if sponsor:
-        open.sort(key=lambda x: x.closed, reverse=True)
-        closed.sort(key=lambda x: x.closed, reverse=True)
+        open_ballots.sort(key=lambda x: x.closed, reverse=True)
+        closed_ballots.sort(key=lambda x: x.closed, reverse=True)
     else:
-        open.sort(key=lambda x: x.number, reverse=True)
-        closed.sort(key=lambda x: x.number, reverse=True)
-    context = dict(has_open=len(open)>0, open=open, closed=closed, next_page=next, export=export, sponsor=sponsor,
-                   needs_update=needs_update, export_page=reverse('ballot.views.main_page')+export_page)
+        open_ballots.sort(key=lambda x: x.number, reverse=True)
+        closed_ballots.sort(key=lambda x: x.number, reverse=True)
+    context = dict(has_open=len(open_ballots)>0, open=open_ballots, \
+                   closed=closed_ballots, next_page=next, export=export, \
+                   sponsor=sponsor, needs_update=needs_update, \
+                   export_page=reverse('ballot.views.main_page')+export_page)
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
     return render_to_response('ballot/ballots.html', context, context_instance=context_instance)
