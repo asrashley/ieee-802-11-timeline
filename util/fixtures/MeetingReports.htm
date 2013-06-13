@@ -1,0 +1,4326 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+
+  <head>
+    <title>Summary reports of IEEE P802.11</title>
+
+
+<style type="text/css">
+
+  
+    /*
+ * HTML5 Boilerplate
+ *
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+
+/* ==========================================================================
+   Base styles: opinionated defaults
+   ========================================================================== */
+
+html,
+button,
+input,
+select,
+textarea {
+    color: #222;
+}
+
+body {
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+/*
+ * Remove text-shadow in selection highlight: h5bp.com/i
+ * These selection rule sets have to be separate.
+ * Customize the background color to match your design.
+ */
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+/*
+ * A better looking default horizontal rule
+ */
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/*
+ * Remove the gap between images and the bottom of their containers: h5bp.com/i/440
+ */
+
+img {
+    vertical-align: middle;
+}
+
+/*
+ * Remove default fieldset styles.
+ */
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+ * Allow only vertical resizing of textareas.
+ */
+
+textarea {
+    resize: vertical;
+}
+
+/* ==========================================================================
+   Chrome Frame prompt
+   ========================================================================== */
+
+.chromeframe {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+/*
+ * Image replacement
+ */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    /* IE 6/7 fallback */
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 150%;
+}
+
+/*
+ * Hide from both screenreaders and browsers: h5bp.com/u
+ */
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+/*
+ * Hide only visually, but have it available for screenreaders: h5bp.com/v
+ */
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/*
+ * Extends the .visuallyhidden class to allow the element to be focusable
+ * when navigated to via the keyboard: h5bp.com/p
+ */
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+/*
+ * Hide visually and from screenreaders, but maintain layout
+ */
+
+.invisible {
+    visibility: hidden;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* ==========================================================================
+   EXAMPLE Media Queries for Responsive Design.
+   These examples override the primary ('mobile first') styles.
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+    /* Style adjustments for viewports that meet the condition */
+}
+
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+    /* Style adjustments for high resolution devices */
+}
+
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster: h5bp.com/s */
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    /*
+     * Don't show links for images, or javascript/internal links
+     */
+
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* h5bp.com/t */
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
+
+  
+  #header {
+	font-size: 1.5em;
+	font-family: Verdana, Arial, sans-serif;
+	vertical-align: middle;
+	text-align: center;
+	color: #ffffff;
+	height: 2em;
+	width: 100%;
+	border: 1px solid;
+	line-height: 2em;
+	padding: 0.1em 0.25em;
+	background-color: #008080;
+}
+
+#header > a {
+	color: yellow;
+	text-decoration: none;
+}
+
+#footer {
+	text-align: center;
+}
+#footer > table {
+	border: 0;
+	padding: 0;
+	margin: 0.65em;
+}
+#footer > table td {
+	height: 2.7em;
+	width: 6.4em;
+	vertical-align: bottom;
+}
+#footer > table img {
+	border: 0;
+}
+
+div.centered {
+	text-align: center;
+}
+p.center {
+	text-align: center;
+}
+
+div.centered table, #footer table {
+	margin: 0 auto;
+	text-align: left;
+}
+
+
+
+    
+
+h4	{
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:2.0pt;
+	margin-left:2.0in;
+	text-indent:-.5in;
+	page-break-after:avoid;
+	tab-stops:list 2.25in;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:normal
+	}
+	
+.style1 {
+				font-size: x-small;
+}
+.style2 {
+				color: #FFFFFF;
+				font-weight: bold;
+				text-align: center;
+}
+.style3 {
+				text-align: center;
+}
+
+table.report {
+	font-family: "Times New Roman", Times, Serif;
+	border: 1px solid black;
+	text-align: center;
+	padding: 1px;
+	margin: 4px;
+	border-collapse: collapse;
+	table-layout: fixed;
+	margin-left: auto;
+	margin-right: auto;
+	width: 840px;
+}
+table.report tr.row1 td {
+	background:#dddddd;
+}
+table.report tr td a {
+	color: blue;
+}
+table.report tr.blank td {
+	background: white;
+	color: black;
+}
+table.report th{ 
+	background:#008080;
+	text-align:center;
+	vertical-align: bottom;
+	color: white;
+	font-size: 10pt;
+} 
+table.report th a {
+	text-decoration: none;
+	color: white;
+}
+table.report th.notice a {
+	color: blue;
+}
+table.report th.notice a:hover {
+	text-decoration: underline;
+}
+table.report td {
+	background:#cccccc;
+	font-size: 9pt;
+	border: 1px solid black;
+	text-align: center;
+	vertical-align: middle;
+}
+	
+table.report td.result0{
+	color:#808080;
+}
+table.report td.result1{
+	color:black;
+}
+table.report td.notice, table.report th.notice {
+ 	background:white;
+	color:black;
+	text-align:justify;
+	vertical-align: middle;
+	font-weight: normal;
+	font-size: 12pt;
+	padding: 2px 6px;
+}
+table.report td.header, table.report th.header {
+	background:black;
+	color:white;
+	text-align:center;
+	vertical-align: middle;
+	font-weight: bold;
+}
+table.report th.header {
+	font-size: 16pt;
+}
+table.report td.header {
+	font-size: 12pt;
+}
+table.report tfoot tr td.notice {
+	font-size: 8pt;
+}
+
+table.report td.empty {
+	font-size: 14pt;
+}
+table.report td.empty a {
+	text-decoration: none;
+	color: black;
+}
+p.style1 {
+	font-size:16pt;
+}
+p.style2, p.style3 {
+	font-size:14pt;
+}
+
+div.Section1 {
+	page: Section1
+}
+
+
+    </style>
+
+    
+    
+
+    
+
+
+    
+        
+  </head>
+
+  <body>
+    <div id="header">
+
+<a id="logo" href="/">SUMMARY REPORTS &amp; MINUTES  OF 802.11 WG SESSIONS:</a>
+
+
+</div>
+    <div id="menu">
+
+</div>
+	
+    <div class="columns">
+      <div id="content" class="column">
+        
+          
+          
+          
+        
+
+        
+<table class="report" >
+<col width="56" />
+<col width="86" />
+<col width="90" />
+<col width="90" />
+<col width="90" />
+<col width="190" />
+<col width="170" />
+<col width="65" />
+  <thead>
+  <tr><th class="header" colspan="8">IEEE 802.11 WLAN WORKING GROUP SESSIONS</th></tr>
+  <tr>
+    <th class="notice" colspan="8">
+    As our sessions are open to the public, all interested parties 
+      are welcome to attend IEEE P802.11 Working Group sessions, for which there 
+      is a registration fee, to defray the cost of the session. At Plenary 
+      sessions this is administered by the IEEE P802 LMSC organization. Whereas, 
+      the Interim sessions are normally managed by our sponsoring host. This is 
+      in-addition to your individual hotel accommodation, and travel expenses. 
+      Click here to view <a href="http://grouper.ieee.org/groups/802/11/Meetings/Typical_Meeting_Agenda.htm">Example 
+      Plenary and Interim Session Agenda</a>.
+      </th>
+    </tr>
+
+  <tr>
+    <th rowspan="2" >Session</th>
+    <th rowspan="2" >Date</th>
+    <th rowspan="2">Month</th>
+    <th colspan="2">File URL or Doc#</th>
+    <th rowspan="2">Location</th>
+    <th rowspan="2" >Place</th>
+    <th rowspan="2">Type</th>
+    </tr>
+  <tr>
+    <th >Report</th>
+    <th>Minutes</th>
+    </tr>
+  </thead>
+  <tfoot>
+ <tr><td class="header" colspan="8">&nbsp;</td></tr>
+ <tr><td class="notice" colspan="8">n/a Denotes - Not Applicable.</td></tr>
+ <tr><td class="header" colspan="8">&nbsp;</td></tr>
+ </tfoot>
+  <tbody>
+
+  
+<tr>
+    <td class="header" colspan="8">For Year 2013</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+1390
+
+</td>
+<td>11<sup>th</sup> - 17<sup>th</sup></td>
+<td>May</td>
+<td colspan="2">
+
+  Soon to be posted
+
+</td>
+
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+1385
+
+</td>
+<td>24<sup>th</sup> - 25<sup>th</sup></td>
+<td>April</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/13/11-13-0540-00-0000-ieee-802-11-working-group-april-2013-beijing-interim-meeting.doc">Minutes</a>
+
+</td>
+<td>Nikko New Century</td>
+<td>Beijing China</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+1380
+
+</td>
+<td>17<sup>th</sup> - 22<sup>nd</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-13-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/13/11-13-0218-01-0000-minutes-working-group-march-2013.doc">Minutes</a>
+
+</td>
+<td>Caribe Royale</td>
+<td>Orlando FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+1375
+
+</td>
+<td>23<sup>rd</sup> - 24<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-13-Jan-China-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/13/11-13-0217-00-0000-minutes-working-group-shenzhen-january-2013.doc">Minutes</a>
+
+</td>
+<td>Grand Mercure Oriental Ginza</td>
+<td>Shenzhen China</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+1370
+
+</td>
+<td>12<sup>th</sup> - 18<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-13-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/13/11-13-0100-01-00aq-january-2013-meeting-minutes.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Vancouver BC Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2012</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+1360
+
+</td>
+<td>12<sup>th</sup> - 16<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-1288-01-0000-minutes-working-group-november-2012.doc">Minutes</a>
+
+</td>
+<td>Grand Hyatt</td>
+<td>San Antonio TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+1355
+
+</td>
+<td>26<sup>th</sup> - 27<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-Sept-China-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-1349-01-0000-minutes-working-group-beijing-september-2012.doc">Minutes</a>
+
+</td>
+<td>Nikko New Century</td>
+<td>Beijing China</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+135
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-1112-00-0000-minutes-working-group-september-2012.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Indian Wells CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+134
+
+</td>
+<td>14<sup>th</sup> - 20<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-0873-00-0000-minutes-working-group-july-2012.doc">Minutes</a>
+
+</td>
+<td>Manchester Grand Hyatt</td>
+<td>San Diego CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+133
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-0636-01-0000-may-2012-meeting-minutes.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Atlanta GA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+132
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-0381-00-0000-minutes-working-group-mar-2012.doc">Minutes</a>
+
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+131
+
+</td>
+<td>15<sup>th</sup> - 20<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-12-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/12/11-12-0083-00-0000-minutes-working-group-jan-2012.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Jacksonville FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2011</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+130
+
+</td>
+<td>6<sup>th</sup> - 11<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-1508-00-0000-minutes-working-group-nov-2011.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Atlanta GA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+129
+
+</td>
+<td>18<sup>th</sup> - 23<sup>rd</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-1246-01-0000-minutes-working-group-sept-2011.doc">Minutes</a>
+
+</td>
+<td>Okinawa Convention Center</td>
+<td>Okinawa Japan</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+128
+
+</td>
+<td>17<sup>th</sup> - 22<sup>nd</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-1004-01-0000-minutes-working-group-july-2011.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>San Francisco CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+127
+
+</td>
+<td>8<sup>th</sup> - 13<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-0688-02-0000-minutes-working-group-may-2011.doc">Minutes</a>
+
+</td>
+<td>Hyatt Grand Champion</td>
+<td>Indian Wells (Palm Springs) CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+126
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-March-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-0312-00-0000-minutes-working-group-march-2011.doc">Minutes</a>
+
+</td>
+<td>Marina Bay Sands</td>
+<td>Singapore</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+125
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-11-January-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/11/11-11-0024-00-0000-minutes-working-group-january-2011.doc">Minutes</a>
+
+</td>
+<td>Hyatt Century Plaza</td>
+<td>Los Angeles CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2010</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+124
+
+</td>
+<td>7<sup>th</sup> - 12<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-November-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-1392-00-0000-minutes-working-group-november-2010.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Dallas TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+123
+
+</td>
+<td>12<sup>th</sup> - 17<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-September-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-1082-00-0000-minutes-working-group-september-2010.doc">Minutes</a>
+
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+122
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-0792-01-0000-minutes-working-group-july-2010.doc">Minutes</a>
+
+</td>
+<td>Manchester Grand Hyatt</td>
+<td>San Diego CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+121
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-0683-00-0000-minutes-working-group-may-2010.doc">Minutes</a>
+
+</td>
+<td>China World</td>
+<td>Beijing PRC</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+120
+
+</td>
+<td>14<sup>th</sup> - 19<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-0325-00-0000-minutes-working-group-march-2010.doc">Minutes</a>
+
+</td>
+<td>Caribe Royale</td>
+<td>Orlando FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+119
+
+</td>
+<td>17<sup>th</sup> - 22<sup>nd</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-10-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/10/11-10-0066-01-0000-minutes-working-group-january-2010.doc">Minutes</a>
+
+</td>
+<td>Hyatt Century Plaza</td>
+<td>Los Angeles CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2009</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+118
+
+</td>
+<td>15<sup>th</sup> - 20<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/09/11-09-1158-00-0000-minutes-working-group-november-2009.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Atlanta GA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+117
+
+</td>
+<td>20<sup>th</sup> - 25<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/09/11-09-0999-01-0000-minutes-working-group-september-2009.doc">Minutes</a>
+
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+116
+
+</td>
+<td>12<sup>th</sup> - 17<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/09/11-09-0781-01-0000-minutes-working-group-july-2009.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>San Francisco CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+115
+
+</td>
+<td>10<sup>th</sup> - 15<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/09/11-09-0549-01-0000-minutes-working-group-may-2009.doc">Minutes</a>
+
+</td>
+<td>Fairmont The Queen Elizabeth</td>
+<td>Montreal PQ Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+114
+
+</td>
+<td>8<sup>th</sup> - 13<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/dcn/09/11-09-0368-00-0000-working-group-minutes-march-2009.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Vancouver BC Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+113
+
+</td>
+<td>18<sup>th</sup> - 23<sup>rd</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-09-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/09/11-09-0085-00-0000-minutes-working-group-january-2009.doc">Minutes</a>
+
+</td>
+<td>Hyatt Century Plaza</td>
+<td>Los Angeles CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2008</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+112
+
+</td>
+<td>9<sup>th</sup> - 14<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/08/11-08-1466-00-0000-minutes-working-group-november-2008.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Dallas TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+111
+
+</td>
+<td>7<sup>th</sup> - 12<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/08/11-08-1062-00-0000-minutes-working-group-september-2008.doc">Minutes</a>
+
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+110
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/08/11-08-0834-01-0000-minutes-working-group-july-2008.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Denver CO USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+109
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/08/11-08-0571-01-0000-minutes-working-group-may-2008.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Jacksonville FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+108
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/file/08/11-08-0428-00-0000-minutes-working-group-march-2008.doc">Minutes</a>
+
+</td>
+<td>Caribe Royale</td>
+<td>Orlando FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+107
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-08-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/public/08/11-08-0202-00-0000-minutes-working-group-january-2008.doc">Minutes</a>
+
+</td>
+<td>Howard Plaza</td>
+<td>Taipei Taiwan ROC</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2007</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+106
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/public-file/07/11-07-2830-00-0000-minutes-working-group-november-2007.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Atlanta GA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+105
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/public-file/07/11-07-2507-00-0000-minutes-working-group-september-2007.doc">Minutes</a>
+
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa       HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+104
+
+</td>
+<td>15<sup>th</sup> - 20<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/public/07/11-07-2278-04-0000-minutes-working-group-july-2007.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>San Francisco CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+103
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td><a href="https://mentor.ieee.org/802.11/public/07/11-07-1962-01-0000-ieee-802-11-wg-minutes-for-may-2007-session.doc">Minutes</a>
+
+</td>
+<td>Fairmont The Queen Elizabeth</td>
+<td>Montreal PQ Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+102
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-March-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2007.pdf">Minutes</a>
+</td>
+<td>Caribe Royale</td>
+<td>Orlando FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+101
+
+</td>
+<td>14<sup>th</sup> - 19<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-07-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2007.pdf">Minutes</a>
+</td>
+<td>Hilton London Metropole</td>
+<td>London United Kingdom</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2006</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+100
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2006.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Dallas TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+99
+
+</td>
+<td>17<sup>th</sup> - 22<sup>nd</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-Sep-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sep-2006.pdf">Minutes</a>
+</td>
+<td>Exhibition  Convention Centre</td>
+<td>Melbourne Victoria Australia</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+98
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-Jul-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jul-2006.pdf">Minutes</a>
+</td>
+<td>Manchester Grand Hyatt</td>
+<td>San Diego CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+97
+
+</td>
+<td>15<sup>th</sup> - 19<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2006.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Jacksonville FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+96
+
+</td>
+<td>6<sup>th</sup> - 10<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2006.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Denver CO USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+95
+
+</td>
+<td>15<sup>th</sup> - 20<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-06-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2006.pdf">Minutes</a>
+</td>
+<td>Hilton Waikoloa Village</td>
+<td>Waikoloa       HI USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2005</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+94
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2005.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Vancouver       BC Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+93
+
+</td>
+<td>18<sup>th</sup> - 23<sup>rd</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sept-2005.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Garden Grove CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+92
+
+</td>
+<td>17<sup>th</sup> - 22<sup>nd</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_July-2005.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>San Francisco CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+91
+
+</td>
+<td>15<sup>th</sup> - 20<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2005.pdf">Minutes</a>
+</td>
+<td>Cairns Convention Centre</td>
+<td>Cairns Queensland Australia</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+90
+
+</td>
+<td>13<sup>th</sup> - 18<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2005.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Atlanta GA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+89
+
+</td>
+<td>16<sup>th</sup> - 21<sup>st</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-05-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2005.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Monterey CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2004</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+88
+
+</td>
+<td>15<sup>th</sup> - 19<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2004.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>San Antonio       TX  USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+87
+
+</td>
+<td>12<sup>th</sup> - 17<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sept-2004.pdf">Minutes</a>
+</td>
+<td>Estrel Hotel       Berlin</td>
+<td>Berlin       Germany</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+86
+
+</td>
+<td>12<sup>th</sup> - 16<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_July-2004.pdf">Minutes</a>
+</td>
+<td>Portland Hilton</td>
+<td>Portland       OR USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+85
+
+</td>
+<td>9<sup>th</sup> - 14<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2004.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Garden Grove CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+84
+
+</td>
+<td>14<sup>th</sup> - 19<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2004.pdf">Minutes</a>
+</td>
+<td>Hilton in Walt Disney       World</td>
+<td>Lake Buena       Vista FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+83
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-04-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2004.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Vancouver       BC Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2003</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+82
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-03-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2003.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Albuquerque NM USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+81
+
+</td>
+<td>15<sup>th</sup> - 19<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-03-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sept-2003.pdf">Minutes</a>
+</td>
+<td>Swisstel       The Stamford</td>
+<td>Singapore</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+79
+
+</td>
+<td>12<sup>th</sup> - 16<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-03-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2003.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Dallas/Ft       Worth Airport TX USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+78
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-03-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2003.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Dallas/Ft       Worth Airport TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+77
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-03-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2003.pdf">Minutes</a>
+</td>
+<td>Fort       Lauderdale Marina Marriott</td>
+<td>Fort       Lauderdale FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2002</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+76
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2002.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Kauai       HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+75
+
+</td>
+<td>9<sup>th</sup> - 13<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sept-2002.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Monterey CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+74
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_July-2002.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Vancouver       BC Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+73
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2002.pdf">Minutes</a>
+</td>
+<td>Wentworth       Sydney Hotel</td>
+<td>Sydney NSW       Australia</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+72
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2002.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>St. Louis       MO USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+71
+
+</td>
+<td>21<sup>st</sup> - 25<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-02-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2002.pdf">Minutes</a>
+</td>
+<td>Wyndham       Anatole Hotel</td>
+<td>Dallas       TX USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2001</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+70
+
+</td>
+<td>11<sup>th</sup> - 16<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-01-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2001.pdf">Minutes</a>
+</td>
+<td>Hyatt       Regency</td>
+<td>Austin       TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+69
+
+</td>
+<td>17<sup>th</sup> - 21<sup>st</sup></td>
+<td>September</td>
+<td colspan="2">
+Cancelled Session
+</td>
+
+<td>Hyatt       Regency</td>
+<td>Bellevue       WA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+68
+
+</td>
+<td>9<sup>th</sup> - 13<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-01-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_July-2001.pdf">Minutes</a>
+</td>
+<td>Portland       Marriott Downtown</td>
+<td>Portland       OR USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+67
+
+</td>
+<td>14<sup>th</sup> - 18<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-01-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2001-r1.pdf">Minutes</a>
+</td>
+<td>Radisson at Universal Orlando</td>
+<td>Orlando FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+66
+
+</td>
+<td>12<sup>th</sup> - 16<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-01-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Mar-2001.pdf">Minutes</a>
+</td>
+<td>Marriott Resort</td>
+<td>Hilton Head SC USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+65
+
+</td>
+<td>15<sup>th</sup> - 19<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-01-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Jan-2001.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency Resort</td>
+<td>Monterey CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 2000</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+64
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Nov-2000.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Tampa FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+63
+
+</td>
+<td>18<sup>th</sup> - 22<sup>nd</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-Sept-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_Sept-2000.pdf">Minutes</a>
+</td>
+<td>Radisson Resort  Spa</td>
+<td>Scottsdale AZ USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+62
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_July-2000.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>La Jolla CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+61
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_May-2000.pdf">Minutes</a>
+</td>
+<td>Renaissance Madison Hotel</td>
+<td>Seattle WA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+60
+
+</td>
+<td>6<sup>th</sup> - 10<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-Mar-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_March-2000.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Albuquerque NM USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+59
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-00-Jan-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_minutes_January-2000.PDF">Minutes</a>
+</td>
+<td>David Intercontinental Hotel</td>
+<td>Tel Aviv Israel</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1999</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+58
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-99-Nov-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_minutes_99Nov.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Kauai HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+57
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Cons._minutes_99Sep.pdf">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_minutes_99Sep.pdf">Minutes</a>
+</td>
+<td>Hilton Sonoma County</td>
+<td>Santa Rosa CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+56
+
+</td>
+<td>5<sup>th</sup> - 9<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-99-July-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_99July.pdf">Minutes</a>
+</td>
+<td>Queen Elizabeth</td>
+<td>Montreal PQ Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+55
+
+</td>
+<td>3<sup>rd</sup> - 7<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-99-May-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_99May.pdf">Minutes</a>
+</td>
+<td>Makuhari Prince Hotel</td>
+<td>Chiba Japan</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+54
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-99-March-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_99Mar.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Austin TX USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+53
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    <a href="http://grouper.ieee.org/groups/802/11/Reports/Summary-report-99January-meeting.html">Report</a>
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_99Jan.pdf">Minutes</a>
+</td>
+<td>Grosvenor</td>
+<td>Lake Buena Vista FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1998</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+52
+
+</td>
+<td>9<sup>th</sup> - 13<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1998_docs/83756-Tentative-Minutes-Westford-Sep98.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Albuquerque NM USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+51
+
+</td>
+<td>1<sup>st</sup> - 1<sup>st</sup></td>
+<td>October</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1998_docs/83397W-Tentative-Minutes-Westford-Sep98.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Atlanta GA USA</td>
+<td>Special</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+50
+
+</td>
+<td>14<sup>th</sup> - 18<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_98Sept.pdf">Minutes</a>
+</td>
+<td>Westford Regency Inn</td>
+<td>Westford MA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+49
+
+</td>
+<td>6<sup>th</sup> - 11<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1998_docs/83377B-Tentative-Minutes-Westford-Sep98.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>La Jolla CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+48
+
+</td>
+<td>19<sup>th</sup> - 21<sup>st</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/SG-Minutes-Irving.pdf">Minutes</a>
+</td>
+<td>Sheraton       Grand</td>
+<td>Irving TX USA</td>
+<td>Special</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+47
+
+</td>
+<td>8<sup>th</sup> - 9<sup>th</sup></td>
+<td>April</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/SG_minutes-98Apr.pdf">Minutes</a>
+</td>
+<td>Boston       Marriott</td>
+<td>Cambridge MA USA</td>
+<td>Special</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+46
+
+</td>
+<td>4<sup>th</sup> - 8<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons-Minutes-and-Reports-Utrecht.pdf">Minutes</a>
+</td>
+<td>Holiday Inn</td>
+<td>Utrecht Nederlands</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+45
+
+</td>
+<td>9<sup>th</sup> - 13<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_minutes_98Mar.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Irvine CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+44
+
+</td>
+<td>19<sup>th</sup> - 23<sup>rd</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_minutes_98Jan.pdf">Minutes</a>
+</td>
+<td>Embassy Suites</td>
+<td>Lynnwood WA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1997</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+43
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_97Nov.pdf">Minutes</a>
+</td>
+<td>Queen Elizabeth</td>
+<td>Montreal PQ Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+42
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/70893.pdf">Minutes</a>
+</td>
+<td>Grafton Radisson Edwardian</td>
+<td>London United Kingdom</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+41
+
+</td>
+<td>6<sup>th</sup> - 11<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_97July.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Maui HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+40
+
+</td>
+<td>7<sup>th</sup> - 9<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/11-97-040_May%2097%20minutes.pdf">Minutes</a>
+</td>
+<td>AMD Facility</td>
+<td>Sunnyvale CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+39
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_97Mar.pdf">Minutes</a>
+</td>
+<td>Marriott</td>
+<td>Irvine CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+38
+
+</td>
+<td>13<sup>th</sup> - 17<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/11-97-005-r1_Jan%2097%20minutes.pdf">Minutes</a>
+</td>
+<td>Harris Facility</td>
+<td>Palm Bay FL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1996</td>
+    </tr>
+    
+<tr class="row1">
+<td>
+
+37
+
+</td>
+<td>11<sup>th</sup> - 14<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_96Nov.pdf">Minutes</a>
+</td>
+<td>Hotel Vancouver</td>
+<td>Vancouver BC Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+36
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_96July.pdf">Minutes</a>
+</td>
+<td>Various Campus Locations</td>
+<td>Twente University Nederlands</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+35
+
+</td>
+<td>6<sup>th</sup> - 9<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_96May.pdf">Minutes</a>
+</td>
+<td>Westin</td>
+<td>Waltham MA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+34
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_96Mar.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>La Jolla CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+33
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_96Jan.pdf">Minutes</a>
+</td>
+<td>Westgate Hotel</td>
+<td>San Diego CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1995</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+32
+
+</td>
+<td>6<sup>th</sup> - 9<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95Nov.pdf">Minutes</a>
+</td>
+<td>Queen Elizabeth</td>
+<td>Montreal PQ Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+31
+
+</td>
+<td>28<sup>th</sup> - 31<sup>st</sup></td>
+<td>August</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95Aug.pdf">Minutes</a>
+</td>
+<td>Marriott</td>
+<td>Schaumburg IL USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+30
+
+</td>
+<td>10<sup>th</sup> - 13<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95July.pdf">Minutes</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Maui HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+29
+
+</td>
+<td>8<sup>th</sup> - 11<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95May.pdf">Minutes</a>
+</td>
+<td>Hilton Inn</td>
+<td>Salt Lake City UT USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+28
+
+</td>
+<td>6<sup>th</sup> - 10<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95Mar.pdf">Minutes</a>
+</td>
+<td>Ramada Resort</td>
+<td>West Palm Beach FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+27
+
+</td>
+<td>9<sup>th</sup> - 12<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_95Jan.pdf">Minutes</a>
+</td>
+<td>LeBaron</td>
+<td>San Jose CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1994</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+26
+
+</td>
+<td>7<sup>th</sup> - 11<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1994_docs/1194281.doc">Minutes</a>
+
+</td>
+<td>Hyatt Regency</td>
+<td>Incline       Village NV USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+25
+
+</td>
+<td>29<sup>th</sup> - 1<sup>st</sup></td>
+<td>
+Aug / Sep
+</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/Cons_Minutes_94Aug.pdf">Minutes</a>
+</td>
+<td>Marriott Rivercenter</td>
+<td>San Antonio TX USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+24
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1994_docs/1194200.DOC">Minutes</a>
+
+</td>
+<td>Walt Disney World Swan</td>
+<td>Orlando FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+23
+
+</td>
+<td>9<sup>th</sup> - 12<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1994_docs/1194141.DOC">Minutes</a>
+
+</td>
+<td>Holiday Inn</td>
+<td>Oshawa ON Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+22
+
+</td>
+<td>7<sup>th</sup> - 11<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1994_docs/1194083.DOC">Minutes</a>
+
+</td>
+<td>Hotel Vancouver</td>
+<td>Vancouver BC Canada</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+21
+
+</td>
+<td>10<sup>th</sup> - 13<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1994_docs/1194026.doc">Minutes</a>
+
+</td>
+<td>LeBaron</td>
+<td>San Jose CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1993</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+20
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1993_docs/1193174.doc">Minutes</a>
+
+</td>
+<td>Ramada</td>
+<td>West Palm Beach FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+19
+
+</td>
+<td>20<sup>th</sup> - 23<sup>rd</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1993_docs/1193166.doc">Minutes</a>
+
+</td>
+<td>Wyndham Garden</td>
+<td>Atlanta GA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+18
+
+</td>
+<td>12<sup>th</sup> - 15<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/11-93-117_July%2093%20minutes.pdf">Minutes</a>
+</td>
+<td>Sheraton</td>
+<td>Denver CO USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+17
+
+</td>
+<td>10<sup>th</sup> - 13<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1993_docs/1193087.DOC">Minutes</a>
+
+</td>
+<td>Holiday Inn</td>
+<td>Wilmington DE USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+16
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1993_docs/1193044.DOC">Minutes</a>
+
+</td>
+<td>Omni Inner Harbor</td>
+<td>Baltimore MD USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+15
+
+</td>
+<td>11<sup>th</sup> - 14<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td>
+<a href="http://grouper.ieee.org/groups/802/11/Minutes/11-93-014_Jan%2093%20minutes.pdf">Minutes</a>
+</td>
+<td>Ramada</td>
+<td>Agoura Hills CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1992</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+14
+
+</td>
+<td>9<sup>th</sup> - 12<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192134.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-92-134_Nov%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Hyatt Regency</td>
+<td>La Jolla CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+13
+
+</td>
+<td>14<sup>th</sup> - 17<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192116.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-92-116_Sept%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Hilton</td>
+<td>Dayton OH USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+12
+
+</td>
+<td>6<sup>th</sup> - 9<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192086.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs-part-II/11-92-086_July%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Radisson</td>
+<td>Minneapolis MN USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+11
+
+</td>
+<td>11<sup>th</sup> - 14<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192060.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-92-060_May%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Holiday Inn</td>
+<td>Leiden Nederlands</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+10
+
+</td>
+<td>9<sup>th</sup> - 12<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192045.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-92-045_Mar%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Marriott</td>
+<td>Irvine CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+9
+
+</td>
+<td>13<sup>th</sup> - 16<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1992_docs/1192018.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-92-018_Jan%2092%20minutes.pdf">.pdf</a>
+</td>
+<td>Omni Europe</td>
+<td>Chapel Hill NC USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1991</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+8
+
+</td>
+<td>11<sup>th</sup> - 15<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191131.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs-part-II/11-91-131_Nov%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Crown Sterling Suites</td>
+<td>Ft. Lauderdale     FL USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+7
+
+</td>
+<td>8<sup>th</sup> - 12<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191087.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-91-107_Sept%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Palo Alto CA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+6
+
+</td>
+<td>8<sup>th</sup> - 11<sup>th</sup></td>
+<td>July</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191086.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-91-078_July%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Hyatt Regency</td>
+<td>Kauai HI USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+5
+
+</td>
+<td>6<sup>th</sup> - 9<sup>th</sup></td>
+<td>May</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191072X.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-91-072_May%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Marriott</td>
+<td>Worcester MA USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr class="row2">
+<td>
+
+4
+
+</td>
+<td>11<sup>th</sup> - 14<sup>th</sup></td>
+<td>March</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191042.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-91-042_Mar%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Westin Resort</td>
+<td>Hilton Head SC USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+3
+
+</td>
+<td>7<sup>th</sup> - 10<sup>th</sup></td>
+<td>January</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1991_docs/1191013.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-91-013_Jan%2091%20minutes.pdf">.pdf</a>
+</td>
+<td>Compri hotel</td>
+<td>Gaithersburg MD USA</td>
+<td>Interim</td>
+    </tr>
+ 
+  
+<tr>
+    <td class="header" colspan="8">For Year 1990</td>
+    </tr>
+    
+<tr class="row2">
+<td>
+
+2
+
+</td>
+<td>12<sup>th</sup> - 16<sup>th</sup></td>
+<td>November</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1990_docs/1190022.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-90-22_Nov%2090%20minutes.pdf">.pdf</a>
+</td>
+<td>Hyatt Regency</td>
+<td>La Jolla CA USA</td>
+<td>Plenary</td>
+    </tr>
+ 
+  
+<tr class="row1">
+<td>
+
+1
+
+</td>
+<td>10<sup>th</sup> - 14<sup>th</sup></td>
+<td>September</td>
+<td >
+
+  
+    
+n/a
+    
+  
+
+</td>
+
+<td><a href="http://grouper.ieee.org/groups/802/11/Documents/DocumentArchives/1990_docs/1190010.DOC">.doc</a>
+<a href="http://www.ieee802.org/11/Reports/early-minutes-pdfs/11-90-10_Sept%2090%20minutes.pdf">.pdf</a>
+</td>
+<td>Holiday Inn</td>
+<td>Oshawa ON Canada</td>
+<td>Interim</td>
+    </tr>
+ 
+  </tbody>
+</table>
+
+      </div>
+    </div>
+
+    <div id="footer">
+    
+
+
+
+	<table>
+  <tr>
+    <td><img src="ieeel.gif" alt="IEEE Networking the World"  width="80" 
+    	height="69" /></td>
+    <td><a href="http://standards.ieee.org/search.html">
+    	<img src="search.gif" alt="Search IEEE" width="54" 
+    	height="58" /></a></td>
+    <td><a href="http://standards.ieee.org/cgi-bin/staffmail">
+    	<img src="email.gif" alt="E-mail IEEE Staff" width="55" 
+    	height="59" /></a></td>
+    <td><a href="http://standards.ieee.org/index.html">
+	    <img src="home.gif" alt="IEEE Standards Home Page" width="52"
+	     height="58" /></a></td>
+    <td><a href="http://www.ieee.org/">
+    	<img src="corp.gif" alt="IEEE Corporate Home Page" width="72" 
+    	height="58" /></a></td>
+    <td><img src="802.GIF" width="66" height="68" alt="IEEE 802.11"/></td>
+  </tr>
+</table>
+      <h6 style="text-align:center"><a href="http://www.ieee.org/about/documentation/copyright/">Copyright (c)</a>,
+      the Institute of Electrical and Electronics Engineers, Inc. (IEEE). All rights reserved.</h6>
+      <h6 style="text-align:center">This website may contain names, logos, designs, titles, words, or phrases that may
+constitute trademarks, service marks, or tradenames of the IEEE or other entities which may be registered in certain jurisdictions.</h6>
+
+
+
+    </div>
+    
+    
+  </body>
+</html>
