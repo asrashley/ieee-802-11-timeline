@@ -1,8 +1,35 @@
+total_storage_limit: 5M
 queue:
 - name: default
-  rate: 1/s
+  rate: 5/s
 - name: mail-queue
-  rate: 2000/d
+  rate: 20/d
   bucket_size: 10
 - name: background-processing
-  rate: 5/s
+  rate: 10/s
+  bucket_size: 2
+  max_concurrent_requests: 2
+  retry_parameters:
+    task_age_limit: 12h
+    task_retry_limit: 30
+- name: project-backlog
+  rate: 10/s
+  bucket_size: 2
+  max_concurrent_requests: 2
+  retry_parameters:
+    task_age_limit: 12h
+    task_retry_limit: 30
+- name: ballot-backlog
+  rate: 4/s
+  bucket_size: 2
+  max_concurrent_requests: 2
+  retry_parameters:
+    task_age_limit: 12h
+    task_retry_limit: 30
+- name: timeline-backlog
+  rate: 4/s
+  bucket_size: 2
+  max_concurrent_requests: 2
+  retry_parameters:
+    task_age_limit: 12h
+    task_retry_limit: 30

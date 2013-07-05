@@ -1,8 +1,9 @@
-from django.conf.urls import patterns
+from django.conf.urls import patterns, url
+from ballot.views import BallotDelete
 
 urlpatterns = patterns('ballot.views',
                        (r'^edit_ballot/(?P<bal>\d+)$', 'edit_ballot'),
-                       (r'^delete_ballot/(?P<bal>\d+)$', 'del_ballot'),
+                       url(r'delete_ballot/(?P<pk>\d+)$', BallotDelete.as_view(), name='del_ballot'),
                        (r'^new_ballot/$', 'add_ballot'),
                        (r'^LetterBallots.html$', 'wg_page', {'export':'html'}),
                        (r'^LetterBallots.shtml$', 'wg_page', {'export':'shtml'}),

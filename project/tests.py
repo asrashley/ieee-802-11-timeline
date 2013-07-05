@@ -23,10 +23,10 @@
 import datetime, re, json
 
 from django.core.urlresolvers import reverse
-from django.test.client import RequestFactory
-from django.contrib.auth import authenticate
+#from django.test.client import RequestFactory
+#from django.contrib.auth import authenticate
 
-from project.models import Project, DenormalizedProject, ProjectBacklog, InProgress
+from project.models import Project, DenormalizedProject, InProgress
 from project.views import ProjectForm, backlog_poll
 from util.tasks import run_test_task_queue 
 from util.tests import LoginBasedTest
@@ -42,7 +42,7 @@ class ProjectTest(LoginBasedTest):
         run_test_task_queue(self.client)
         self.failUnlessEqual(Project.objects.count(),1)
         self.failUnlessEqual(DenormalizedProject.objects.count(),1)
-        dn = DenormalizedProject.objects.get(project_pk=proj.pk)
+        dn = DenormalizedProject.objects.get(pk=proj.pk)
         self.failIfEqual(dn,None)
         self.failUnlessEqual(Project.objects.count(),1)
         proj.delete()
@@ -142,7 +142,8 @@ class ProjectTest(LoginBasedTest):
     def test_edit_project(self):
         proj = Project(name='test',order=0, doc_type=Project.Standard.code, description='test project', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
-        url = reverse('project.views.edit_project',args=[proj.pk])
+        self.failIf(proj.slug is None)
+        url = reverse('project.views.edit_project',args=[proj.slug])
         response = self._check_page(url)
         data = response.context['form'].initial
         for key in data.keys():
@@ -166,19 +167,20 @@ class ProjectTest(LoginBasedTest):
         url = reverse('project.views.main_page',args=[])
         response = self._check_page(url)
         self.failUnlessEqual(Project.objects.count(),1)
-        run_test_task_queue(self.client)
+        self.wait_for_backlog_completion([DenormalizedProject], 10*Project.objects.count())
         self.failUnlessEqual(Project.objects.count(),1)
         dn = DenormalizedProject.objects.get(pk=proj.pk)
         self.failIfEqual(dn,None)
         Project.objects.filter(pk=proj.pk).delete()
-        run_test_task_queue(self.client)
+        self.wait_for_backlog_completion([DenormalizedProject], 10*Project.objects.count())
         self.failUnlessRaises(DenormalizedProject.DoesNotExist, DenormalizedProject.objects.get, pk=123)
         proj = Project(pk=235, name='test',order=0, doc_type=Project.Standard.code, \
                        description='delete test 2', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
-        run_test_task_queue(self.client)
+        self.failIf(proj.slug is None)
+        self.wait_for_backlog_completion([DenormalizedProject], 10*Project.objects.count())
         DenormalizedProject.objects.get(pk=proj.pk)
-        url = reverse('project.views.edit_project',args=[proj.pk])
+        url = reverse('project.views.edit_project',args=[proj.slug])
         response = self._check_page(url)
         data = response.context['form'].initial
         for key in data.keys():
@@ -192,7 +194,7 @@ class ProjectTest(LoginBasedTest):
         self.failIf(response.status_code!=302 and response.status_code!=303)
         url = response.get('Location')
         response = self._check_page(url)
-        match = re.search(r'input type="submit" name="confirm"', str(response), re.IGNORECASE)
+        match = re.search(r'<input[^/]+type="submit"[^/]+name="confirm"[^/]*/>', str(response), re.IGNORECASE)
         self.assertTrue(match)
         data = {"confirm":"Yes, I'm sure"}
         response = self.client.post(url,data)
@@ -206,18 +208,18 @@ class ProjectTest(LoginBasedTest):
         url = reverse('project.views.main_page',args=[])+'?refresh=1'
         self._check_page(url, status_code=302)
         self.failUnlessEqual(Project.objects.count(),1)
-        self.failUnlessEqual(ProjectBacklog.objects.count(),1)
+        self.failUnlessEqual(DenormalizedProject.backlog_poll().idle,False)
         poll_url = reverse('project.views.backlog_poll',args=[])
         request = self.get_request(poll_url)
         poll = backlog_poll(request)
         status = json.loads(poll.content)
-        self.failUnlessEqual(status['backlog'],True)
+        self.failIfEqual(status['backlog'],0)
         self.failUnlessEqual(status['count'],0)
-        run_test_task_queue(self.client)
+        self.wait_for_backlog_completion([DenormalizedProject], 10*Project.objects.count())
         request = self.get_request(poll_url)
         poll = backlog_poll(request)
         status = json.loads(poll.content)
-        self.failUnlessEqual(status['backlog'],False)
+        self.failUnlessEqual(status['backlog'],0)
         self.failUnlessEqual(Project.objects.count(),1)
         self.failUnlessEqual(status['count'],Project.objects.count())
         DenormalizedProject.objects.get(pk=proj.pk)

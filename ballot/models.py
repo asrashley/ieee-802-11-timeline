@@ -14,14 +14,15 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                                            *
 #
 #  Author              :    Alex Ashley
 #
 #############################################################################
 
 from project.models import Project
-from util.tasks import add_task
+from util.tasks import add_task, poll_task_queue, delete_task
+from util.db import KeyField
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -29,7 +30,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.urlresolvers import reverse
 
-import datetime
+import datetime, logging
 
 class BallotType(object):
     def __init__(self,code,descr):
@@ -160,67 +161,110 @@ class Ballot(AbstractBallot):
     
         
 class DenormalizedBallot(AbstractBallot):
+    QUEUE_NAME='ballot-backlog'
     #ballot = models.OneToOneField(Ballot, primary_key=True)
     #ballot_pk = models.IntegerField(primary_key=True)
     result = models.IntegerField(null=True, blank=True)
-    project_pk = models.IntegerField()
+    #project_pk = models.IntegerField()
+    project_pk = KeyField(null=False)
+    project_slug = models.SlugField(max_length=25, unique=True, editable=False, null=True, blank=True)
     project_name = models.CharField(max_length=30, help_text=_('Name of standard/amendment'))
     task_group = models.CharField(max_length=10, help_text=_('Name of task group (TG..)'))
     
-    def denormalize(self, commit=True):
-        ballot = Ballot.objects.get(pk=self.number)
+    @classmethod
+    def denormalize(clz, ballot_pk, commit=True):
+        ballot = Ballot.objects.get(number=ballot_pk)
+        #sys.stderr.write('denormalize ballot %d\n'%ballot.number)
+        #ballot = Ballot.objects.get(pk=self.number)
+        dn = DenormalizedBallot(pk=ballot.pk)
         for field in ballot._meta.fields:
             if field.attname!='project' and field.attname!='project_id':
-                setattr(self,field.attname,getattr(ballot,field.attname))
-        #try:
-        self.project_pk = ballot.project.pk
-        self.project_name = ballot.project.fullname
-        self.task_group = ballot.project.task_group
-        #except Project.DoesNotExist:
-        #    print 'Invalid project ',ballot.project_id
-        if self.project_name.endswith('-xxxx'):
-            self.project_name = self.project_name[:-5]
-        self.result = ballot.result if self.vote_for is not None else None
+                #print field.attname,getattr(ballot,field.attname)
+                setattr(dn,field.attname,getattr(ballot,field.attname))
+        try:
+            dn.project_pk = ballot.project.pk
+            dn.project_slug = ballot.project.slug
+            dn.project_name = ballot.project.fullname
+            dn.task_group = ballot.project.task_group
+        except Project.DoesNotExist:
+            logging.error('Invalid project %s'%str(ballot_pk))
+        if dn.project_name.endswith('-xxxx'):
+            dn.project_name = dn.project_name[:-5]
+        dn.result = ballot.result if dn.vote_for is not None else None
         if commit:
-            self.save()
+            dn.save()
+        return dn
+    
+    @classmethod
+    def request_update(clz,ballot=None, ballot_pk=None):
+        if ballot is not None:
+            ballot_pk = ballot.pk
+        #sys.stderr.write('ru %s\n'%str(ballot_pk))
+        add_task(url=reverse('ballot.views.backlog_worker'),
+                 name = 'ballot'+str(ballot_pk), 
+                 queue_name=clz.QUEUE_NAME,
+                 params={'ballot':ballot_pk},
+                 countdown=2)        
+        
+    @classmethod
+    def cancel_update(clz,ballot=None, ballot_pk=None):
+        if ballot is not None:
+            ballot_pk = ballot.pk
+        try:
+            delete_task(clz.QUEUE_NAME,'ballot'+str(ballot_pk))
+        except Exception,e:
+            logging.info('Exception cancelling update of ballot')
+            logging.info(str(e))
+        
+    @classmethod
+    def backlog_poll(clz):
+        return poll_task_queue(clz.QUEUE_NAME)
     
     def __unicode__(self):
         return 'LB%03d'%int(self.number)
     
-class BallotBacklog(models.Model):
-    #ballot = models.OneToOneField(Ballot, primary_key=True)
-    ballot_pk = models.IntegerField(primary_key=True)
-
-    #def __getattribute__(self, *args, **kwargs):
-    #    if args and args[0]=='ballot':
-    #        return Ballot.objects.get(pk=self.ballot_pk)
-    #    return models.Model.__getattribute__(self, *args, **kwargs)
+#class BallotBacklog(models.Model):
+#    #ballot = models.OneToOneField(Ballot, primary_key=True)
+#    #ballot_pk = models.CharField(primary_key=True, blank=False, null=False, max_length=255)
+#    number = models.IntegerField(primary_key=True)
+#    #ballot = models.ForeignKey(Ballot, primary_key=True)
+#
+#    #def __getattribute__(self, *args, **kwargs):
+#    #    if args and args[0]=='ballot':
+#    #        return Ballot.objects.get(pk=self.ballot_pk)
+#    #    return models.Model.__getattribute__(self, *args, **kwargs)
+#    
+#    #def __setattr__(self, *args, **kwargs):
+#    #    if args and len(args)>1 and args[0]=='ballot':
+#    #        self.ballot_pk= args[1].pk
+#    #        return args[1]
+#    #    return models.Model.__setattr__(self, *args, **kwargs)
     
-    #def __setattr__(self, *args, **kwargs):
-    #    if args and len(args)>1 and args[0]=='ballot':
-    #        self.ballot_pk= args[1].pk
-    #        return args[1]
-    #    return models.Model.__setattr__(self, *args, **kwargs)
-    
-def check_ballot_backlog(force=False):
-    needs_update = force
-    if not force:
-        needs_update = BallotBacklog.objects.exists()
-    if needs_update:
-        add_task(name = 'ballot-backlog', url=reverse('ballot.views.backlog_worker'))
-    return needs_update
+#def check_ballot_backlog(force=False):
+#    needs_update = force
+#    if not force:
+#        needs_update = BallotBacklog.objects.exists()
+#    if needs_update:
+#        add_task(name = 'ballot-backlog', url=reverse('ballot.views.backlog_worker'))
+#    return needs_update
     
 @receiver(post_save, sender=Ballot)
 def add_to_backlog(sender, instance, **kwargs):
     if kwargs.get('raw',False):
         #don't create a backlog when loading a fixture in a unit test
         return
-    b = BallotBacklog(ballot_pk=instance.pk)
-    b.save()
-    check_ballot_backlog(True)
+    DenormalizedBallot.request_update(ballot=instance)
+    #check_ballot_backlog(True)
     
 @receiver(pre_delete, sender=Ballot)
 def remove_ballot(sender, instance, **kwargs):
-    BallotBacklog.objects.filter(ballot_pk=instance.pk).delete()
-    DenormalizedBallot.objects.filter(pk=instance.pk).delete()
+    DenormalizedBallot.cancel_update(ballot=instance)
+    #try:
+    #    BallotBacklog.objects.filter(number=instance.number).delete()
+    #except BallotBacklog.DoesNotExist:
+    #    pass
+    try:
+        DenormalizedBallot.objects.filter(number=instance.number).delete()
+    except DenormalizedBallot.DoesNotExist:
+        pass
     

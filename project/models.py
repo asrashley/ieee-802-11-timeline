@@ -20,8 +20,8 @@
 #
 #############################################################################
 
-from util.tasks import add_task
-from util.db import bulk_delete
+from util.tasks import add_task, poll_task_queue, delete_task
+#from util.db import bulk_delete
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -30,22 +30,29 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.urlresolvers import reverse
 
-import random, re
+import random, re, logging
 
-def generate_slug(model,object,field, max_length):
+def generate_slug(model,obj,field, max_length):
     """Generates a slug that is unique within the specified model.
     """
-    title = getattr(object,field)
+    title = getattr(obj,field)
     if title is None:
         raise Exception("Unable to find name/title of object")
     newSlug = slugify(title[:max_length])
-    if object.pk is not None:
-        counter=int(object.pk)
+    counter=random.randint(0,99)
+    #if obj.pk is not None:
+    #    try:
+    #        counter=int(obj.pk)
+    #    except ValueError:
+    #        pass
+    if obj.pk is not None:
+        while model.objects.filter(slug=newSlug).exclude(pk=obj.pk).exists():
+            newSlug = slugify(u"%s-%d"%(title[:max_length-5],counter))
+            counter += 1
     else:
-        counter=random.randint(0,99)
-    while model.objects.filter(slug=newSlug).exists():
-        newSlug = slugify(u"%s %d"%(title[:max_length-5],counter))
-        counter += 1
+        while model.objects.filter(slug=newSlug).exists():
+            newSlug = slugify(u"%s-%d"%(title[:max_length-5],counter))
+            counter += 1
     return newSlug
 
 class Status(object):
@@ -86,8 +93,9 @@ class AbstractProject(models.Model):
     
     _PROJECT_TYPES = [ (b.code,b.description) for b in Amendment, Standard, RecommendedPractice, Corrigendum] 
     MAX_AMENDMENTS = 20
+    key = models.AutoField(primary_key=True)
     name = models.CharField(max_length=20, help_text=_('Name of standard/amendment (e.g. 802.11aa), WITHOUT year designation'))
-    slug = models.SlugField(max_length=15, unique=True, editable=False, null=True, blank=True)
+    slug = models.SlugField(max_length=25, unique=True, editable=False, null=True, blank=True)
     description = models.CharField(max_length=100, help_text=_('Project Description'))
     doc_type = models.CharField("Document type", max_length=4, choices=_PROJECT_TYPES, help_text='Amendment, Standard, Recommended Practice or Corrigendum')
     par = models.URLField(null=False, blank=True, help_text=_('URL pointing to PAR document'))
@@ -137,6 +145,7 @@ class AbstractProject(models.Model):
         return InProgress
     
 class Project(AbstractProject):
+    #key = KeyField(primary_key=True) 
     name_re = re.compile('.+-[0-9x][0-9x][0-9x][0-9x]$')
         
     def __unicode__(self):
@@ -166,16 +175,25 @@ class Project(AbstractProject):
         if self.published:
             return '%s-%04d'%(self.name,self.revcom_approval_date.year)
         return self.name
+    
+    def get_absolute_url(self):
+        if self.pk is not None and self.slug:
+            return reverse('project.views.edit_project', args=[self.slug])
+        return reverse('project.views.add_project')
         
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = generate_slug(Project,self,'task_group',10)
+        #if not self.slug:
+        self.slug = generate_slug(Project,self,'task_group',10)
         if self.name_re.match(self.name):
             self.name = self.name[:-5]
         super(Project,self).save(*args, **kwargs)
+
     
 class DenormalizedProject(AbstractProject):
-    project_pk = models.IntegerField(primary_key=True)
+    QUEUE_NAME='project-backlog'
+    #project_pk = models.CharField(primary_key=True, blank=False, null=False, max_length=255)
+    #project_pk = KeyField(primary_key=True)
+    #project = models.ForeignKey(Project)
     fullname = models.CharField(max_length=30, help_text=_('Name of standard/amendment, WITH year designation'))
     sortkey = models.CharField(max_length=25, editable=False, db_index=True)
     denormalized_baselines_slug = models.CharField(max_length=16*AbstractProject.MAX_AMENDMENTS, blank=True, null=True, editable=False)
@@ -189,34 +207,71 @@ class DenormalizedProject(AbstractProject):
         rv = [ProjectProxy(name,slug) for name,slug in zip(self.denormalized_baselines_name.split(','),
                                                            self.denormalized_baselines_slug.split(','))]
         return rv
-      
-    def denormalize(self, commit=True):
-        project= Project.objects.get(pk=self.project_pk)
+
+    @classmethod      
+    def denormalize(clz, project_pk, commit=True):
+        project = Project.objects.get(pk=project_pk)
+        #logging.info('denormalise %s'%(project.task_group))
+        dn = DenormalizedProject(key=project.key)
         for field in project._meta.fields:
-            setattr(self,field.attname,getattr(project,field.attname))
-        self.fullname = project.fullname
+            if field.attname!='pk' and field.attname!='key':
+                setattr(dn,field.attname,getattr(project,field.attname))
+        dn.fullname = project.fullname
         bsl = project.baselines
-        self.denormalized_baselines_name = ','.join([proj.fullname for proj in bsl])
-        self.denormalized_baselines_slug = ','.join([proj.slug for proj in bsl])
+        dn.denormalized_baselines_name = ','.join([proj.fullname for proj in bsl])
+        dn.denormalized_baselines_slug = ','.join([proj.slug for proj in bsl])
         a = project.withdrawn_date.strftime('%Y%m%d') if project.withdrawn_date is not None else '00000000'
         b = project.revcom_approval_date.strftime('%Y%m%d') if project.published and project.revcom_approval_date is not None else '00000000'
         c = project.par_date.strftime('%Y%m%d')
-        self.sortkey = ''.join([a,b,c])
+        dn.sortkey = ''.join([a,b,c])
         if commit:
-            self.save()
-        
+            dn.save()
+        return dn
+
+    @classmethod
+    def backlog_poll(clz):
+        rv= poll_task_queue(clz.QUEUE_NAME)
+        #logging.info(str(rv))
+        return rv
+    
     def __unicode__(self):
         return self.fullname
     
-class ProjectBacklog(models.Model):
-    project_pk = models.IntegerField(primary_key=True)
+    @classmethod
+    def request_update(clz,project=None, project_pk=None):
+        if project_pk is None:
+            if project is None:
+                raise ValueError('request_update with no project')
+            project_pk = project.pk
+        #sys.stderr.write('ru %s\n'%str(project_pk))
+        add_task(url=reverse('project.views.backlog_worker'),
+                 name = 'project'+str(project_pk), 
+                 queue_name=clz.QUEUE_NAME,
+                 params={'project':project_pk},
+                 countdown=1)        
+        #ProjectBacklog(key=project.pk).save()
+        
+    @classmethod
+    def cancel_update(clz,project=None, project_pk=None):
+        if project is not None:
+            project_pk = project.pk
+        try:
+            delete_task(clz.QUEUE_NAME,'project'+str(project_pk))
+        except Exception,e:
+            logging.info('Exception cancelling update of project')
+            logging.info(str(e))
+    
+#class ProjectBacklog(models.Model):
+#    #project_pk = KeyField(primary_key=True, blank=False, null=False)
+#    key = models.AutoField(primary_key=True)
+#    #project_pk = models.IntegerField(primary_key=True)
 
-def check_project_backlog(needs_update=False):
-    if not needs_update:
-        needs_update = ProjectBacklog.objects.exists()
-    if needs_update:
-        add_task(url=reverse('project.views.backlog_worker'), name='project-backlog')
-    return needs_update
+#def check_project_backlog(needs_update=False):
+#    if not needs_update:
+#        needs_update = ProjectBacklog.objects.exists()
+#    if needs_update:
+#        add_task(url=reverse('project.views.backlog_worker'), name='project-backlog')
+#    return needs_update
     
 @receiver(post_save, sender=Project)
 def add_to_backlog(sender, instance, **kwargs):
@@ -224,25 +279,26 @@ def add_to_backlog(sender, instance, **kwargs):
         #don't create a backlog when loading a fixture in a unit test
         return
     # instance is a Project object
-    b = ProjectBacklog(project_pk=instance.pk)
-    b.save()
+    DenormalizedProject.request_update(project=instance)
+    #b = ProjectBacklog(key=instance.pk)
+    #b.save()
     if instance.baseline is not None:
-        for p in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).iterator():
-            b = ProjectBacklog(project_pk=p.pk)
-            b.save()
+        for pk in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).values_list('pk',flat=True):
+            DenormalizedProject.request_update(project_pk=pk)
     if instance.doc_type==Project.Standard.code:
-        for p in Project.objects.filter(baseline=instance.pk).iterator():
-            b = ProjectBacklog(project_pk=p.pk)
-            b.save()
-    check_project_backlog(True)
+        for pk in Project.objects.filter(baseline=instance.pk).values_list('pk',flat=True):
+            DenormalizedProject.request_update(project_pk=pk) 
 
 @receiver(pre_delete, sender=Project)
 def remove_project(sender, instance, **kwargs):
     # instance is a Project object
+    DenormalizedProject.cancel_update(project=instance)
     if instance.baseline is not None:
-        for proj in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk).iterator():
+        for proj in Project.objects.filter(baseline=instance.baseline).exclude(pk=instance.pk):
             proj.baseline = None
             proj.save()
-    ProjectBacklog.objects.filter(project_pk=instance.pk).delete()
-    DenormalizedProject.objects.filter(project_pk=instance.pk).delete()
+    try:
+        DenormalizedProject.objects.filter(key=instance.pk).delete()
+    except DenormalizedProject.DoesNotExist:
+        pass
     

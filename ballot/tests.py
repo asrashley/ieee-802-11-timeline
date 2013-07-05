@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-from ballot.models import Ballot, DenormalizedBallot, check_ballot_backlog
+from ballot.models import Ballot, DenormalizedBallot
 from ballot.views import BallotForm, backlog_poll
 from project.models import Project
 from util.tasks import run_test_task_queue
@@ -94,14 +94,18 @@ class BallotTest(BallotBaseTest):
         response = self._check_page(url+'?refresh=1', status_code=302)
         poll = backlog_poll(self.get_request(poll_url))
         status = json.loads(poll.content)
-        self.failUnlessEqual(status['backlog'],True)
+        self.failIfEqual(status['backlog'],0)
         self.failUnlessEqual(status['count'],0)
-        check_ballot_backlog()
-        run_test_task_queue(self.client)
+        wg_count = Ballot.objects.filter(ballot_type=Ballot.WGInitial.code).count()
+        wg_count += Ballot.objects.filter(ballot_type=Ballot.WGRecirc.code).count()
+        self.wait_for_backlog_completion(DenormalizedBallot, 3*wg_count)
+        for bal in Ballot.objects.filter(ballot_type=Ballot.WGInitial.code):
+            DenormalizedBallot.objects.get(number=bal.number)
+        for bal in Ballot.objects.filter(ballot_type=Ballot.WGRecirc.code):
+            DenormalizedBallot.objects.get(number=bal.number)
         poll = backlog_poll(self.get_request(poll_url))
         status = json.loads(poll.content)
-        self.failUnlessEqual(status['backlog'],False)
-        self.failUnlessEqual(status['count'],Ballot.objects.count())
+        self.failUnlessEqual(status['backlog'],0)
         response = self._check_page(url+'?redraw=0', status_code=302)
         run_test_task_queue(self.client)
         response = self._check_page(url+'?redraw=1', status_code=302)
@@ -239,6 +243,7 @@ class BallotTestNoData(BallotBaseTest):
         url = reverse('ballot.views.main_page',args=[])
         response = self._check_page(url)
         self.failUnlessEqual(Ballot.objects.count(),1)
+        self.wait_for_backlog_completion(DenormalizedBallot, 10)
         run_test_task_queue(self.client)
         self.failUnlessEqual(Ballot.objects.count(),1)
         dn = DenormalizedBallot.objects.get(pk=bal.pk)
@@ -265,7 +270,7 @@ class BallotTestNoData(BallotBaseTest):
         self.failUnless(valid)
         response = self.client.post(url,data)
         self.failIf(response.status_code!=302 and response.status_code!=303)
-        url = reverse('ballot.views.del_ballot',args=[bal.number])
+        url = reverse('del_ballot',args=[bal.number])
         response.get('Location').index(url)
         response = self._check_page(url)
         match = re.search(r'input\s+type="submit"\s+name="confirm"', str(response), re.IGNORECASE)
@@ -278,7 +283,7 @@ class BallotTestNoData(BallotBaseTest):
         self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, pk=124)
         
     def test_renumber_ballot(self):
-        proj = Project(name='test',order=0, doc_type='STD', description='', task_group='TGx', par_date=datetime.datetime.now())
+        proj = Project(name='test',order=0, doc_type='STD', description='test_renumber_ballot', task_group='TGx', par_date=datetime.datetime.now())
         proj.save()
         self.failUnlessEqual(Project.objects.count(),1)
         self.failUnlessEqual(Ballot.objects.count(),0)
@@ -289,13 +294,13 @@ class BallotTestNoData(BallotBaseTest):
         url = reverse('ballot.views.main_page',args=[])
         self._check_page(url)
         #response = self.client.get(url)
-        run_test_task_queue(self.client)
+        self.wait_for_backlog_completion(DenormalizedBallot, 10)
         dn = DenormalizedBallot.objects.get(pk=bal.pk)
         bal2 = Ballot.objects.get(number=bal.number)
         bal2.number = 321
         bal2.save()
         Ballot.objects.get(number=123).delete()
-        run_test_task_queue(self.client)
+        self.wait_for_backlog_completion(DenormalizedBallot, 10)
         self.failUnlessRaises(DenormalizedBallot.DoesNotExist, DenormalizedBallot.objects.get, number=123)
         dn = DenormalizedBallot.objects.get(number=bal2.number)
                 

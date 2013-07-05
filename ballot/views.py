@@ -14,13 +14,13 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool
 #
 #  Author              :    Alex Ashley
 #
 #############################################################################
 
-from ballot.models import Ballot, BallotBacklog, DenormalizedBallot, check_ballot_backlog
+from ballot.models import Ballot, DenormalizedBallot
 from project.models import InProgress, Published, Withdrawn
 from util.cache import CacheControl
 from util.forms import DateModelForm
@@ -30,14 +30,22 @@ from django.shortcuts import render_to_response,  get_object_or_404
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
-from django.views.generic import create_update
 from django import forms,http
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.http import HttpResponse
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.core.urlresolvers import reverse_lazy
+from util.db import bulk_delete
+import sys
 
+#@login_required
+class BallotDelete(DeleteView):
+    model = Ballot
+    success_url = reverse_lazy('ballot.views.main_page')
+    
 class BallotForm(DateModelForm):
     curstat = forms.IntegerField(widget=forms.HiddenInput)
     curpk  = forms.IntegerField(widget=forms.HiddenInput, required=False)
@@ -56,16 +64,18 @@ def main_page(request):
     next_page=reverse('ballot.views.main_page')
     if request.GET.get('refresh'):
         for b in Ballot.objects.all():
-            BallotBacklog(ballot_pk=b.pk).save()
+            DenormalizedBallot.request_update(ballot_pk=b.number)
         return http.HttpResponseRedirect(next_page)
-    needs_update = check_ballot_backlog()
+    needs_update = not DenormalizedBallot.backlog_poll().idle 
     return render_to_response('ballot/index.html', locals(), context_instance=RequestContext(request))
     
 @login_required        
 def wg_page(request, export=None):
     if request.GET.get('refresh'):
-        for b in Ballot.objects.all():
-            BallotBacklog(ballot_pk=b.pk).save()
+        for b in Ballot.objects.filter(ballot_type=Ballot.WGInitial.code):
+            DenormalizedBallot.request_update(ballot_pk=b.number)
+        for b in Ballot.objects.filter(ballot_type=Ballot.WGRecirc.code):
+            DenormalizedBallot.request_update(ballot_pk=b.number)
         return http.HttpResponseRedirect(reverse('ballot.views.wg_page'))
     next_page = reverse('ballot.views.wg_page')
     if request.GET.get('redraw',None) is not None:
@@ -85,8 +95,10 @@ def wg_page(request, export=None):
 @login_required
 def sponsor_page(request, export=None):
     if request.GET.get('refresh'):
-        for b in Ballot.objects.all():
-            BallotBacklog(ballot_pk=b.pk).save()
+        for b in Ballot.objects.filter(ballot_type=Ballot.SBInitial.code):
+            DenormalizedBallot.request_update(ballot_pk=b.number)
+        for b in Ballot.objects.filter(ballot_type=Ballot.SBRecirc.code):
+            DenormalizedBallot.request_update(ballot_pk=b.number)
         return http.HttpResponseRedirect(reverse('ballot.views.sponsor_page'))
     next_page=reverse('ballot.views.sponsor_page')
     if request.GET.get('redraw',None) is not None:
@@ -123,7 +135,7 @@ def edit_ballot(request,bal):
         if request.POST.has_key('cancel'):
             return http.HttpResponseRedirect(next_page)
         if request.POST.has_key('delete'):
-            return http.HttpResponseRedirect(reverse('ballot.views.del_ballot',args=[bal]))
+            return http.HttpResponseRedirect(reverse('del_ballot',args=[bal]))
         form = BallotForm(request.POST, request.FILES, instance=ballot)
         if form.is_valid():
             data = form.cleaned_data
@@ -150,16 +162,16 @@ def edit_ballot(request,bal):
     context['no_delete'] = bal is None
     return render_to_response('edit-object.html',context, context_instance=RequestContext(request))
 
-@login_required
-def del_ballot(request,bal):
-    next_page = request.GET.get('next','/')
-    return create_update.delete_object(request, model=Ballot, object_id=bal,
-                                       post_delete_redirect=next_page)
+#@login_required
+#def del_ballot(request,bal):
+#    next_page = request.GET.get('next','/')
+#    return create_update.delete_object(request, model=Ballot, object_id=bal,
+#                                       post_delete_redirect=next_page)
 
 def ballot_page(request, ballots, export, sponsor, next, export_page):
     closed_ballots = []
     open_ballots = []
-    needs_update = check_ballot_backlog()
+    needs_update = not DenormalizedBallot.backlog_poll().idle
     for b in ballots:
         if b.is_open:
             open_ballots.append(b)
@@ -179,25 +191,39 @@ def ballot_page(request, ballots, export, sponsor, next, export_page):
     context_instance['cache'].export = export
     return render_to_response('ballot/ballots.html', context, context_instance=context_instance)
 
+#class BallotBacklogPoll(BacklogPoll):
+#    backlog = BallotBacklog
+#    denormalized = DenormalizedBallot
+#    check_backlog = check_ballot_backlog
+    
 @login_required
 def backlog_poll(request):
-    status = 'true' if BallotBacklog.objects.exists() else 'false'
-    denormalized_count = DenormalizedBallot.objects.count()
-    return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')
+    stats = DenormalizedBallot.backlog_poll()
+    return HttpResponse(content='{"backlog":%d, "count":%d}'%(stats.waiting+stats.active,DenormalizedBallot.objects.count()), mimetype='application/json')
+    #return BallotBacklogPoll().poll(request)
         
 @csrf_exempt
 def backlog_worker(request):
-    done=[]
-    for backlog in BallotBacklog.objects.all().iterator():
-        done.append(backlog.ballot_pk)
-        try:
-            b = DenormalizedBallot(number=backlog.ballot_pk)
-            b.denormalize()
-        except Ballot.DoesNotExist:
-            pass
-    message='Timeline backlog complete'
-    BallotBacklog.objects.filter(pk__in=done).delete()
-    return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+    try:
+        dn = DenormalizedBallot.denormalize(ballot_pk=request.POST['ballot'], commit=True)
+        return HttpResponse(content='DenormalizedBallot %s'%(dn.task_group), mimetype='text/plain')
+    except DenormalizedBallot.DoesNotExist:
+        return HttpResponse(content='DenormalizedBallot %s does not exist'%str(request.POST['ballot']), mimetype='text/plain')
+#    done=[]
+#    try:
+#        for backlog in BallotBacklog.objects.all():
+#            done.append(backlog.number)
+#            try:
+#                DenormalizedBallot.denormalize(backlog)
+#            except Ballot.DoesNotExist:
+#                sys.stderr.write('Unable to find ballot %d\n'%backlog.number)
+#                pass
+#        message='Timeline backlog complete'
+#        return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+#    except:
+#        raise
+#    finally:
+#        bulk_delete(BallotBacklog,BallotBacklog.objects.filter(pk__in=done))
 
 @receiver(post_save, sender=DenormalizedBallot)
 def update_cache(sender, instance, **kwargs):

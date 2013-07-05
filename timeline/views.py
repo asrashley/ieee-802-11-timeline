@@ -20,17 +20,16 @@
 #
 #############################################################################
 
-from project.models import Project, InProgress, Published, Withdrawn, \
-    DenormalizedProject, ProjectBacklog, check_project_backlog
-from timeline.models import ProjectBallotsBacklog, DenormalizedProjectBallots, \
-    check_project_ballot_backlog 
+from project.models import InProgress, Published, Withdrawn, DenormalizedProject
+from timeline.models import DenormalizedProjectBallots
 from util.cache import CacheControl
-from util.db import bulk_delete
+#from util.db import bulk_delete
+#from util.backlog import BacklogPoll
+#from util.tasks import poll_task_queue
 
 from django.template import RequestContext
-from django.shortcuts import render_to_response,  get_object_or_404
+from django.shortcuts import render_to_response
 from django import forms,http
-from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save, pre_delete
@@ -38,18 +37,11 @@ from django.dispatch import receiver
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-import datetime, sys
+import datetime, logging
 from operator import attrgetter
 
 @login_required
 def main_page(request, export=None):
-    if request.GET.get('refresh'):
-        for p in Project.objects.all().iterator():
-            ProjectBacklog(project_pk=p.pk).save()
-            ProjectBallotsBacklog.request_update(p.pk)
-        check_project_backlog(True)
-        check_project_ballot_backlog(True)
-        return http.HttpResponseRedirect(reverse('timeline.views.main_page'))
     if request.GET.get('redraw',None) is not None:
         try:
             redraw = int(request.GET.get('redraw',-1))
@@ -67,25 +59,23 @@ def main_page(request, export=None):
     in_process = []
     published = []
     withdrawn = []
-    needs_update = check_project_backlog()
-    for pd in DenormalizedProject.objects.all().iterator():
+    needs_update = DenormalizedProject.backlog_poll().idle and DenormalizedProjectBallots.backlog_poll().idle
+    needs_update = not needs_update
+    #logging.info('needs_update %s'%str(needs_update))
+    for pd in DenormalizedProject.objects.all():
         try:
-            pd.ballots = DenormalizedProjectBallots.objects.get(project_pk=pd.pk)
+            pd.ballots = DenormalizedProjectBallots.objects.get(pk=pd.pk)
         except DenormalizedProjectBallots.DoesNotExist:
-            pd.ballots = DenormalizedProjectBallots(project_pk=pd.pk)
-            sys.stderr.write('Unable to find DenormalizedProjectBallots for project %d\n'%pd.pk)
-            try:
-                pbb = ProjectBallotsBacklog.objects.get(project_pk=pd.pk)
-            except ProjectBallotsBacklog.DoesNotExist:
-                pbb = ProjectBallotsBacklog(project_pk=pd.pk)
-                pbb.save()
-            check_project_ballot_backlog()
+            pd.ballots = DenormalizedProjectBallots(pk=pd.pk)
+            #sys.stderr.write('Unable to find DenormalizedProjectBallots for project %s\n'%str(pd.pk))
+            DenormalizedProjectBallots.request_update(pd)
         if pd.withdrawn:
             withdrawn.append(pd)
         elif pd.published:
             published.append(pd)
         else:
             in_process.append(pd)
+    #check_project_ballot_backlog()
     in_process.sort(key=attrgetter('sortkey'), reverse=True)
     published.sort(key=attrgetter('sortkey'), reverse=True)
     withdrawn.sort(key=attrgetter('sortkey'), reverse=True)
@@ -98,28 +88,45 @@ def main_page(request, export=None):
     context_instance['cache'].export = export
     return render_to_response('timeline/index.html', context, context_instance=context_instance)
 
+#class TimelineBacklogPoll(BacklogPoll):
+#    backlog = ProjectBallotsBacklog
+#    denormalized = DenormalizedProjectBallots
+#    check_backlog = check_project_ballot_backlog
+
 @login_required
 def backlog_poll(request):
-    status = 'true' if ProjectBallotsBacklog.objects.exists() else 'false'
-    denormalized_count = DenormalizedProjectBallots.objects.count()
-    return HttpResponse(content='{"backlog":%s, "count":%d}'%(status,denormalized_count), mimetype='application/json')
+    stats = DenormalizedProjectBallots.backlog_poll()
+    #done = 'true' if stats.idle else 'false'
+    return HttpResponse(content='{"backlog":%d, "count":%d}'%(stats.waiting+stats.active,DenormalizedProject.objects.count()), mimetype='application/json')
+    #return TimelineBacklogPoll().poll(request)
 
 @csrf_exempt
 def backlog_worker(request):
-    done=[]
-    for backlog in ProjectBallotsBacklog.objects.all().iterator():
-        done.append(backlog.project_pk)
-        try:
-            b = DenormalizedProjectBallots.objects.get(project_pk=backlog.project_pk)
-        except DenormalizedProjectBallots.DoesNotExist:
-            b = DenormalizedProjectBallots(project_pk=backlog.project_pk)
-        try:
-            b.denormalize(backlog)
-        except Project.DoesNotExist:
-            pass
-    message='Timeline backlog complete'
-    bulk_delete(ProjectBallotsBacklog, ProjectBallotsBacklog.objects.filter(pk__in=done))
-    return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+    try:
+        dn = DenormalizedProjectBallots.denormalize(project_pk=request.POST['project'], commit=True)
+        return HttpResponse(content='DenormalizedProjectBallots %s'%(dn.project_task_group), mimetype='text/plain')
+    except DenormalizedProject.DoesNotExist:
+        return HttpResponse(content='DenormalizedProjectBallots %s does not exist'%str(request.POST['project']), mimetype='text/plain')
+    
+#def old_backlog_worker(request):
+#    done=[]
+#    try:
+#        sys.stderr.write('%s\n'%str(request.POST.backlog))
+#        sys.stderr.write('bw%d '%ProjectBallotsBacklog.objects.count())
+#        #sys.stderr.write('backlog_worker\n')
+#        for backlog in ProjectBallotsBacklog.objects.all():
+#            done.append(backlog.pk)
+#            #sys.stderr.write('backlog_worker %s\n'%str(backlog.pk))
+#            DenormalizedProjectBallots.denormalize(backlog)
+#        #message='Timeline backlog complete'
+#        return HttpResponse(content='Timeline backlog complete', mimetype='text/plain')
+#        #return render_to_response('done.html',locals(),context_instance=RequestContext(request))
+#    except:
+#        raise
+#    finally:
+#        bulk_delete(ProjectBallotsBacklog, ProjectBallotsBacklog.objects.filter(pk__in=done))
+#        sys.stderr.write('timeline backlog %d\n'%ProjectBallotsBacklog.objects.count())
+#        #sys.stderr.write('backlog_worker done=%d\n'%ProjectBallotsBacklog.objects.count())
 
 @receiver(post_save, sender=DenormalizedProject)
 @receiver(pre_delete, sender=DenormalizedProject)
