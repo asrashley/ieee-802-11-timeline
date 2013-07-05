@@ -1,4 +1,4 @@
-application: ieee80211timeline
+application: ieee-802-11-timeline
 version: 4
 runtime: python27
 api_version: 1
@@ -7,6 +7,7 @@ default_expiration: '365d'
 
 builtins:
 - remote_api: on
+- deferred: on
 
 #inbound_services:
 #- warmup
@@ -19,58 +20,33 @@ handlers:
 - url: /remoteapi.*
   script: google.appengine.ext.remote_api.handler.app
   login: admin
-
 - url: /_ah/queue/deferred
   script: djangoappengine.deferred.handler.application
   login: admin
-  
 - url: /media/admin
   static_dir: django/contrib/admin/static/
-
 - url: /static/admin
   static_dir: django/contrib/admin/static/
-
-#- url: /timeline/dn
-#  script: djangoappengine.main.application
-#  login: admin
-  
-#- url: /ballot/dn
-#  script: djangoappengine.main.application
-#  login: admin
-  
-#- url: /util/import/work
-#  script: djangoappengine.main.application
-#  login: admin
-  
 - url: /media
   static_dir: media/
-  
-#- url: /media/css
-#  static_dir: media/css/
-#
-#- url: /media/js
-#  static_dir: media/js/
-  
-#- url: /media/bin
-#  static_dir: media/bin/
-
-
+  expiration: 1d
 - url: /favicon.ico
   static_files: media/images/favicon.ico
   upload: media/images/favicon.ico
-
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt
   secure: optional
   expiration: '0'
-  
 - url: /.*
   script: djangoappengine.main.application
-    
+
 admin_console:
   pages:
   - name: Django Admin
     url: /admin
-     
-  
+
+pagespeed:
+  enabled_rewriters:
+  - MinifyCss
+  - CollapseWhitespace
