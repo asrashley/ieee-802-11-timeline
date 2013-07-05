@@ -4,6 +4,7 @@ from djangoappengine.utils import on_production_server
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+# Settings for Django 1.4
 DATABASES['native'] = DATABASES['default']
 DATABASES['default'] = {
                         'ENGINE': 'dbindexer',
@@ -11,17 +12,29 @@ DATABASES['default'] = {
                         'HIGH_REPLICATION':True
                         }
 
-#DATABASES = {
-#    'native': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#    },
-#    'default': {
-#                'ENGINE': 'dbindexer',
-#                 'TARGET': 'native'
-#                 },
-#}
-AUTOLOAD_SITECONF = 'indexes'
+# settings for Django 1.5
+#DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': DATABASES['default']}
+#DATABASES['default']['HIGH_REPLICATION']=True
+
+if False:
+    DATABASES['native'] = {
+        'ENGINE': 'djangoappengine.db',
+
+        'HIGH_REPLICATION': True,
+
+        'DEV_APPSERVER_OPTIONS': {
+            'high_replication' : True,
+            'use_sqlite': True,
+            }
+    }
+
+
+AUTOLOAD_SITECONF = 'dbindexes'
+DBINDEXER_BACKENDS = (
+    'dbindexer.backends.BaseResolver',
+    'dbindexer.backends.FKNullFix',
+    'dbindexer.backends.InMemoryJOINResolver',
+)
 
 # People who get code error notifications.
 ADMINS = ( ('Alex Ashley', 'webmaster@digital-video.org.uk'))
@@ -34,8 +47,9 @@ if on_production_server==True:
 else:
     SECRET_KEY = '=r-$b*8hglm+858&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
     DEBUG = True
-    DATABASES['default']['DEV_APPSERVER_OPTIONS']= {      
+    DATABASES['native']['DEV_APPSERVER_OPTIONS']= {      
                                                   'use_sqlite': True,
+                                                  'high_replication': True,
                                                   #'port_sqlite_data':True
                                                   }
     
@@ -60,14 +74,15 @@ INSTALLED_APPS = (
                   'django.contrib.sessions',
                   'django.contrib.admin',
                   'djangotoolbox',
-                  'autoload',
-                  'dbindexer',
-                  'timeline',
                   'util',
                   'project',
                   'ballot',
+                  'timeline',
+                  'system',
                   'report',
                   'djangoappengine',
+                  'autoload',
+                  'dbindexer',
                   )
 
 TEST_RUNNER = 'djangotoolbox.test.CapturingTestSuiteRunner'
