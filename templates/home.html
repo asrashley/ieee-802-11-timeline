@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load cache %}
 {% load siteutils %}
+{% load url from future %}
 
 {% block title %}IEEE 802.11 chair's toolbox{% endblock %}
 
@@ -11,10 +12,10 @@
 <tr><th class="heading">IEEE 802.11 chair's toolbox</th><td class="version">v{% version %}</td></tr>
 </thead>
 <tbody>
-<tr><td><a href="{% url timeline.views.main_page %}">Timeline</a></td></tr>
-<tr><td><a href="{% url ballot.views.main_page %}">Letter ballots</a></td></tr>
-<tr><td><a href="{% url report.views.main_page %}">Meeting reports</a></td></tr>
-{% if not user.is_authenticated %}<tr><td><a href="{% url django.contrib.auth.views.login %}">Log in</a></td></tr>{%endif %}
+<tr><td><a href="{% url 'timeline.views.main_page' %}">Timeline</a></td></tr>
+<tr><td><a href="{% url 'ballot.views.main_page' %}">Letter ballots</a></td></tr>
+<tr><td><a href="{% url 'report.views.main_page' %}">Meeting reports</a></td></tr>
+{% if not user.is_authenticated %}<tr><td><a href="{% url 'django.contrib.auth.views.login' %}">Log in</a></td></tr>{%endif %}
 </tbody>
 </table>
 {% endcache %}
