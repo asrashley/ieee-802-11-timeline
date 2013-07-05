@@ -1,2 +1,2 @@
 #!/bin/sh
-python manage.py test project ballot project report timeline util 
+python manage.py test util project ballot project report timeline system 
