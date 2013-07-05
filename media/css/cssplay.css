@@ -64,12 +64,12 @@
 }
 #menu ul li:hover ul li a {
 	display: block;
-	background: #ddd;
-	color: #000;
+/*	background: #ddd;
+	color: #000; */
 }
 #menu ul li:hover ul li a:hover {
-	background: #6fc;
-	color: #000;
+	/*background: #6fc;
+	color: #000; */
 }
 #menu ul li:hover ul li:hover ul {
 	display: block;
