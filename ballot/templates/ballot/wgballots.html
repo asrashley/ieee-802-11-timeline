@@ -1,4 +1,5 @@
 {% load siteutils %}
+{% load url from future %}
 
     <table border="1" class="ballot">
       <col width="36" />
@@ -19,19 +20,19 @@
         <td class="notice" colspan="11">
         <p class="style1">IEEE 802.11 WG LETTER BALLOTS</p>
         <p class="style3">Note - percentage results are rounded to the nearest integer</p>
-        <p class="style2">Note - Links to documents in the voting members' private 
-		area (such as drafts) will stop functioning once the project is 
-		complete, e.g., when its output document has been published by the 
+        <p class="style2">Note - Links to documents in the voting members' private
+		area (such as drafts) will stop functioning once the project is
+		complete, e.g., when its output document has been published by the
 		IEEE-SA.</p></td>
         </tr>
       {% endif %}
-      
+
       {% if cache.export != "shtml" or completed %}
         <tr class="table{{completed}}"><td colspan="11">
         {% if completed %}COMPLETED BALLOTS, from LB101 onwards<br />Letter ballot results up to LB100
 		<a href="{{urls.old_wg_ballots}}">can be found here</a>. Ballot results can also be found in
 		<a href="{{urls.timeline_history}}">this spreadsheet</a>.
-		{% else %}		
+		{% else %}
 		ONGOING BALLOTS
         {% endif %}
 		</td></tr>
@@ -51,21 +52,21 @@
       	{% endif %}
       	</thead>
       	<tbody>
-{% if cache.export == "shtml" and not completed %}        
+{% if cache.export == "shtml" and not completed %}
 <!-- Hide error message when lb_block is not there -->
 <!--#config errmsg="" -->
 <!--#set var="inTable" value="yes" -->
 <!--#include file="lb_block.shtml" -->
 <!--#if expr="${lb_block_included} != 'yes'" -->
-{% endif %}    
+{% endif %}
       {% if cache.export != "shtml" or completed %}
       	{% for lb in ballots %}
 		<tr>
       <td rowspan="7">
-      {% if not export %}<a href="{% url ballot.views.edit_ballot lb.number %}?next={{next_page|escape}}">{%endif%}{{lb.number}}
+      {% if not export %}<a href="{% url 'ballot.views.edit_ballot' lb.number %}?next={{next_page|escape}}">{%endif%}{{lb.number}}
       	{% if not export %}</a>{%endif%}
       </td>
-      <td rowspan="7">{% if not export %}<a href="{% url project.views.edit_project lb.project_pk %}?next={{next_page|escape}}">{%endif%}
+      <td rowspan="7">{% if not export %}<a href="{% url 'project.views.edit_project' lb.project_slug %}?next={{next_page|escape}}">{%endif%}
       	{{lb.task_group}}{% if not export %}</a>{%endif%}</td>
       <td rowspan="7">{{lb.description}} {{lb.task_group}}{% if lb.draft %} Draft {{lb.draft}}{% endif %}</td>
       <td rowspan="7"><a href="{{lb.instructions_url}}">LB# {{lb.number}}</a></td>
@@ -113,9 +114,9 @@
     {% empty %}
     <tr><td colspan="11" class="empty">{% if not export %}<a href="?redraw={{completed}}">{%endif%}No ballots are currently open{% if not export %}</a>{%endif%}</td></tr>
     {% endfor %}
-{% endif %}    
+{% endif %}
 {% if cache.export == "shtml" and not completed %}
-<!--#endif -->        
-{% endif %}    
+<!--#endif -->
+{% endif %}
     </tbody>
    </table>
