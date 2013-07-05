@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load cache %}
 {% load siteutils %}
+{% load url from future %}
 
 {% block title %}Summary reports of IEEE P802.11{% endblock %}
 
@@ -33,7 +34,7 @@ h4	{
 	font-family:Arial;
 	font-weight:normal
 	}
-	
+
 .style1 {
 				font-size: x-small;
 }
@@ -68,13 +69,13 @@ table.report tr.blank td {
 	background: white;
 	color: black;
 }
-table.report th{ 
+table.report th{
 	background:#008080;
 	text-align:center;
 	vertical-align: bottom;
 	color: white;
 	font-size: 10pt;
-} 
+}
 table.report th a {
 	text-decoration: none;
 	color: white;
@@ -92,7 +93,7 @@ table.report td {
 	text-align: center;
 	vertical-align: middle;
 }
-	
+
 table.report td.result0{
 	color:#808080;
 }
@@ -159,13 +160,13 @@ div.Section1 {
   <tr><th class="header" colspan="8">IEEE 802.11 WLAN WORKING GROUP SESSIONS</th></tr>
   <tr>
     <th class="notice" colspan="8">
-    As our sessions are open to the public, all interested parties 
-      are welcome to attend IEEE P802.11 Working Group sessions, for which there 
-      is a registration fee, to defray the cost of the session. At Plenary 
-      sessions this is administered by the IEEE P802 LMSC organization. Whereas, 
-      the Interim sessions are normally managed by our sponsoring host. This is 
-      in-addition to your individual hotel accommodation, and travel expenses. 
-      Click here to view <a href="{{urls.example_agenda|default:'http://grouper.ieee.org/groups/802/11/Meetings/Typical_Meeting_Agenda.htm'}}">Example 
+    As our sessions are open to the public, all interested parties
+      are welcome to attend IEEE P802.11 Working Group sessions, for which there
+      is a registration fee, to defray the cost of the session. At Plenary
+      sessions this is administered by the IEEE P802 LMSC organization. Whereas,
+      the Interim sessions are normally managed by our sponsoring host. This is
+      in-addition to your individual hotel accommodation, and travel expenses.
+      Click here to view <a href="{{urls.example_agenda|default:'http://grouper.ieee.org/groups/802/11/Meetings/Typical_Meeting_Agenda.htm'}}">Example
       Plenary and Interim Session Agenda</a>.
       </th>
     </tr>
@@ -198,7 +199,7 @@ div.Section1 {
     {%endifchanged %}
 <tr class="{%cycle 'row1' 'row2' %}">
 <td>
-{% if not export %}<a href="{%url report.views.edit_report report.pk %}?next={%url report.views.main_page %}">{%endif %}
+{% if not export %}<a href="{%url 'report.views.edit_report' report.pk %}?next={%url 'report.views.main_page' %}">{%endif %}
 {{report.session}}
 {% if not export %}</a>{%endif%}
 </td>
@@ -226,4 +227,4 @@ n/a
  {% endfor %}
   </tbody>
 </table>
-{% endblock %}    
+{% endblock %}
