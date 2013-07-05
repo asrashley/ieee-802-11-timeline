@@ -2,9 +2,14 @@
 {% load url from future %}
 {% block content %}
 <div id="tools">
-<p class="heading">Project tools</p>
-<ul>
-<li><a href="{% url 'project.views.add_project' %}">Add a new project</a></li>
-</ul>
+<p class="addproject"><a href="{% url 'project.views.add_project' %}">Add a new project</a></p>
+<div class="projects">
+	{% for proj in projects %}
+	<div class="project"><a href="{% url 'project.views.edit_project' proj.slug %}" title="{{proj.task_group}}">
+	<p class="title"><span class="taskgroup">{{proj.task_group}}</span>{{proj.name}}</p>
+	<p class="description">{{proj.description}}</p>
+	</a></div>
+	{% endfor %}
+</div>
 </div>
 {% endblock %}
