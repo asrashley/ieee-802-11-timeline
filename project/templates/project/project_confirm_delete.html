@@ -1,9 +1,25 @@
 {% extends "base.html" %}
+{% load siteutils %}
+{% block preload_js %}
+<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery-1.10.0.min.js"></script>
+{% endblock %}
 
 {% block content %}
 <h2>Are you sure you want to delete project <q>{{object}}</q>?</h2>
 <form action="" method="post">
 {% csrf_token %}
-<input type="submit" name="confirm" value="Yes, I'm sure" />
+<input class="button" type="submit" name="confirm" value="Yes, I'm sure" />
+<input class="button" type="button" id="id_cancel" name="cancel" value="No, keep it"/>
 </form>
+<script type="text/javascript">
+$(document).ready(function(){
+	'use strict';
+	$('#id_cancel').on('click', function(ev){
+		var nextpage = document.location.search.slice(6);
+		ev.preventDefault();
+		document.location.replace(document.location.origin+nextpage);
+		return false;
+	});
+});
+</script>
 {% endblock %}
