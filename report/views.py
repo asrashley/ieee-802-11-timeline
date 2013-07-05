@@ -29,9 +29,16 @@ from django.shortcuts import render_to_response,  get_object_or_404
 from django import http
 from django.core.context_processors import csrf
 from django.core.urlresolvers import reverse
-from django.views.generic import create_update
+from django.views.generic.edit import DeleteView
+from django.core.urlresolvers import reverse_lazy
 
 from django.contrib.auth.decorators import login_required
+
+#@login_required
+class ReportDelete(DeleteView):
+    model = MeetingReport
+    success_url = reverse_lazy('report.views.main_page')
+    
 
 class ReportForm(DateModelForm):
     def __init__(self, *args, **kwargs):
@@ -83,9 +90,9 @@ def edit_report(request,rep):
     context['no_delete'] = rep is None
     return render_to_response('report/edit-report.html',context, context_instance=RequestContext(request))
 
-@login_required
-def del_report(request,rep):
-    next_page = request.GET.get('next',reverse('report.views.main_page'))
-    return create_update.delete_object(request, model=MeetingReport, object_id=rep,
-                                       post_delete_redirect=next_page)
+#@login_required
+#def del_report(request,rep):
+#    next_page = request.GET.get('next',reverse('report.views.main_page'))
+#    return create_update.delete_object(request, model=MeetingReport, object_id=rep,
+#                                       post_delete_redirect=next_page)
     

@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                                            *
 #
 #  Author              :    Alex Ashley
 #
@@ -39,7 +39,8 @@ class MeetingReport(models.Model):
     Interim = MeetingType('I', 'Interim')
     Special = MeetingType('S', 'Special')
     _MEETING_TYPES = [ (b.code,b.description) for b in Plenary, Interim, Special]
-     
+    
+    id = models.AutoField(primary_key=True)
     session = models.IntegerField(unique=True, db_index=True, help_text=_('Session number'))
     start = models.DateField(help_text=_('Session start date'))
     end = models.DateField(help_text=_('Session end date'))

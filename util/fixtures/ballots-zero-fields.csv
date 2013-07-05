@@ -1,4 +1,0 @@
-number,draft,opened,closed,ballot_type,pool,vote_for,vote_against,vote_abstain,vote_invalid,comments,instructions_url,draft_url,redline_url,resolution_url,template_url,pool_url,project_id,project.task_group
-200,2.00,2012-09-27,2012-10-27,WR,278,134,32,40,0,,http://www.ieee802.org/11/LetterBallots/LB169ae/LB169_instructions.html,http://www.ieee802.org/11/private/Draft_Standards/11ae/Draft%20P802.11ae_D1.0.pdf,,,http://www.ieee802.org/11/LetterBallots/LB169ae/LB169_comment_form.xls,http://www.ieee802.org/11/LetterBallots/LB169ae/LB169_voters_list.xls,0,TGae
-0,16.00,2012-10-08,2012-10-18,SR,161,141,3,7,0,1355,,,,,,,0,TGv
-
