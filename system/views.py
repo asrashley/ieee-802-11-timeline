@@ -95,6 +95,7 @@ def import_page(request, next):
                 bulk_delete(DenormalizedProjectBallots)
                 bulk_delete(DenormalizedProject)
                 bulk_delete(Project)
+                data['wipe_ballots']=True
                 #DenormalizedProject.objects.all().delete()
             if data['wipe_ballots']:
                 bulk_delete(DenormalizedProjectBallots)
