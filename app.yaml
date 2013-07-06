@@ -41,6 +41,10 @@ handlers:
 
 - url: /media/js
   static_dir: media/js/
+  
+- url: /media/bin
+  static_dir: media/bin/
+
 
 - url: /favicon.ico
   static_files: media/images/favicon.ico

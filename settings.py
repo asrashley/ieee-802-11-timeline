@@ -9,8 +9,8 @@ except ImportError:
 import os
 
 SITE_ID = 1
-APP_VERSION = 3.20
-SECRET_KEY = '=r-$b*8hglm+858dslfkjdlsjs&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
+APP_VERSION = 3.3
+SECRET_KEY = ''
 
 INSTALLED_APPS = (
                   'autoload',
