@@ -40,7 +40,7 @@ DBINDEXER_BACKENDS = (
 ADMINS = ( ('Alex Ashley', 'webmaster@digital-video.org.uk'))
 
 SITE_ID = 1
-APP_VERSION = 4.0
+APP_VERSION = 4.1
 
 if on_production_server==True:
     from production_server import SECRET_KEY 

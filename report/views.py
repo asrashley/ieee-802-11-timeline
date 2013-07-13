@@ -51,6 +51,7 @@ class ReportForm(DateModelForm):
 def main_page(request, export=None):
     context = dict(reports=MeetingReport.objects.all().order_by('-session'))
     context['export'] = export
+    context['title'] = 'SUMMARY REPORTS & MINUTES OF 802.11 WG SESSIONS'
     context['next_page'] = reverse('report.views.main_page')
     context['needs_update'] = False
     context['export_page'] = 'meeting-reports' 

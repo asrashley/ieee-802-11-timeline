@@ -41,7 +41,7 @@ class MeetingReport(models.Model):
     _MEETING_TYPES = [ (b.code,b.description) for b in Plenary, Interim, Special]
     
     id = models.AutoField(primary_key=True)
-    session = models.IntegerField(unique=True, db_index=True, help_text=_('Session number'))
+    session = models.DecimalField(unique=True, db_index=True, decimal_places=1, max_digits=5, help_text=_('Session number'))
     start = models.DateField(help_text=_('Session start date'))
     end = models.DateField(help_text=_('Session end date'))
     cancelled = models.BooleanField(default=False,help_text=_(u'Session was cancelled'))
@@ -58,8 +58,13 @@ class MeetingReport(models.Model):
     location = models.CharField(max_length=100, help_text=_('Location of meeting venue'))
     meeting_type = models.CharField(max_length=2, choices=_MEETING_TYPES, help_text=_('Plenary or Interim'))
 
+    @property
+    def session_num(self):
+        s = int(self.session)
+        return s if s==self.session else self.session
+    
     def __unicode__(self):
         try:
-            return '%03d: %s'%(int(self.session),self.location)
+            return '%03.1f: %s'%(int(self.session),self.location)
         except (ValueError,TypeError):
             return self.location

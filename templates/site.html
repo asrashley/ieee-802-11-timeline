@@ -5,7 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="{% firstof LANGUAGE_CODE 'en' %}"> <!--<![endif]-->
 {% load siteutils %}
   <head>
-    <title>{% block title %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
+    <title>{% block titlehead %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
 {% if not cache.export %}
 	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/boilerplate.css" />
 	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/ieeeadmin.css" />

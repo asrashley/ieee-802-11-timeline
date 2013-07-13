@@ -3,20 +3,9 @@
 {% load siteutils %}
 {% load url from future %}
 
-{% block title %}Summary reports of IEEE P802.11{% endblock %}
-
-{% block header %}
-{% if needs_update %}
-<a id="logo" href="{{next_page}}">UPDATES ARE BEING PROCESSED</a>
-{% else %}
-<a id="logo" href="/">SUMMARY REPORTS &amp; MINUTES  OF 802.11 WG SESSIONS:</a>
-{% endif %}
-{% if not export %}<div id="greeting">{{user.username}}</div>{%endif %}
-{% endblock %}
-
 {% block extra-head %}
 {% if needs_update %}
-<meta http-equiv="refresh" content="15; URL=''">
+<meta http-equiv="refresh" content="15">
 {% endif %}
 {% endblock %}
 
@@ -133,14 +122,14 @@ table.report td.empty a {
 	text-decoration: none;
 	color: black;
 }
-p.style1 {
+.style1 {
 	font-size:16pt;
 }
-p.style2, p.style3 {
+.style2, .style3 {
 	font-size:14pt;
 }
 
-div.Section1 {
+.Section1 {
 	page: Section1
 }
 {% endcache %}
@@ -200,7 +189,7 @@ div.Section1 {
 <tr class="{%cycle 'row1' 'row2' %}">
 <td>
 {% if not export %}<a href="{%url 'report.views.edit_report' report.pk %}?next={%url 'report.views.main_page' %}">{%endif %}
-{{report.session}}
+{{report.session_num}}
 {% if not export %}</a>{%endif%}
 </td>
 <td>{{report.start|date:"j"}}<sup>{{report.start|date:"S"}}</sup> - {{report.end|date:"j"}}<sup>{{report.end|date:"S"}}</sup></td>
