@@ -50,6 +50,9 @@ class ImportForm(forms.Form):
 class DebugImportForm(ImportForm):
     debug = forms.BooleanField(required=False,help_text='Debug')
 
+class RebuildDatabaseForm(forms.Form):
+    confirm = forms.BooleanField(required=True,help_text='Yes, I really want to rebuild the database')
+
 class URLForm(forms.ModelForm):
     class Meta:
         model = SiteURLs
@@ -163,15 +166,24 @@ def refresh_projects():
 
 @login_required
 def update_page(request):
-    bulk_delete(DenormalizedProjectBallots)
-    bulk_delete(DenormalizedBallot)
-    bulk_delete(DenormalizedProject)
-    title='Updating denormalized data...'
-    project_count = Project.objects.count()
-    ballot_count = Ballot.objects.count()
-    defer_function(refresh_projects)
-    defer_function(refresh_ballots)        
-    return render_to_response('system/update.html', locals(), context_instance=RequestContext(request))
+    if request.method == 'POST':
+        if request.POST.has_key('cancel'):
+            return http.HttpResponseRedirect(reverse('system.views.index_page'))
+        form = RebuildDatabaseForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            if data['confirm']==True:    
+                bulk_delete(DenormalizedProjectBallots)
+                bulk_delete(DenormalizedBallot)
+                bulk_delete(DenormalizedProject)
+                title='Updating denormalized data...'
+                project_count = Project.objects.count()
+                ballot_count = Ballot.objects.count()
+                defer_function(refresh_projects)
+                defer_function(refresh_ballots)        
+                return render_to_response('system/update.html', locals(), context_instance=RequestContext(request))
+    form = RebuildDatabaseForm()
+    return render_to_response('system/update_confirm.html', locals(), context_instance=RequestContext(request))
 
 @login_required
 def edit_urls(request):

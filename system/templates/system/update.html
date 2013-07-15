@@ -4,7 +4,7 @@
 
 {% block content %}
 <p id="updatemsg">
-	{% if message %}{{message|safe}}{%else%}Done{%endif%}
+	{% if title %}{{title}}{%else%}Done{%endif%}
 </p>
 <div>
 	<p id="projects">Rebuilding projects <progress value="0" max="{{ project_count }}"></progress></p>
@@ -16,22 +16,29 @@
     $(document).ready(function(){
 		'use strict';
 		var rebuildCount=3;
+		var pollCount={};
 		function pollProjects(id, url){
 			function poll(){
-				$.getJSON(url, function(data, textStatus, jqXHR){
+				console.log(url);
+				$.getJSON(url).done(function(data, textStatus, jqXHR){
     				$(id+' progress').attr('value', data.count);
-	    			if(data.backlog==false){
-	    				$(id).append($('<span>', {'class':'done'}).text('done'));
-	    				rebuildCount--;
-	    				if(rebuildCount===0){
-	    					$('#updatemsg').append($('<span>', {'class':'done'}).text('done'));
+	    			if(data.backlog===0){
+	    				pollCount[id]--;
+	    				if(pollCount[id]<1){
+	    					$(id).append($('<span>', {'class':'done'}).text('done'));
+	    					rebuildCount--;
+	    					if(rebuildCount===0){
+		    					$('#updatemsg').append($('<span>', {'class':'done'}).text('done'));
+		    				}
+		    				return;
 	    				}
     				}
-    				else{
-			    		window.setTimeout(poll,2000);
-					}
+		    		window.setTimeout(poll,5000);
+    			}).fail(function(jqXHR, textStatus, errorThrown){
+    				console.error('failed to fetch '+url+' '+textStatus);
     			});
 			}
+			pollCount[id]=3;
 			return poll;
     	}
     	window.setTimeout(pollProjects("#projects", "{% url 'project.views.backlog_poll' %}"), 3000);
