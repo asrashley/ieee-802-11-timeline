@@ -93,9 +93,11 @@ text-decoration:none;
     border: 1px solid #CCCCCC;
     margin-bottom: 5px;
 }
-ul.errorlist {
+ul.errorlist, p.error {
 	color: red;
 	font-weight: bold;
+}
+ul.errorlist {
 	display:inline;
 	font-size: 10pt;
 	}
