@@ -20,18 +20,19 @@
 #
 #############################################################################
 
-import logging
+import decimal, logging, re, json
 
-from util.io import from_isodatetime, flatten, parse_date
+from util.io import from_isodatetime, flatten, parse_date, to_python
 from util.tasks import run_test_task_queue
 from util.models import SiteURLs
 from util.db import bulk_delete
 from util.tests import LoginBasedTest
-from system.views import import_page, import_progress
 from ballot.models import Ballot, DenormalizedBallot
 from project.models import Project, DenormalizedProject
 from timeline.models import DenormalizedProjectBallots
 from report.models import MeetingReport
+from system.views import import_page, import_progress
+from system.io import project_fields
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -275,7 +276,16 @@ class UtilPagesTest(LoginBasedTest):
         bulk_delete(DenormalizedBallot)
         bulk_delete(DenormalizedProject)
         timeout = 2*Project.objects.count() + Ballot.objects.count()
-        self._check_page(url)
+        response = self._check_page(url)
+        self.failUnlessEqual(DenormalizedProject.objects.count(),0)
+        self.failUnlessEqual(DenormalizedBallot.objects.count(),0)
+        self.failUnlessEqual(DenormalizedProjectBallots.objects.count(), 0)
+        response.context['form']
+        data = {
+                'confirm': 'on',
+                'yes' : "Yes, I'm sure",
+                }
+        response = self.client.post(url, data, follow=True)
         self.wait_for_backlog_completion([DenormalizedProject,DenormalizedBallot,DenormalizedProjectBallots], 2*timeout)
         projects={}
         for b in Ballot.objects.all():
@@ -285,36 +295,108 @@ class UtilPagesTest(LoginBasedTest):
         self.failUnlessEqual(DenormalizedBallot.objects.count(),Ballot.objects.count())
         self.failUnlessEqual(DenormalizedProjectBallots.objects.count(), len(projects))
 
-class ExportDatabaseTest(TestCase):
+class JsonProxy(dict):
+    def __init__(self, src):
+        self.update(src)
+    def group(self):
+        return json.dumps(self)
+    
+class ExportDatabaseTest(LoginBasedTest):
     fixtures = ['site.json','projects.json', 'ballots.json', 'timelines.json', 'reports.json']
     
     def test_export(self):
         self.assertGreater(Project.objects.count(), 0)
         self.assertGreater(Ballot.objects.count(), 0)
         self.assertGreater(MeetingReport.objects.count(), 0)
-        url = reverse('system.views.export_db',args=[])
-        response = self.client.get(url)
-        # not logged in, should redirect to login page
-        self.failUnlessEqual(response.status_code, 302)
-
-        login = self.client.login(username='test', password='password')
-        self.failUnless(login, 'Could not log in')
-        response = self.client.get(url)
-        for proj in Project.objects.all():
-            for field in proj._meta.fields:
-                if field.attname!='slug':
-                    value = getattr(proj,field.attname)
-                    if value:
-                        self.assertContains(response, value, msg_prefix='Project.%s'%field.attname)
-        for ballot in Ballot.objects.all():
-            for field in ballot._meta.fields:
-                value = getattr(ballot,field.attname)
-                if value:
-                    self.assertContains(response, value, msg_prefix='Ballot.%s'%field.attname)
-        for report in MeetingReport.objects.all():
-            for field in report._meta.fields:
-                value = getattr(report,field.attname)
-                if value:
-                    self.assertContains(response, value, msg_prefix='MeetingReport.%s'%field.attname)
+        #self._check_export(ballots=False, projects=True, reports=False, format='csv')
+        #self._check_export(ballots=True, projects=False, reports=False, format='csv')
+        #self._check_export(ballots=False, projects=False, reports=True, format='csv')
+        #self._check_export(ballots=True, projects=True, reports=True, format='csv')
+        self._check_export(ballots=True, projects=True, reports=True, format='json')
         
-            
+    def _check_export(self,ballots=False, projects=False, reports=False, format='csv'):
+        def find_project(proj):
+            for p in response_json['projects']:
+                if p['key']==proj.key:
+                    return JsonProxy(p)
+            return None
+        def find_ballot(bal):
+            for p in response_json['ballots']:
+                if p['number']==bal.number:
+                    return JsonProxy(p)
+            return None
+        def find_report(rep):
+            for p in response_json['reports']:
+                if p['id']==rep.id:
+                    return JsonProxy(p)
+            return None
+        
+        def check_instance(instance, name):
+            for field in instance._meta.fields:
+                value = getattr(instance,field.attname)
+                if value and not field.primary_key:
+                    if isinstance(value,(decimal.Decimal)):
+                        value = float(value)
+                    if format=='csv':
+                        self.assertTrue(str(value) in search.group(),msg='Could not find %s.%s value %s in %s'%(name,field.attname,str(value),search.group()))
+                    else:
+                        jval = to_python(field,search[field.attname])
+                        #print value.__class__,value,jval
+                        if isinstance(value,(float)):
+                            self.assertAlmostEqual(jval,value,msg='Incorrect %s.%s value %s of %s'%(name,field.attname,str(value),str(jval)))
+                        else:
+                            self.assertEqual(jval,value,msg='Incorrect %s.%s value %s of %s'%(name,field.attname,str(value),str(jval)))
+        
+        url = reverse('system.views.export_db',args=[])        
+        response = self._check_page(url)
+        data = {
+                'format' : format,
+                'submit' : 'submit'
+                }
+        if ballots:
+            data['ballots'] = 'on'
+        if projects:
+            data['projects'] = 'on'
+        if reports:
+            data['reports'] = 'on'
+        response = self.client.post(url, data) #, follow=True)
+        response_str = str(response.content).replace('\r','')
+        if format=='json':
+            response_json = json.loads(response_str)
+        for proj in Project.objects.all():
+            if format=='csv':
+                pattern = '^\w+,'+re.escape(proj.name)+'.+'+proj.slug+'$'
+                search = re.search(pattern,response_str,re.MULTILINE)
+            else:
+                search = find_project(proj)
+            if projects:
+                self.assertNotEqual(search, None)
+                #print search.group()
+                check_instance(proj,'Project')
+            else:
+                #if search:
+                #    print pattern
+                #    print search.group()
+                self.assertEqual(search, None)
+        for ballot in Ballot.objects.all():
+            if format=='csv':
+                pattern = '^'+str(ballot.number)+'.+'+ballot.project.task_group+'$'
+                search = re.search(pattern,response_str,re.MULTILINE)
+            else:
+                search = find_ballot(ballot)
+            if ballots:
+                self.assertNotEqual(search, None)
+                check_instance(ballot,'Ballot')
+            else:
+                self.assertEqual(search, None)
+        for report in MeetingReport.objects.all():
+            if format=='csv':
+                pattern = '^\w+,'+str(report.session)+'.+'+report.meeting_type+'$'
+                search = re.search(pattern,response_str,re.MULTILINE)
+            else:
+                search = find_report(report)
+            if reports:
+                self.assertNotEqual(search, None)
+                check_instance(report,'Report')
+            else:
+                self.assertEqual(search, None)

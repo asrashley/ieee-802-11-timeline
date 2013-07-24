@@ -20,20 +20,21 @@
 #
 #############################################################################
 
+import datetime, csv, re, json
+
 from util.tasks import add_task
-from util.io import flatten, to_python, set_date, as_int, set_date_if_none, as_int_or_none
+from util.io import flatten, to_python, set_date, as_int, set_date_if_none, as_int_or_none,\
+    flatten_model
 from project.models import Project
 from ballot.models import Ballot
 from report.models import MeetingReport
 from system.models import ImportProgress, ImportLine 
 from system.htmlparser import clean, TableHTMLParser
 
-from django.db import models, connection
 from django.http import HttpResponse
 from django.db.models.fields import URLField
 from django.core.urlresolvers import reverse
 
-import datetime, decimal, csv, time, re
 
 project_fields = ['pk', 'name', 'description', 'doc_type','par', 'task_group',
                   'task_group_url', 'doc_format',  'doc_version', 'baseline',
@@ -268,35 +269,51 @@ def parse_projects_and_ballots(progress):
     progress.current_line = progress.linecount
     progress.save()
 
-def export_csv():
+def export_csv(projects=True, ballots=True, reports=True):
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=timeline-'+datetime.datetime.now().strftime('%Y-%m-%d-%H%M.csv')
     writer = csv.writer(response,delimiter=',')
-    writer.writerow(project_fields)
-    for p in Project.objects.all().order_by('par_date'):
-        writer.writerow(flatten([eval('p.'+f) for f in project_fields]))
-    writer.writerow([])
-    writer.writerow(ballot_fields)
-    for b in Ballot.objects.all().order_by('number'):
-        writer.writerow(flatten([eval('b.'+f) for f in ballot_fields]))
-    writer.writerow([])
-    writer.writerow(report_fields)
-    for r in MeetingReport.objects.all().order_by('session'):
-        writer.writerow(flatten([eval('r.'+f) for f in report_fields]))
-    writer.writerow([])
+    if projects:
+        writer.writerow(project_fields)
+        for p in Project.objects.all().order_by('par_date'):
+            writer.writerow(flatten([eval('p.'+f) for f in project_fields]))
+        writer.writerow([])
+    if ballots:
+        writer.writerow(ballot_fields)
+        for b in Ballot.objects.all().order_by('number'):
+            writer.writerow(flatten([eval('b.'+f) for f in ballot_fields]))
+        writer.writerow([])
+    if reports:
+        writer.writerow(report_fields)
+        for r in MeetingReport.objects.all().order_by('session'):
+            writer.writerow(flatten([eval('r.'+f) for f in report_fields]))
+        writer.writerow([])
     return response
 
+def export_json(projects=True, ballots=True, reports=True):
+    response = HttpResponse(mimetype='application/json')
+    response['Content-Disposition'] = 'attachment; filename=timeline-'+datetime.datetime.now().strftime('%Y-%m-%d-%H%M.json')
+    js = {}
+    if projects:
+        js['projects']=[]
+        for proj in Project.objects.all():
+            js['projects'].append(flatten_model(proj))
+    if ballots:
+        js['ballots']=[]
+        for bal in Ballot.objects.all():
+            js['ballots'].append(flatten_model(bal))
+    if reports:
+        js['reports']=[]
+        for rep in MeetingReport.objects.all():
+            js['reports'].append(flatten_model(rep))
+    json.dump(js, response, indent=2)
+    return response
 
 def is_section_header(item,section):
     for a,b in zip(section,item):
         if a!=b:
-            #if item[0]=='LB' and section[0]=='LB':
-            #    raise Exception("debug")
             return False
-    #if item[0]=='LB':
-    #    raise Exception("debug")
     return True
-    #return item[:len(section)]==section
     
 def parse_ballot_dates(dates,results):
     if not dates or not results:

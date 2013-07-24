@@ -34,7 +34,7 @@ def flatten_model(item):
     """
     rv = {}
     for field in item._meta.fields:
-        setattr(rv,field.attname,getattr(item,field.attname))
+        rv[field.attname] = getattr(item,field.attname)
     return flatten(rv)
 
 def flatten(items):
@@ -59,9 +59,11 @@ def flatten(items):
             item = iso
         elif isinstance(item,(datetime.date)):
             item = item.isoformat()
-        elif isinstance(item,long):
-            item = '%d'%item
-        elif isinstance(item,(unicode,str,decimal.Decimal)):
+        #elif isinstance(item,long):
+        #    item = '%d'%item
+        elif isinstance(item,decimal.Decimal):
+            item = float(item)
+        elif isinstance(item,(unicode,str)):
             item = str(item).replace("'","\'")
         elif isinstance(item,models.Model):
             item = item.pk
@@ -79,7 +81,7 @@ def to_python(field,value):
     db_type = field.db_type(connection=connection)
     if db_type =='date':
         value = from_isodatetime(value)
-    elif db_type=='bool':
+    elif db_type=='bool' and not isinstance(value,bool):
         value = value.lower()=='true'
     elif isinstance(field,URLField):
         value = value.replace(' ','%20')
@@ -104,9 +106,9 @@ def from_isodatetime(date_time):
         return datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ")
     if not 'Z' in date_time:
         try:
-            return datetime.datetime.strptime(date_time, "%Y-%m-%d")
+            return datetime.datetime.strptime(date_time, "%Y-%m-%d").date()
         except ValueError:
-            return datetime.datetime.strptime(date_time, "%d/%m/%Y")
+            return datetime.datetime.strptime(date_time, "%d/%m/%Y").date()
     return datetime.datetime.strptime(date_time, "%H:%M:%SZ").time()
 
 

@@ -29,13 +29,14 @@ from django.template import RequestContext
 from django import forms,http
 from django.core.urlresolvers import reverse
 from django.core.context_processors import csrf
+from django.conf import settings
 
 from system.io import parse_projects_and_ballots
 from util.db import bulk_delete
 from util.tasks import defer_function
 from util.models import SiteURLs
 from system.models import ImportProgress
-from system.io import import_projects_and_ballots, export_csv
+from system.io import import_projects_and_ballots, export_csv, export_json
 from report.models import MeetingReport
 from project.models import Project, DenormalizedProject
 from ballot.models import Ballot, DenormalizedBallot
@@ -46,6 +47,13 @@ class ImportForm(forms.Form):
     wipe_projects = forms.BooleanField(required=False,help_text='Remove existing projects')
     wipe_ballots = forms.BooleanField(required=False,help_text='Remove existing ballots')
     wipe_reports = forms.BooleanField(required=False,help_text='Remove existing meeting reports')
+
+class ExportForm(forms.Form):
+    format = forms.ChoiceField(required=True, help_text='File format', 
+                               choices=[('csv','CSV file'),('json','JSON file')])
+    projects = forms.BooleanField(required=False,help_text='Export projects')
+    ballots = forms.BooleanField(required=False,help_text='Export ballots')
+    reports = forms.BooleanField(required=False,help_text='Export meeting reports')
 
 class DebugImportForm(ImportForm):
     debug = forms.BooleanField(required=False,help_text='Debug')
@@ -70,16 +78,29 @@ def main_page(request):
     
 @login_required
 def export_db(request):    
-    return export_csv()
+    context = {}
+    context.update(csrf(request))
+    next_page = request.GET.get('next','/')
+    if request.method == 'POST':
+        if request.POST.has_key('cancel'):
+            return http.HttpResponseRedirect(next_page)
+        form = ExportForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            if data['format']=='csv':
+                del data['format']
+                #logging.info(str(data))
+                return export_csv(**data)
+            else:
+                del data['format']
+                return export_json(**data)
+    form = ExportForm()
+    return render_to_response('system/export.html', dict(form=form), context_instance=RequestContext(request))
         
 @login_required
 def import_page(request, next):
     context = {}
     context.update(csrf(request))
-    try:
-        from django.conf import settings
-    except ImportError:
-        return ''
     if request.method == 'POST':
         if request.POST.has_key('cancel'):
             return http.HttpResponseRedirect(next)
