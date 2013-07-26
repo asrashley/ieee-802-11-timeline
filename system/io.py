@@ -297,15 +297,15 @@ def export_json(projects=True, ballots=True, reports=True):
     if projects:
         js['projects']=[]
         for proj in Project.objects.all():
-            js['projects'].append(flatten_model(proj))
+            js['projects'].append(flatten_model(proj, convert_numbers=False))
     if ballots:
         js['ballots']=[]
         for bal in Ballot.objects.all():
-            js['ballots'].append(flatten_model(bal))
+            js['ballots'].append(flatten_model(bal, convert_numbers=False))
     if reports:
         js['reports']=[]
         for rep in MeetingReport.objects.all():
-            js['reports'].append(flatten_model(rep))
+            js['reports'].append(flatten_model(rep, convert_numbers=False))
     json.dump(js, response, indent=2)
     return response
 

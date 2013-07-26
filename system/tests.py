@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-import decimal, logging, re, json
+import datetime, decimal, logging, re, json
 
 from util.io import from_isodatetime, flatten, parse_date, to_python
 from util.tasks import run_test_task_queue
@@ -341,6 +341,8 @@ class ExportDatabaseTest(LoginBasedTest):
                         self.assertTrue(str(value) in search.group(),msg='Could not find %s.%s value %s in %s'%(name,field.attname,str(value),search.group()))
                     else:
                         jval = to_python(field,search[field.attname])
+                        if isinstance(jval,(datetime.datetime)) and isinstance(value,datetime.date):
+                            jval = jval.date()
                         #print value.__class__,value,jval
                         if isinstance(value,(float)):
                             self.assertAlmostEqual(jval,value,msg='Incorrect %s.%s value %s of %s'%(name,field.attname,str(value),str(jval)))

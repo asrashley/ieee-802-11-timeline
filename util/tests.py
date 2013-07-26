@@ -115,12 +115,15 @@ class UtilTest(unittest.TestCase):
                  ([1,2L,3],[1,'2',3]),
                  ( [1, 2L, 3, datetime.datetime(2009, 8, 13, 10, 52, 8, 734209)], [1, '2', 3, '2009-08-13T10:52:08.734209Z']),
                  ( (1, 2L, 3, datetime.datetime(2009, 8, 13, 10, 52, 8, 734209)), (1, '2', 3, '2009-08-13T10:52:08.734209Z') ),
-                 ( [decimal.Decimal('5.2'), u'Hello World', datetime.date(2009, 8, 13)], ['5.2', 'Hello World', '2009-08-13'] ),
-                 ({'a': decimal.Decimal('5.2'), 'c': datetime.date(2009, 8, 13), 'b': u'Hello World'}, {'a': '5.2', 'c': '2009-08-13', 'b': 'Hello World'}),
+                 ( [decimal.Decimal('5.2'), u'Hello World', datetime.date(2009, 8, 13)], [5.2, 'Hello World', '2009-08-13'] ),
+                 ({'a': decimal.Decimal('5.2'), 'c': datetime.date(2009, 8, 13), 'b': u'Hello World'}, {'a': 5.2, 'c': '2009-08-13', 'b': 'Hello World'}),
                  ]
         for test in tests:
             f = flatten(test[0])
-            self.failUnlessEqual(f,test[1])
+            if isinstance(f,(decimal.Decimal,float)):
+                self.failUnlessAlmostEqual(float(f),test[1])
+            else:
+                self.failUnlessEqual(f,test[1])
             
     def test_date_parse(self):
         dates = [

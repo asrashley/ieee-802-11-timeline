@@ -26,7 +26,7 @@ from django.db.models.fields import URLField
 
 import datetime, decimal, time, re
     
-def flatten_model(item):
+def flatten_model(item, convert_numbers=True):
     """Converts an instance of a Django model in to a form suitable for storage.
     flatten_model will take an instance of a Django model and inspect each field
     in the object looking for items such as datetime.datetime objects that need
@@ -35,9 +35,9 @@ def flatten_model(item):
     rv = {}
     for field in item._meta.fields:
         rv[field.attname] = getattr(item,field.attname)
-    return flatten(rv)
+    return flatten(rv, convert_numbers)
 
-def flatten(items):
+def flatten(items, convert_numbers=True):
     """Converts an object in to a form suitable for storage.
     flatten will take a dictionary, list or tuple and inspect each item in the object looking for
     items such as datetime.datetime objects that need to be converted to a canonical form before
@@ -59,8 +59,8 @@ def flatten(items):
             item = iso
         elif isinstance(item,(datetime.date)):
             item = item.isoformat()
-        #elif isinstance(item,long):
-        #    item = '%d'%item
+        elif convert_numbers and isinstance(item,long):
+            item = '%d'%item
         elif isinstance(item,decimal.Decimal):
             item = float(item)
         elif isinstance(item,(unicode,str)):
@@ -106,10 +106,10 @@ def from_isodatetime(date_time):
         return datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ")
     if not 'Z' in date_time:
         try:
-            return datetime.datetime.strptime(date_time, "%Y-%m-%d").date()
+            return datetime.datetime.strptime(date_time, "%Y-%m-%d") #.date()
         except ValueError:
-            return datetime.datetime.strptime(date_time, "%d/%m/%Y").date()
-    return datetime.datetime.strptime(date_time, "%H:%M:%SZ").time()
+            return datetime.datetime.strptime(date_time, "%d/%m/%Y") #.date()
+    return datetime.datetime.strptime(date_time, "%H:%M:%SZ") #.time()
 
 
 date_hacks = [(re.compile('Apri[^l]'),'Apr '), (re.compile('Sept[^e]'),'Sep '),
