@@ -14,7 +14,7 @@
 #
 #############################################################################
 #
-#  Project Name        :    IEEE 802.11 Timeline Tool#                                                                            *
+#  Project Name        :    IEEE 802.11 Timeline Tool                                                     *
 #
 #  Author              :    Alex Ashley
 #
@@ -64,6 +64,13 @@ class AnchorString(object):
         if self.value[-1]=='%':
             return int(self.value[:-1])
         return int(self.value)
+    
+    def as_float(self):
+        if self.value is None or self.value=='':
+            raise ValueError('Value is None')
+        if self.value[-1]=='%':
+            return float(self.value[:-1])
+        return float(self.value)
     
     def __getitem__(self,key):
         return self.value[key]
@@ -250,7 +257,7 @@ class ImportProgress(models.Model):
     def add_report(self,report):
         if self.reports:
             s = set(self.reports.split(','))
-            s.add('%d'%int(report.session))
+            s.add('%03.1f'%float(report.session))
             self.reports = ','.join(s)
         else:
             self.reports = '%d'%int(report.session)
