@@ -140,7 +140,7 @@ class Cache(object):
         return self._misc['report-%03d'%int(session)]
     
     def put_report(self,report):
-        self._misc['report-%03d'%int(report.session)] = report
+        self._misc['report-%03.1f'%float(report.session)] = report
         
     def get_next_lb_number(self):
         try:
@@ -621,7 +621,7 @@ def import_ballot(item, last_ballot,cache,fields=None):
 def import_report(item,last_report,cache):
     entry = item.as_dict(report_fields)
     try:
-        session = entry['session'].as_int()
+        session = entry['session'].as_float()
     except (ValueError,TypeError):
         return None
     try:
