@@ -260,5 +260,5 @@ class ImportProgress(models.Model):
             s.add('%03.1f'%float(report.session))
             self.reports = ','.join(s)
         else:
-            self.reports = '%d'%int(report.session)
+            self.reports = '%03.1f'%float(report.session)
 
