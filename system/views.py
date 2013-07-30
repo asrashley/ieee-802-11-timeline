@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-import logging
+import logging, decimal
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -157,10 +157,10 @@ def import_done(request,prog):
         #sessions = [ int(a) for a in progress.reports.split(',')]
         for a in progress.reports.split(','):
             try:
-                sessions.append(int(a))
+                sessions.append(decimal.Decimal(a))
             except ValueError:
                 pass
-        for r in MeetingReport.objects.all():
+        for r in MeetingReport.objects.order_by('session'):
             if r.session in sessions:
                 reports.append(r)
     #reports = MeetingReport.objects.filter(session__in=progress.reports.split(',')) if progress.reports else []
