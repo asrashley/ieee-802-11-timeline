@@ -5,6 +5,7 @@ dbindexer
 djangotoolbox
 autoload
 htmlcov
+static
 .gaedata
 .project
 .pydevproject

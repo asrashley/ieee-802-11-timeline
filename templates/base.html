@@ -2,6 +2,7 @@
 {% load url from future %}
 {% load cache %}
 {% load siteutils %}
+{% load staticfiles %}
 
 {% block header %}
   {% if cache.export != "shtml" %}
@@ -82,21 +83,21 @@
 {% site_urls %}
 	<table>
   <tr>
-    <td><img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}ieeel.gif" alt="IEEE Networking the World"  width="80"
+    <td><img {% if not export %}src="{% static 'images/ieeel.gif' %}"{%else%}src="ieeel.gif"{%endif%} alt="IEEE Networking the World"  width="80"
     	height="69" /></td>
     <td><a href="{{urls.search|default:'http://standards.ieee.org/search.html'}}">
-    	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}search.gif" alt="Search IEEE" width="54"
+    	<img {% if not export %}src="{% static 'images/search.gif' %}"{%else%}src="search.gif"{%endif%} alt="Search IEEE" width="54"
     	height="58" /></a></td>
     <td><a href="{{urls.staff_email|default:'http://standards.ieee.org/cgi-bin/staffmail'}}">
-    	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}email.gif" alt="E-mail IEEE Staff" width="55"
+    	<img {% if not export %}src="{% static 'images/email.gif' %}"{%else%}src="email.gif"{%endif%} alt="E-mail IEEE Staff" width="55"
     	height="59" /></a></td>
     <td><a href="{{urls.standards|default:'http://standards.ieee.org/index.html'}}">
-	    <img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}home.gif" alt="IEEE Standards Home Page" width="52"
+	    <img {% if not export %}src="{% static 'images/home.gif' %}"{%else%}src="home.gif"{%endif%} alt="IEEE Standards Home Page" width="52"
 	     height="58" /></a></td>
     <td><a href="{{urls.ieee_home_page|default:'http://www.ieee.org/'}}">
-    	<img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}corp.gif" alt="IEEE Corporate Home Page" width="72"
+    	<img {% if not export %}src="{% static 'images/corp.gif' %}"{%else%}src="corp.gif"{%endif%} alt="IEEE Corporate Home Page" width="72"
     	height="58" /></a></td>
-    <td><img src="{% if not export %}{% get_staticfiles_prefix %}images/{%endif%}802.GIF" width="66" height="68" alt="IEEE 802.11"/></td>
+    <td><img {% if not export %}src="{% static 'images/802.GIF' %}"{%else%}src="802.GIF"{%endif%} width="66" height="68" alt="IEEE 802.11"/></td>
   </tr>
 </table>
       <h6 style="text-align:center"><a href="{{urls.copyright|default:'http://www.ieee.org/about/documentation/copyright/'}}">Copyright (c)</a>,

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load url from future %}
 {% load siteutils %}
+{% load staticfiles %}
 
 {% block content %}
 <p id="updatemsg">
@@ -11,7 +12,7 @@
 	<p id="ballots">Rebuilding ballots <progress value="0" max="{{ ballot_count }}"></progress></p>
 	<p id="timelines">Rebuilding timelines <progress value="0" max="{{ project_count }}"></progress></p>
 </div>
-<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery-1.10.0.min.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
 		'use strict';

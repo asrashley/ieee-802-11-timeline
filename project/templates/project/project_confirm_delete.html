@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load siteutils %}
+{% load staticfiles %}
 {% block preload_js %}
-<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery-1.10.0.min.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}

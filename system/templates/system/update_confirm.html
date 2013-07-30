@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load siteutils %}
+{% load staticfiles %}
 {% block preload_js %}
-<script type="text/javascript" src="{%get_staticfiles_prefix%}js/jquery-1.10.0.min.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <h2>Are you sure you want to rebuild the database?</h2>
 <p>Under normal cicumstances the database automatically builds all denormalized data
-	when projects, ballots or reports are edited. Rebuilding all this data uses up a 
+	when projects, ballots or reports are edited. Rebuilding all this data uses up a
 	lot of database PUT requests, which can cause this application to exceed its
 	free quota. You should only use this option if:
 	<ul>

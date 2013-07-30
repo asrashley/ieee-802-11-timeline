@@ -71,13 +71,6 @@ def padslash(value):
     return value
 
 @register.simple_tag
-def get_staticfiles_prefix():
-    """
-    Returns the string contained in the setting STATICFILES_URL
-    """
-    return settings.STATICFILES_URL
-
-@register.simple_tag
 def version():
     """
     Returns the string contained in the setting APP_VERSION
@@ -155,4 +148,4 @@ def include_css(parser,token):
         f = os.path.join(d,filename)
         if os.path.exists(f):
             return CssIncludeNode(f,filename)
-    raise TemplateSyntaxError("Unable to find CSS file %s"%filename)    
+    raise TemplateSyntaxError("Unable to find CSS file %s, checked %s"%(filename,str(app_css_dirs)))    

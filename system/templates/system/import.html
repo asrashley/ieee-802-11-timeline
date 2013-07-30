@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load siteutils %}
+{% load staticfiles %}
+
 {% block title %}Import Projects, Ballots and Meeting Reports{% endblock %}
 {% block css %}
 input[type=checkbox] {
@@ -38,7 +40,7 @@ the HTML page in to Excel and then <q>Save As</q> a CSV file.</p>
 </form>
 {% endblock %}
 {% block js %}
-<script type="text/javascript" src="{% get_staticfiles_prefix %}js/jquery-1.10.0.min.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery-1.10.0.min.js' %}"></script>
 <script type="text/javascript">
 $(document).ready(function(){
 	'use strict';

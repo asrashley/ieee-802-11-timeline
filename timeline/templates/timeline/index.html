@@ -9,15 +9,7 @@
 {% if needs_update %}
 <meta http-equiv="refresh" content="15">
 {% endif %}
-{% if not cache.export %}
-<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/timeline.css" />
-{% endif %}
-{% endblock %}
-
-{% block css %}
-{% if cache.export %}
 {% include_css "timeline.css" %}
-{% endif %}
 {% endblock %}
 
 {% block header %}
