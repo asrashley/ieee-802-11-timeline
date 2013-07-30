@@ -4,43 +4,38 @@
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="{% firstof LANGUAGE_CODE 'en' %}"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="{% firstof LANGUAGE_CODE 'en' %}"> <!--<![endif]-->
 {% load siteutils %}
+{% load staticfiles %}
   <head>
     <title>{% block titlehead %}{{title|default:"IEEE 802.11, The Working Group Setting the Standards for Wireless LANs"}}{% endblock %}</title>
 {% if not cache.export %}
-	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/boilerplate.css" />
-	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/ieeeadmin.css" />
-	<link rel="stylesheet" media="all" type="text/css" href="{% get_staticfiles_prefix %}css/site.css" />
-{%endif %}
+	<link rel="stylesheet" media="all" type="text/css" href="{% static 'css/boilerplate.css' %}" />
+	<link rel="stylesheet" media="all" type="text/css" href="{% static 'css/ieeeadmin.css' %}" />
+{% endif %}
+{% include_css "site.css" %}
 
 <style type="text/css">
-{% if cache.export %}
-  {% ifnotequal cache.export "shtml" %}
-    {% include "boilerplate.css" %}
-  {% endifnotequal %}
-  {% include "site.css" %}
-{% endif %}
     {% block css %}
     {% endblock %}
-    </style>
+</style>
 
     {% block preload_js %}
     {% endblock %}
 
     {% block extra-head %}{% endblock %}
-    
+
     {% ifequal cache.export "shtml" %}
 <!--#include file="banner_head.html" -->
 
 <!--#include file="banner_body.html" -->
 
 <!-- Hide error message when lb_block is not there -->
-	{% endifequal %}    
+	{% endifequal %}
   </head>
 
   <body>
     <div id="header">{% block header %}{%endblock%}</div>
     <div id="menu">{% block menu %}{%endblock%}</div>
-	
+
     <div class="columns">
       <div id="content" class="column">
         {% block content-header %}

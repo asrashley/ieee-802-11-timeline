@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-import datetime, csv, re, json
+import datetime, csv, re, json, logging
 
 from util.tasks import add_task
 from util.io import flatten, to_python, set_date, as_int, set_date_if_none, as_int_or_none,\
@@ -639,7 +639,8 @@ def import_report(item,last_report,cache):
     entry = item.as_dict(report_fields)
     try:
         session = entry['session'].as_float()
-    except (ValueError,TypeError):
+    except (ValueError,TypeError),e:
+        logging.error(str(e))
         return None
     try:
         report = cache.get_report(session)

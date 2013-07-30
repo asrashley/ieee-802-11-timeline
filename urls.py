@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include
 from django.views.generic.base import RedirectView
+#from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('',
                        (r'^timeline/', include('timeline.urls')),
@@ -14,3 +15,5 @@ urlpatterns = patterns('',
                        ('^ah/$',RedirectView.as_view(url='/_ah/admin/')),
                        ('^$', 'system.views.index_page'),
 )
+
+#urlpatterns += staticfiles_urlpatterns()

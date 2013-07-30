@@ -16,7 +16,7 @@
 
 {% block css %}
 {% if cache.export %}
-{% include "timeline.css" %}
+{% include_css "timeline.css" %}
 {% endif %}
 {% endblock %}
 
@@ -62,7 +62,7 @@
 {% endcache %}
 
 {% cache cache.timeout notes urls.last_modified %}
-<table id="notes"> 
+<table id="notes">
     <col width="5%" />
     <col width="19%" />
     <col width="3%" />
@@ -120,7 +120,7 @@
   </tr>
   </tbody>
 </table>
-{% endcache %}       
+{% endcache %}
 {% cache cache.timeout tpublished cache.published_ver urls.last_modified %}
       <div id="maintained"><p>This page is maintained by
 	{% with urls.timeline_maintainers_list as email_list %}
@@ -133,5 +133,5 @@
 the IEEE. All other names or product names are the trademarks, service
 marks or registered trademarks of their respective holders.
       </p>
-{% endcache %}       
+{% endcache %}
       {% endblock %}

@@ -228,6 +228,11 @@ class ImportCsvPageTest4(ImportCsvPageTest):
             pass
         self.failUnlessEqual(response.redirect_chain[0][1],302)
         
+class ImportCsvPageTest5(ImportCsvPageTest):
+    fixtures = ['site.json'] 
+    TESTFILE = ('system/fixtures/timeline-2013-07-29-0803.csv',454)
+    MODELS = [Project, Ballot, MeetingReport]
+     
 class ImportCsvWipeTest(ImportPageTest):
     fixtures = ['site.json','projects.json','ballots.json','timelines.json','reports.json']
     TESTFILE = ('system/fixtures/timeline-2013-05-23-1708.csv', 452)

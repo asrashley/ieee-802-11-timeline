@@ -70,6 +70,7 @@ USE_L10N = False
 
 INSTALLED_APPS = (
                   'django.contrib.contenttypes',
+                  'django.contrib.staticfiles',
                   'django.contrib.auth',
                   'django.contrib.sessions',
                   'django.contrib.admin',
@@ -91,7 +92,6 @@ ADMIN_MEDIA_PREFIX = '/media/admin/'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 TEMPLATE_DIRS = (
                  os.path.join(os.path.dirname(__file__), 'templates'),
-                 os.path.join(os.path.dirname(__file__), 'media','css'),
                  )
 
 # List of callables that know how to import templates from various sources.
@@ -101,9 +101,10 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
-STATICFILES_ROOT = MEDIA_ROOT 
-STATICFILES_URL = '/media/'
-STATIC_URL = '/static/'
+STATICFILES_URL = '/static/'
+STATIC_URL = STATICFILES_URL
+STATICFILES_DIRS = [MEDIA_ROOT]
+STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static')
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/' 

@@ -1,0 +1,94 @@
+
+.report {
+    font-family: "Times New Roman", Times, Serif;
+    border: 1px solid black;
+    text-align: center;
+    padding: 0.1em;
+    margin: 0.3em;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-left: auto;
+    margin-right: auto;
+    width: 55em;
+}
+.report tr.row1 td {
+    background:#dddddd;
+}
+.report tr td a {
+    color: blue;
+}
+.report tr.blank td {
+    background: white;
+    color: black;
+}
+.report th{
+    background:#008080;
+    text-align:center;
+    vertical-align: bottom;
+    color: white;
+    font-size: 0.8em;
+    font-size: 0.8rem;
+}
+.report th a {
+    text-decoration: none;
+    color: white;
+}
+.report th.notice a {
+    color: blue;
+}
+.report th.notice a:hover {
+    text-decoration: underline;
+}
+.report td {
+    background:#cccccc;
+    font-size: 0.75em;
+    font-size: 0.75rem;
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.report td.result0{
+    color:#808080;
+}
+.report td.result1{
+    color:black;
+}
+.report .notice {
+    background:white;
+    color:black;
+    text-align:justify;
+    vertical-align: middle;
+    font-weight: normal;
+    font-size: 1em;
+    font-size: 1rem;
+    padding: 0.2em 0.6em;
+}
+.report .header {
+    background:black;
+    color:white;
+    text-align:center;
+    vertical-align: middle;
+    font-weight: bold;
+}
+.report th.header {
+    font-size: 1.3em;
+    font-size: 1.3rem;
+}
+.report td.header {
+    font-size: 1em;
+    font-size: 1rem;
+}
+.report tfoot .notice {
+    font-size: 0.67em;
+    font-size: 0.67rem;
+}
+
+.report .empty {
+    font-size: 1.2em;
+    font-size: 1.2rem;
+}
+.report .empty a {
+    text-decoration: none;
+    color: black;
+}

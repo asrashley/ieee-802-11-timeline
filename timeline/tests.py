@@ -29,7 +29,7 @@ from util.cache import CacheControl
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
-import json
+import json, os
 
 class TimelineTestBase(LoginBasedTest):
     fixtures = ['site.json']
@@ -61,22 +61,27 @@ class TimelineTestBase(LoginBasedTest):
                         self.assertContains(response, ballot.closed.isoformat(), msg_prefix='%s LB%d.%s'%(ballot.project_name,ballot.number,field))
                     if ballot.result:
                         self.assertContains(response, '%2d%%'%ballot.result, msg_prefix='%s LB%d.%s'%(ballot.project_name,ballot.number,field))
-        
+
     def test_html_export(self):
+        BASE_DIR = os.path.dirname(__file__)
         static_url = settings.STATICFILES_URL
         url = ''.join([reverse('timeline.views.main_page',args=[]),'timeline.html'])
         response = self._check_page(url)
+        self._check_css(os.path.join(BASE_DIR,"static","css","timeline.css"), response)
+        self._check_site_css(response)
         self.assertContains(response, 'ieeel.gif')
-        self.assertContains(response, 'oilerplate')
+        self.assertNotContains(response, static_url)
         self.failUnlessRaises(ValueError, response.content.index,static_url)
         
     def test_shtml_export(self):
+        BASE_DIR = os.path.dirname(__file__)
         static_url = settings.STATICFILES_URL
         url = ''.join([reverse('timeline.views.main_page',args=[]),'timeline.shtml'])
         response = self._check_page(url)
+        self._check_css(os.path.join(BASE_DIR,"static","css","timeline.css"), response)
         self.assertContains(response, 'ieeel.gif')
         self.assertContains(response, '#include file="banner_head.html')
-        self.assertNotContains(response, 'oilerplate')
+        self.assertNotContains(response, static_url)
         self.failUnlessRaises(ValueError, response.content.index,static_url)
 
 class TestProjectsNoBallots(TimelineTestBase):

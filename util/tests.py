@@ -32,7 +32,7 @@ from django.db.models.fields import URLField
 from django.conf import settings
 from django.utils import http
 
-import datetime, decimal
+import datetime, decimal, os, re
 import unittest
 
 class LoginBasedTest(TestCase):    
@@ -51,7 +51,29 @@ class LoginBasedTest(TestCase):
             self.failUnless(self.logged_in, 'Could not log in')
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, status_code)
+        self._check_site_css(response)
         return response
+    
+    def _check_css(self,filename,response):
+        if not response.context:
+            return
+        if not response.context['cache'].export:
+            search=r'<link\s+.*\s+href="[^"]+/%s"\s*/>'%re.escape(os.path.basename(filename))
+            match = re.search(search, response.content, re.MULTILINE)
+            self.failIf(match is None, msg='Unable to find %s'%search)
+        else:
+            css_file = open(filename,'r')
+            try:
+                for line in css_file:
+                    self.assertContains(response, line)
+            except:
+                raise
+            finally:
+                css_file.close()
+            
+    def _check_site_css(self,response):
+        self._check_css(os.path.join(settings.MEDIA_ROOT,"css","site.css"), response)
+
     
     @property
     def user(self):

@@ -19,16 +19,34 @@
 #  Author              :    Alex Ashley
 #
 #############################################################################
-from util.cache import CacheControl
-from util.models import SiteURLs
+import re, os, logging, sys
+from urlparse import urlsplit
+from xml.sax.saxutils import unescape
 
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 #from django.utils.translation import ugettext, ungettext
+from django.conf import settings
+from django.utils.importlib import import_module
+from django.core.exceptions import ImproperlyConfigured
 
-from urlparse import urlsplit
-from xml.sax.saxutils import unescape
-import re
+from util.cache import CacheControl
+from util.models import SiteURLs
+
+# At compile time, cache the directories to search.
+fs_encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
+app_css_dirs = []
+for app in settings.INSTALLED_APPS:
+    try:
+        mod = import_module(app)
+    except ImportError, e:
+        raise ImproperlyConfigured('siteutils.py ImportError %s: %s' % (app, e.args[0]))
+    template_dir = os.path.join(os.path.dirname(mod.__file__), 'static', 'css')
+    if os.path.isdir(template_dir):
+        app_css_dirs.append(template_dir.decode(fs_encoding))
+app_css_dirs.append(os.path.join(settings.MEDIA_ROOT,'css'))
+# It won't change, so convert it to a tuple to save memory.
+app_css_dirs = tuple(app_css_dirs)
 
 register = Library()
 
@@ -57,10 +75,6 @@ def get_staticfiles_prefix():
     """
     Returns the string contained in the setting STATICFILES_URL
     """
-    try:
-        from django.conf import settings
-    except ImportError:
-        return ''
     return settings.STATICFILES_URL
 
 @register.simple_tag
@@ -68,10 +82,6 @@ def version():
     """
     Returns the string contained in the setting APP_VERSION
     """
-    try:
-        from django.conf import settings
-    except ImportError:
-        return ''
     return settings.APP_VERSION
     
 @register.filter(name='field_type')
@@ -104,3 +114,45 @@ def site_urls(parser, token):
         #raise TemplateSyntaxError("%r tag requires arguments" % token.contents.split()[0])
         pass
     return SiteURLsNode(var_name)
+
+class CssIncludeNode(Node):
+    def __init__(self,absfilename,filename):
+        self.absfilename = absfilename
+        self.filename = filename
+    def render(self,context):
+        rv = ''
+        export = True
+        #try:
+        export = context['cache'].export is not None
+        #except KeyError,e:
+        #    logging.error(str(e))
+        if export:
+            cssfile = None
+            try:
+                cssfile = open(self.absfilename,'r')
+                rv = '\n'.join(['<style type="text/css">','/* %s */'%self.filename,cssfile.read(),'</style>'])
+            except Exception,e:
+                logging.error(str(e))
+            finally:
+                if cssfile:
+                    cssfile.close()
+        else:
+            #url = self.filename.replace('\\','/')
+            rv = '<link rel="stylesheet" media="all" type="text/css" href="%scss/%s" />'%(settings.STATIC_URL,self.filename)
+        return rv
+
+@register.tag        
+def include_css(parser,token):
+    try:
+        # split_contents() knows not to split quoted strings.
+        tag_name, filename = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
+    if not (filename[0] == filename[-1] and filename[0] in ('"', "'")):
+        raise TemplateSyntaxError("%r tag's argument should be in quotes" % tag_name)
+    filename = filename[1:-1]
+    for d in app_css_dirs:
+        f = os.path.join(d,filename)
+        if os.path.exists(f):
+            return CssIncludeNode(f,filename)
+    raise TemplateSyntaxError("Unable to find CSS file %s"%filename)    
