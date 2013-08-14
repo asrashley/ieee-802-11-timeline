@@ -23,11 +23,9 @@
 from project.models import InProgress, Published, Withdrawn, DenormalizedProject
 from timeline.models import DenormalizedProjectBallots
 from util.cache import CacheControl
-#from util.db import bulk_delete
-#from util.backlog import BacklogPoll
-#from util.tasks import poll_task_queue
+from util.io import export_html
 
-from django.template import RequestContext
+from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
 from django import forms,http
 from django.views.decorators.csrf import csrf_exempt
@@ -86,6 +84,8 @@ def main_page(request, export=None):
     context['export_page'] = 'timeline'
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
+    if export:
+        return export_html('timeline/index.html', context, context_instance=context_instance, filename='timeline.%s'%export)
     return render_to_response('timeline/index.html', context, context_instance=context_instance)
 
 #class TimelineBacklogPoll(BacklogPoll):

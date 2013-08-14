@@ -21,8 +21,7 @@
 
 {% block menu %}
 {% if user.is_authenticated and cache and not cache.export %}
-{% cache cache.timeout menu request.path %}
-  <ul class="menu">
+  <ul class="menu" data-update="{{needs_update}}">
     <li class="import"><a class="hide" href="{% url 'system.views.import_page' %}">Import</a></li>
 	<li><a class="hide" href="{% url 'system.views.main_page' %}">Export</a>
 	<ul>
@@ -32,6 +31,7 @@
 		<li><a href="{{export_page}}.shtml" title="Export as SHTML page">SHTML</a></li>
 	{% endif %}
 	</ul>
+{% cache cache.timeout menu request.path %}
     </li>
     <li><a class="hide" href="{% url 'project.views.main_page' %}">Projects</a>
 	<ul>

@@ -23,6 +23,7 @@
 from util.cache import CacheControl
 from report.models import MeetingReport
 from util.forms import DateModelForm
+from util.io import export_html
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response,  get_object_or_404
@@ -57,6 +58,8 @@ def main_page(request, export=None):
     context['export_page'] = 'meeting-reports' 
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
+    if export:
+        return export_html('report/reports.html', context, context_instance=context_instance, filename='%s.%s'%(context['export_page'],export))
     return render_to_response('report/reports.html', context, context_instance=context_instance)
 
 @login_required

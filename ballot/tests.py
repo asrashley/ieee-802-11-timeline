@@ -27,7 +27,7 @@ from util.tasks import run_test_task_queue
 
 from django.core.urlresolvers import reverse
 
-import datetime, re, json
+import datetime, re, json, logging
 from django.conf import settings
 from util.tests import LoginBasedTest
 from util.db import bulk_delete
@@ -44,6 +44,8 @@ class BallotBaseTest(LoginBasedTest):
         self.assertContains(response, 'ieeel.gif')
         response.content.index(static_url)
         response = self.client.get(export)
+        self.assertTrue(response.has_header('Content-Disposition'))
+        response.get('Content-Disposition').index('attachment; filename=')
         self.assertContains(response, 'ieeel.gif')
         self.failUnlessRaises(ValueError, response.content.index,static_url)
         return response

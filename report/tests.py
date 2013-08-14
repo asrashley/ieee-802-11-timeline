@@ -56,6 +56,8 @@ class EmptyReportTest(LoginBasedTest):
         response = self._check_page(url)
         self.assertContains(response, 'ieeel.gif')
         self.failUnlessRaises(ValueError, response.content.index,static_url)
+        self.assertTrue(response.has_header('Content-Disposition'))
+        response.get('Content-Disposition').index('attachment; filename=meeting-reports.html')
 
 class ReportTest(LoginBasedTest):
     static_url = settings.STATICFILES_URL
@@ -84,3 +86,5 @@ class ReportTest(LoginBasedTest):
         self.assertContains(response, 'ieeel.gif')
         self.failUnlessRaises(ValueError, response.content.index,self.static_url)
         self._check_response(response)
+        self.assertTrue(response.has_header('Content-Disposition'))
+        response.get('Content-Disposition').index('attachment; filename=meeting-reports.html')

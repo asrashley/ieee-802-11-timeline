@@ -23,6 +23,8 @@
 
 from django.db import models, connection
 from django.db.models.fields import URLField
+from django.http import HttpResponse
+from django.template import loader
 
 import datetime, decimal, time, re
     
@@ -175,3 +177,11 @@ def as_int_or_none(v):
             return int(v)
     except (ValueError, TypeError):
         return None    
+
+def export_html(*args, **kwargs):
+    response = HttpResponse(mimetype='text/html')
+    response['Content-Disposition'] = 'attachment; filename=%s'%kwargs.pop('filename',None)
+    html = loader.render_to_string(*args, **kwargs)
+    response.write(html)
+    return response
+    

@@ -24,6 +24,7 @@ from ballot.models import Ballot, DenormalizedBallot
 from project.models import InProgress, Published, Withdrawn
 from util.cache import CacheControl
 from util.forms import DateModelForm
+from util.io import export_html
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response,  get_object_or_404
@@ -39,7 +40,7 @@ from django.http import HttpResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 from util.db import bulk_delete
-import sys
+import sys, logging
 
 #@login_required
 class BallotDelete(DeleteView):
@@ -189,6 +190,8 @@ def ballot_page(request, ballots, export, sponsor, next, export_page):
                    export_page=reverse('ballot.views.main_page')+export_page)
     context_instance=RequestContext(request)
     context_instance['cache'].export = export
+    if export:
+        return export_html('ballot/ballots.html', context, context_instance=context_instance, filename='%s.%s'%(export_page,export))
     return render_to_response('ballot/ballots.html', context, context_instance=context_instance)
 
 #class BallotBacklogPoll(BacklogPoll):

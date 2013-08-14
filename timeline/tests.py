@@ -72,6 +72,8 @@ class TimelineTestBase(LoginBasedTest):
         self.assertContains(response, 'ieeel.gif')
         self.assertNotContains(response, static_url)
         self.failUnlessRaises(ValueError, response.content.index,static_url)
+        self.assertTrue(response.has_header('Content-Disposition'))
+        response.get('Content-Disposition').index('attachment; filename=timeline.html')
         
     def test_shtml_export(self):
         BASE_DIR = os.path.dirname(__file__)
@@ -83,6 +85,8 @@ class TimelineTestBase(LoginBasedTest):
         self.assertContains(response, '#include file="banner_head.html')
         self.assertNotContains(response, static_url)
         self.failUnlessRaises(ValueError, response.content.index,static_url)
+        self.assertTrue(response.has_header('Content-Disposition'))
+        response.get('Content-Disposition').index('attachment; filename=timeline.shtml')
 
 class TestProjectsNoBallots(TimelineTestBase):
     fixtures = ['site.json', 'projects.json']
