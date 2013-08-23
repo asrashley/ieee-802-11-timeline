@@ -104,11 +104,11 @@ def run_test_task_queue(client):
                     #content_type=='application/octet-stream' and queue['name']=='default':
                     deferred.run(data)
                 else:
-                    #sys.stderr.write('p'.join([task['name'],' - ',task['url'],'\n']))
+                    #logging.info(' '.join(['post',task['name'],' - ',task['url']]))
                     client.post(task['url'],data=data, content_type=content_type)
             else:
-                #sys.stderr.write('g'.join([task['name'],' - ',task['url'],'\n']))
+                #logging.info(' '.join(['get',task['name'],' - ',task['url']]))
                 client.get(task['url'])
-            #sys.stderr.write('r'.join([task['name'],' - ',task['url'],'\n']))
+            #logging.info(' '.join(['done',task['name'],' - ',task['url']]))
         test_task_stub.FlushQueue(queue['name'])
         
