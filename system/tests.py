@@ -64,6 +64,7 @@ class ImportPageTest(LoginBasedTest):
         progress_url = reverse('system.views.import_progress',args=[progress.pk])
         self.failUnless(response.redirect_chain[0][0].endswith(progress_url))
         #self.failIf(response.context['errors'])
+        #print response
         if length:
             self.assertContains(response, 'input file contains %d line'%length)
         timeout = 3*length
@@ -77,6 +78,7 @@ class ImportPageTest(LoginBasedTest):
             #response = import_progress(request, progress.pk)
             self.failUnlessEqual(response.status_code, 200)
             progress = response.context['progress']
+            #logging.info(unicode(progress))
         done_url = reverse('system.views.import_done',args=[progress.pk])
         response = self.client.get(done_url)
         self.failUnlessEqual(response.status_code, 200)
@@ -253,6 +255,45 @@ class ImportCsvWipeTest(ImportPageTest):
         self.assertEqual(Project.objects.count(),37)
         self.assertEqual(Ballot.objects.count(),269)
         self.assertEqual(MeetingReport.objects.count(),141)
+
+class ImportJsonTest(ImportPageTest):
+    fixtures = ['site.json']
+    TESTFILE = ('system/fixtures/timeline-2013-08-20-0807.json' ,8654)
+    MODELS = [Ballot, Project, MeetingReport]
+    
+    def test_json_import(self):
+        """
+        Tests import page with JSON files
+        """
+        url = reverse('system.views.import_page',args=[])
+        response = self.client.get(url)
+        # not logged in, should redirect to login page
+        self.failUnlessEqual(response.status_code, 302)
+
+        login = self.client.login(username='test', password='password')
+        self.failUnless(login, 'Could not log in')
+
+        response = self.client.get(url)
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertContains(response, '<input type="submit" name="submit"')
+        response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1])
+        counts = {}
+        tmodels = {}
+        for m in self.MODELS:
+            tmodels[m]=0
+        for m in tmodels.keys():
+            self.failIfEqual(m.objects.count(),tmodels[m],msg='%s model has %d items, should have more than %d items'%
+                                 (m._meta.verbose_name,m.objects.count(),tmodels[m]))
+            counts[m] = m.objects.count()
+        # Check that a second attempt to import the data does not cause errors and does not add any new objects to the database
+        response = self._post_import(url, self.TESTFILE[0], self.TESTFILE[1])
+        for m in tmodels.keys():
+            if m in self.NOT_IDEMPOTENT:
+                self.failIfEqual(m.objects.count(),counts[m],msg='%s model had %d items, but after a second import it still has %d'%
+                                     (m._meta.verbose_name,counts[m],m.objects.count()))
+            else:
+                self.failUnlessEqual(m.objects.count(),counts[m],msg='%s model had %d items, but after a second import has %d'%
+                                     (m._meta.verbose_name,counts[m],m.objects.count()))
         
 class MainPageTest(TestCase):
     fixtures = ['site.json']

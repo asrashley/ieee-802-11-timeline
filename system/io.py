@@ -20,7 +20,9 @@
 #
 #############################################################################
 
-import datetime, csv, re, json, logging
+import datetime, csv, re, json, logging, mimetypes, urllib
+
+mimetypes.add_type("application/json", ".json", strict=True)
 
 from util.tasks import add_task
 from util.io import flatten, to_python, set_date, as_int, set_date_if_none, as_int_or_none,\
@@ -166,42 +168,61 @@ class Cache(object):
 def import_projects_and_ballots(source, debug=False):
     """ Called by import_view to store a file on the server for later processing.
     """
-    if 'html' in source.content_type:
+    content_type = source.content_type
+    if content_type=='application/octet-stream':
+        content_type, encoding = mimetypes.guess_type(source.name, strict=False)
+    logging.info('Import %s (%s)'%(source.name,content_type))
+    clean_text = True
+    if '/' in content_type:
+        content_type = content_type.split('/')[1]
+    if 'html' in content_type:
         hr = TableHTMLParser()
         for line in source:
             hr.feed(line)
         reader = hr.buffer
+    elif 'json' in content_type:
+        il = ImportLine(line=1,text=[source.read()])
+        il.save(force_insert=True)
+        reader = source
+        clean_text = False
+        #linenumber=il.text[0].count('\n')
+        #if not (il.text[0][-1] in ('\n','\r')):
+        #    linenumber += 1
+        #logging.info('linenumber=%d'%linenumber)
     else:
         reader = csv.reader(source,delimiter=',',skipinitialspace=True)
     #ImportLine.objects.all().delete()
-    for linenumber,line in enumerate(reader):
-        try:
-            il = ImportLine(line=linenumber+1,text=line.text, anchors = line.anchors)
-        except AttributeError:
-            il = ImportLine(line=linenumber+1,text=[clean(c) for c in line])
-        il.save(force_insert=True)
+    if reader:
+        for linenumber,line in enumerate(reader):
+            try:
+                il = ImportLine(line=linenumber+1,text=line.text, anchors = line.anchors)
+            except AttributeError:
+                txt = [clean(c) for c in line] if clean_text else line
+                il = ImportLine(line=linenumber+1,text=txt)
+            il.save(force_insert=True)
     ip = ImportProgress( linecount = linenumber+1, current_line = 0)
     ip.save()
     if debug:
-        parse_projects_and_ballots(ip)
+        parse_projects_and_ballots(ip, content_type)
     else:
-        add_task(name = 'import-worker', url=reverse('system.views.import_worker', args=[ip.pk]),countdown=10)
+        add_task(name = 'import-worker', url=reverse('system.views.import_worker', kwargs={'prog':ip.pk,'content_type':urllib.quote_plus(content_type)}),countdown=10)
     return ip
 
-def parse_projects_and_ballots(progress):
+def parse_projects_and_ballots(progress, content_type):
     """ Called by import worker to process a file that as been uploaded by import_view
     """
     if progress.started is None:
         progress.started=datetime.datetime.now()
         progress.save()
-    #source = ImportLine.objects.all().order_by('line')
+    logging.debug('parse_projects_and_ballots')
+    if 'json' in content_type:
+        return import_json(progress)
     handler = None
     model = None
     html_project_re = re.compile('IEEE Project and Final Document')
     cache = Cache()
     last = LastObject(progress)
     for linenum in range(1,progress.linecount+1):
-    #for impline in source:
         impline = ImportLine.objects.get(line=linenum)
         if impline.text is None:
             continue
@@ -265,6 +286,57 @@ def parse_projects_and_ballots(progress):
         last.add(impline)                
     last.set(None)
     #ImportLine.objects.all().delete()
+    progress.finished = datetime.datetime.now()
+    progress.current_line = progress.linecount
+    progress.save()
+    
+def import_json(progress):
+    """ Called by import worker to process a JSON file that as been uploaded by import_view
+    """
+    text = []
+    for linenum in range(1,progress.linecount+1):
+        impline = ImportLine.objects.get(line=linenum)
+        if impline.text is None:
+            continue
+        text.append(''.join(impline.text))
+    #impline = ImportLine.objects.get(line=1)
+    text = '\n'.join(text)
+    #if impline is not None and impline.text is not None:
+    if text:
+        try:
+            #js = json.loads(''.join(impline.text))
+            js = json.loads(text)
+        except ValueError,e:
+            js={}
+            logging.error(e)
+            progress.add_error(1,e,impline)
+        try:
+            for proj in js['projects']:
+                proj = Project(**proj)
+                proj.save()
+                progress.add_project(proj)
+        except KeyError:
+            pass
+        try:
+            for bal in js['ballots']:
+                try:
+                    proj = Project.objects.get(task_group=bal['task_group'])
+                    bal['project_id'] = proj.pk
+                    del bal['task_group']
+                except KeyError:
+                    pass
+                bal = Ballot(**bal)
+                bal.save()
+                progress.add_ballot(bal)
+        except KeyError:
+            pass
+        try:
+            for rep in js['reports']:
+                rep = MeetingReport(**rep)
+                rep.save()
+                progress.add_report(rep)
+        except KeyError:
+            pass
     progress.finished = datetime.datetime.now()
     progress.current_line = progress.linecount
     progress.save()

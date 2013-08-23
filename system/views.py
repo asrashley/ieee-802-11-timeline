@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-import logging, decimal
+import logging, decimal, urllib
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -224,9 +224,10 @@ def edit_urls(request):
     return render_to_response('edit-object.html',locals(),context_instance=RequestContext(request))
     
 @csrf_exempt
-def import_worker(request, prog):
+def import_worker(request, prog, content_type):
     progress = get_object_or_404(ImportProgress,pk=prog)
-    parse_projects_and_ballots(progress)
+    content_type = urllib.unquote_plus(content_type)
+    parse_projects_and_ballots(progress,content_type)
     message = ' '.join(['Imported<br />Projects: ', progress.projects.replace(',',', '),
                         '<br />Ballots: ',progress.ballots.replace(',',', ')])
     return render_to_response('done.html', locals(), context_instance=RequestContext(request))

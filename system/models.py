@@ -130,7 +130,7 @@ class CacheImportLine(object):
     """ Container for one line from an imported file, using the Django cache as the temporary store for the file."""
     def __init__(self, line, text=None, anchors=None):
         self.line = line
-        self.text = text
+        self.text = [text] if isinstance(text,(str,unicode)) else text
         self.anchors = anchors
 
     def __str__(self):
@@ -150,7 +150,7 @@ class CacheImportLine(object):
         
     @classmethod
     def get(cls,line):
-        key = 'imp%04d'%line
+        key = 'imp%05d'%line
         text_str=cache.get(key+'l','')
         anchors_str=cache.get(key+'a','')
         text = text_str.split('|') if text_str!='' else None
@@ -176,12 +176,12 @@ class CacheImportLine(object):
         return entry
     
     def save(self, *args, **kwargs):
-        key = 'imp%04d'%self.line
+        key = 'imp%05d'%self.line
         cache.set(key+'l',self.text_str)
         cache.set(key+'a',self.anchors_str)
         
     def delete(self):
-        key = 'imp%04d'%self.line
+        key = 'imp%05d'%self.line
         cache.delete(key+'l')
         cache.delete(key+'a')
 CacheImportLine.objects = CacheImportLine
@@ -197,6 +197,9 @@ class ImportProgress(models.Model):
     ballots = models.TextField(blank=True)
     reports = models.TextField(blank=True)
     errorstr = models.TextField(blank=True)
+    
+    def __unicode__(self):
+        return u'ImportProgress %d/%d'%(self.current_line,self.linecount)
     
     def add_error(self,linenum,excp,linestr):
         exc_type, exc_value, exc_traceback = sys.exc_info()
